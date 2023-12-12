@@ -12,6 +12,7 @@ import com.ozgen.telegrambinancebot.model.bot.FutureTrade;
 import com.ozgen.telegrambinancebot.model.events.NewBuyOrderEvent;
 import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
+import com.ozgen.telegrambinancebot.utils.PriceCalculator;
 import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import com.ozgen.telegrambinancebot.utils.validators.TradingSignalValidator;
 import org.slf4j.Logger;
@@ -68,7 +69,7 @@ public class BinanceBuyOrderManager {
 
         BuyOrder buyOrder = this.createBuyOrder(tradingSignal, tickerData, btcToUsdRate);
         if (buyOrder != null) {
-            NewSellOrderEvent newSellOrderEvent = new NewSellOrderEvent(this, buyOrder);
+            NewSellOrderEvent newSellOrderEvent = new NewSellOrderEvent(this, buyOrder, tradingSignal);
             this.publisher.publishEvent(newSellOrderEvent);
             log.info("NewSellOrderEvent published successfully. NewSellOrderEvent: {}", newSellOrderEvent);
         }
@@ -87,11 +88,6 @@ public class BinanceBuyOrderManager {
         double coinAmount = btcAmount / coinToBtcRate;
 
         return coinAmount;
-    }
-
-    private double calculateCoinPrice(Double lastPrice, double percentageIncrease) {
-        double increase = lastPrice * (percentageIncrease / 100);
-        return lastPrice + increase;
     }
 
     private boolean hasAccountEnoughBtc(SnapshotData accountSnapshot, Double btcToUsdRate) {
@@ -113,9 +109,9 @@ public class BinanceBuyOrderManager {
     private BuyOrder createBuyOrder(TradingSignal tradingSignal, TickerData tickerData, double btcToUsdRate) {
         Integer times = this.getTimes();
         double coinAmount = this.calculateCoinAmount(tickerData, btcToUsdRate);
-        double stopLossLimit = GenericParser.getDouble(tradingSignal.getStopLoss());
-        double stopLoss = this.calculateCoinPrice(stopLossLimit, this.botConfiguration.getPercentageInc());
-        double buyPrice = this.calculateCoinPrice(GenericParser.getDouble(tickerData.getLastPrice()),
+        double stopLossLimit = GenericParser.getDouble(tradingSignal.getEntryEnd());
+        double stopLoss = PriceCalculator.calculateCoinPriceDec(stopLossLimit, this.botConfiguration.getPercentageInc());
+        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()),
                 this.botConfiguration.getPercentageInc());
         String symbol = tradingSignal.getSymbol();
 

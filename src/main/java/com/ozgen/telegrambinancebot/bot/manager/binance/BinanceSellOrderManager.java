@@ -9,7 +9,10 @@ import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.bot.FutureTrade;
 import com.ozgen.telegrambinancebot.model.bot.SellOrder;
 import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
+import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
+import com.ozgen.telegrambinancebot.utils.PriceCalculator;
 import com.ozgen.telegrambinancebot.utils.SymbolGenerator;
+import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -58,7 +61,6 @@ public class BinanceSellOrderManager {
 
         if (sellOrder != null) {
 
-            this.publisher.publishEvent(null);
             log.info("NewSellOrderEvent published successfully. NewSellOrderEvent: {}", "null");
         }
     }
@@ -77,13 +79,9 @@ public class BinanceSellOrderManager {
         return coinAmounts;
     }
 
-    private double calculateCoinPrice(Double buyPrice, double percentageProfit) {
-        double increase = buyPrice * (percentageProfit / 100);
-        return buyPrice + increase;
-    }
-
     private SellOrder createSellOrder(BuyOrder buyOrder, SnapshotData accountSnapshot, String coinSymbol) {
         Double coinAmount = accountSnapshot.getCoinValue(coinSymbol);
+        TradingSignal tradingSignal = buyOrder.getTradingSignal();
         double expectedTotal = buyOrder.getCoinAmount() * buyOrder.getTimes();
         if (coinAmount == expectedTotal) {
             log.info("all buy orders completed. successfully.");
@@ -96,20 +94,22 @@ public class BinanceSellOrderManager {
         }
 
         List<Double> coinAmountList = this.calculateCoinAmount(coinAmount, buyOrder.getCoinAmount());
-        double sellPrice = this.calculateCoinPrice(buyOrder.getBuyPrice(), this.botConfiguration.getProfitPercentage());
+        double sellPrice = PriceCalculator.calculateCoinPriceInc(buyOrder.getBuyPrice(), this.botConfiguration.getProfitPercentage());
+        double stopLoss = GenericParser.getDouble(tradingSignal.getStopLoss());
+        double stopLossLimit = PriceCalculator.calculateCoinPriceDec(buyOrder.getBuyPrice(), this.botConfiguration.getPercentageInc());
         String sellOrderSymbol = SymbolGenerator.generateSellOrderSymbol(buyOrder.getSymbol(), this.botConfiguration.getCurrency());
         SellOrder sellOrder = new SellOrder();
         sellOrder.setSymbol(sellOrderSymbol);
         sellOrder.setSellPrice(sellPrice);
         sellOrder.setCoinAmount(buyOrder.getCoinAmount());
         sellOrder.setTimes(coinAmountList.size());
-        sellOrder.setStopLoss(buyOrder.getStopLoss());
-        sellOrder.setStopLossLimit(buyOrder.getStopLossLimit());
-        sellOrder.setTradingSignal(buyOrder.getTradingSignal());
+        sellOrder.setStopLoss(stopLoss);
+        sellOrder.setStopLossLimit(stopLossLimit);
+        sellOrder.setTradingSignal(tradingSignal);
         sellOrder = this.botOrderService.createSellOrder(sellOrder);
         coinAmountList.forEach(amount -> {
             try {
-                this.binanceApiManager.newOrderWithStopLoss(sellOrderSymbol, sellPrice, amount, buyOrder.getStopLoss(), buyOrder.getStopLossLimit());
+                this.binanceApiManager.newOrderWithStopLoss(sellOrderSymbol, sellPrice, amount, stopLoss, stopLossLimit);
             } catch (Exception e) {
                 log.error("Failed to create sell order  for symbol " + sellOrderSymbol, e);
                 FutureTrade futureTrade = new FutureTrade();
