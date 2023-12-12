@@ -1,8 +1,8 @@
-package com.ozgen.telegrambinancebot.bot.service;
+package com.ozgen.telegrambinancebot.service;
 
-import com.ozgen.telegrambinancebot.bot.repository.OpenOrderRepository;
-import com.ozgen.telegrambinancebot.bot.repository.OrderInfoRepository;
-import com.ozgen.telegrambinancebot.bot.repository.OrderResponseRepository;
+import com.ozgen.telegrambinancebot.repository.OpenOrderRepository;
+import com.ozgen.telegrambinancebot.repository.OrderInfoRepository;
+import com.ozgen.telegrambinancebot.repository.OrderResponseRepository;
 import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
 import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
 import com.ozgen.telegrambinancebot.model.binance.OrderResponse;

@@ -1,7 +1,7 @@
 package com.ozgen.telegrambinancebot.adapters.telegram;
 
 
-import com.ozgen.telegrambinancebot.bot.manager.telegram.TelegramMessageManager;
+import com.ozgen.telegrambinancebot.manager.telegram.TelegramMessageManager;
 import com.ozgen.telegrambinancebot.configuration.telegram.TelegramConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

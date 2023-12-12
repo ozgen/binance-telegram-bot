@@ -1,6 +1,6 @@
-package com.ozgen.telegrambinancebot.bot.service;
+package com.ozgen.telegrambinancebot.service;
 
-import com.ozgen.telegrambinancebot.bot.repository.SnapshotDataRepository;
+import com.ozgen.telegrambinancebot.repository.SnapshotDataRepository;
 import com.ozgen.telegrambinancebot.model.binance.SnapshotData;
 import org.springframework.stereotype.Service;
 

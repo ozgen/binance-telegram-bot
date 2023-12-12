@@ -1,7 +1,8 @@
-package com.ozgen.telegrambinancebot.bot.manager.binance;
+package com.ozgen.telegrambinancebot.manager.binance;
 
-import com.ozgen.telegrambinancebot.bot.service.BotOrderService;
-import com.ozgen.telegrambinancebot.bot.service.FutureTradeService;
+import com.ozgen.telegrambinancebot.model.ProcessStatus;
+import com.ozgen.telegrambinancebot.service.BotOrderService;
+import com.ozgen.telegrambinancebot.service.FutureTradeService;
 import com.ozgen.telegrambinancebot.configuration.properties.BotConfiguration;
 import com.ozgen.telegrambinancebot.model.TradeStatus;
 import com.ozgen.telegrambinancebot.model.binance.SnapshotData;
@@ -105,6 +106,7 @@ public class BinanceSellOrderManager {
         sellOrder.setTimes(coinAmountList.size());
         sellOrder.setStopLoss(stopLoss);
         sellOrder.setStopLossLimit(stopLossLimit);
+        tradingSignal.setIsProcessed(ProcessStatus.SELL);
         sellOrder.setTradingSignal(tradingSignal);
         sellOrder = this.botOrderService.createSellOrder(sellOrder);
         coinAmountList.forEach(amount -> {

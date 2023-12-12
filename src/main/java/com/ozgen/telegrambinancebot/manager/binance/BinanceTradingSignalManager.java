@@ -1,4 +1,4 @@
-package com.ozgen.telegrambinancebot.bot.manager.binance;
+package com.ozgen.telegrambinancebot.manager.binance;
 
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.events.IncomingTradingSignalEvent;
