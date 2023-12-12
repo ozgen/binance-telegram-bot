@@ -1,4 +1,4 @@
-package com.ozgen.telegrambinancebot.bot.repository;
+package com.ozgen.telegrambinancebot.repository;
 
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import org.springframework.data.jpa.repository.JpaRepository;

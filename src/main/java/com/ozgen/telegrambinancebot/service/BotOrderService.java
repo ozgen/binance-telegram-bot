@@ -1,7 +1,7 @@
-package com.ozgen.telegrambinancebot.bot.service;
+package com.ozgen.telegrambinancebot.service;
 
-import com.ozgen.telegrambinancebot.bot.repository.BuyOrderRepository;
-import com.ozgen.telegrambinancebot.bot.repository.SellOrderRepository;
+import com.ozgen.telegrambinancebot.repository.BuyOrderRepository;
+import com.ozgen.telegrambinancebot.repository.SellOrderRepository;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.bot.SellOrder;
 import org.slf4j.Logger;

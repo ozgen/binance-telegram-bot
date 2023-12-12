@@ -1,7 +1,8 @@
-package com.ozgen.telegrambinancebot.bot.manager.telegram;
+package com.ozgen.telegrambinancebot.manager.telegram;
 
 import com.ozgen.telegrambinancebot.adapters.binance.BinanceAPI;
-import com.ozgen.telegrambinancebot.bot.service.TradingSignalService;
+import com.ozgen.telegrambinancebot.model.ProcessStatus;
+import com.ozgen.telegrambinancebot.service.TradingSignalService;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.events.IncomingTradingSignalEvent;
@@ -42,7 +43,8 @@ public class TelegramMessageManager {
             log.warn("invalid data comes from telegram message: '{}'", message);
             return FAILED_MESSAGE;
         }
-        TradingSignal saved = this.tradingSignalService.createTradingSignal(tradingSignal);
+        tradingSignal.setIsProcessed(ProcessStatus.INIT);
+        TradingSignal saved = this.tradingSignalService.saveTradingSignal(tradingSignal);
         IncomingTradingSignalEvent event = new IncomingTradingSignalEvent(this, saved);
         this.publisher.publishEvent(event);
         return SUCCESS_MESSAGE;

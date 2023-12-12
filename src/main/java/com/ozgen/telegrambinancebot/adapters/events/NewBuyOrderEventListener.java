@@ -1,6 +1,6 @@
 package com.ozgen.telegrambinancebot.adapters.events;
 
-import com.ozgen.telegrambinancebot.bot.manager.binance.BinanceBuyOrderManager;
+import com.ozgen.telegrambinancebot.manager.binance.BinanceBuyOrderManager;
 import com.ozgen.telegrambinancebot.model.events.NewBuyOrderEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -2,6 +2,7 @@ package com.ozgen.telegrambinancebot.model.bot;
 
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -25,7 +26,7 @@ public class SellOrder {
     private double stopLoss;
     private double sellPrice;
     private Integer times;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private TradingSignal tradingSignal;
 
     private Date createdAt;

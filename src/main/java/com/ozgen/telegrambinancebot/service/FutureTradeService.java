@@ -1,6 +1,6 @@
-package com.ozgen.telegrambinancebot.bot.service;
+package com.ozgen.telegrambinancebot.service;
 
-import com.ozgen.telegrambinancebot.bot.repository.FutureTradeRepository;
+import com.ozgen.telegrambinancebot.repository.FutureTradeRepository;
 import com.ozgen.telegrambinancebot.model.bot.FutureTrade;
 import org.springframework.stereotype.Service;
 
