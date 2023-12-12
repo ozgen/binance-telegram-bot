@@ -1,9 +1,9 @@
-package com.ozgen.telegrambinancebot.bot.manager.binance;
+package com.ozgen.telegrambinancebot.manager.binance;
 
 import com.ozgen.telegrambinancebot.adapters.binance.BinanceAPI;
-import com.ozgen.telegrambinancebot.bot.service.AccountSnapshotService;
-import com.ozgen.telegrambinancebot.bot.service.BinanceOrderService;
-import com.ozgen.telegrambinancebot.bot.service.TickerDataService;
+import com.ozgen.telegrambinancebot.service.AccountSnapshotService;
+import com.ozgen.telegrambinancebot.service.BinanceOrderService;
+import com.ozgen.telegrambinancebot.service.TickerDataService;
 import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
 import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
 import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
