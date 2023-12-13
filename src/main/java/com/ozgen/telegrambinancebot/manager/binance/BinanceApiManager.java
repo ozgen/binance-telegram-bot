@@ -34,9 +34,7 @@ public class BinanceApiManager {
     }
 
 
-
-
-    TickerData getTickerPrice24(String symbol) throws Exception {
+    public TickerData getTickerPrice24(String symbol) throws Exception {
         String tickerPrice24 = this.binanceAPI.getTickerPrice24(symbol);
         TickerData tickerData = JsonParser.parseTickerJson(tickerPrice24);
 
