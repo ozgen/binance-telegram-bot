@@ -76,12 +76,12 @@ public class BinanceBuyOrderManager {
     }
 
     private double calculateCoinAmount(TickerData tickerData, double btcPriceInUsd) {
-        double dollarsToInvest = this.botConfiguration.getPerAmount();
+        double dollarsToInvest = this.botConfiguration.getAmount();
 
         // Convert the lastPrice from String to Double
         double coinToBtcRate = Double.parseDouble(tickerData.getLastPrice());
 
-        // Calculate how much BTC you can buy with $100
+        // Calculate how much BTC you can buy with $500
         double btcAmount = dollarsToInvest / btcPriceInUsd;
 
         // Calculate how much coin you can buy with that BTC amount
