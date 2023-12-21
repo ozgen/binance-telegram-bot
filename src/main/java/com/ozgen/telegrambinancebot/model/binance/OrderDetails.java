@@ -1,25 +1,29 @@
 package com.ozgen.telegrambinancebot.model.binance;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import java.util.Date;
 import java.util.UUID;
 
 @Entity
-public class OrderInfo {
+public class OrderDetails {
 
     @Id
     @GeneratedValue
     private UUID id;
+
     private String symbol;
+    private String origClientOrderId;
     private Long orderId;
     private Long orderListId;
     private String clientOrderId;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date transactTime;
     private String price;
     private String origQty;
     private String executedQty;
@@ -28,19 +32,9 @@ public class OrderInfo {
     private String timeInForce;
     private String type;
     private String side;
-    private String stopPrice;
-    private String icebergQty;
-
-    @JsonProperty("time")
-    private Long orderTime;
-
-    @JsonProperty("updateTime")
-    private Long lastUpdateTime;
-
-    private Boolean isWorking;
-    private String origQuoteOrderQty;
-    private Long workingTime;
     private String selfTradePreventionMode;
+
+    private Long workingTime;
 
     private Date createdAt;
     private Date updatedAt;
@@ -70,6 +64,14 @@ public class OrderInfo {
         this.symbol = symbol;
     }
 
+    public String getOrigClientOrderId() {
+        return origClientOrderId;
+    }
+
+    public void setOrigClientOrderId(String origClientOrderId) {
+        this.origClientOrderId = origClientOrderId;
+    }
+
     public Long getOrderId() {
         return orderId;
     }
@@ -92,6 +94,14 @@ public class OrderInfo {
 
     public void setClientOrderId(String clientOrderId) {
         this.clientOrderId = clientOrderId;
+    }
+
+    public Date getTransactTime() {
+        return transactTime;
+    }
+
+    public void setTransactTime(Date transactTime) {
+        this.transactTime = transactTime;
     }
 
     public String getPrice() {
@@ -158,52 +168,12 @@ public class OrderInfo {
         this.side = side;
     }
 
-    public String getStopPrice() {
-        return stopPrice;
+    public String getSelfTradePreventionMode() {
+        return selfTradePreventionMode;
     }
 
-    public void setStopPrice(String stopPrice) {
-        this.stopPrice = stopPrice;
-    }
-
-    public String getIcebergQty() {
-        return icebergQty;
-    }
-
-    public void setIcebergQty(String icebergQty) {
-        this.icebergQty = icebergQty;
-    }
-
-    public Long getOrderTime() {
-        return orderTime;
-    }
-
-    public void setOrderTime(Long orderTime) {
-        this.orderTime = orderTime;
-    }
-
-    public Long getLastUpdateTime() {
-        return lastUpdateTime;
-    }
-
-    public void setLastUpdateTime(Long lastUpdateTime) {
-        this.lastUpdateTime = lastUpdateTime;
-    }
-
-    public Boolean getWorking() {
-        return isWorking;
-    }
-
-    public void setWorking(Boolean working) {
-        isWorking = working;
-    }
-
-    public String getOrigQuoteOrderQty() {
-        return origQuoteOrderQty;
-    }
-
-    public void setOrigQuoteOrderQty(String origQuoteOrderQty) {
-        this.origQuoteOrderQty = origQuoteOrderQty;
+    public void setSelfTradePreventionMode(String selfTradePreventionMode) {
+        this.selfTradePreventionMode = selfTradePreventionMode;
     }
 
     public Long getWorkingTime() {
@@ -212,14 +182,6 @@ public class OrderInfo {
 
     public void setWorkingTime(Long workingTime) {
         this.workingTime = workingTime;
-    }
-
-    public String getSelfTradePreventionMode() {
-        return selfTradePreventionMode;
-    }
-
-    public void setSelfTradePreventionMode(String selfTradePreventionMode) {
-        this.selfTradePreventionMode = selfTradePreventionMode;
     }
 
     public Date getCreatedAt() {

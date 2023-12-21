@@ -57,5 +57,14 @@ public class FutureTrade {
         this.tradeStatus = tradeStatus;
     }
 
-
+    @Override
+    public String toString() {
+        return "FutureTrade{" +
+                "id=" + id +
+                ", tradeSignalId=" + tradeSignalId +
+                ", tradeStatus=" + tradeStatus +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }

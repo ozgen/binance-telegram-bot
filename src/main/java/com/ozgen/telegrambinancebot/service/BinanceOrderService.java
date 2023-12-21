@@ -1,5 +1,7 @@
 package com.ozgen.telegrambinancebot.service;
 
+import com.ozgen.telegrambinancebot.model.binance.CancelAndNewOrderResponse;
+import com.ozgen.telegrambinancebot.repository.CancelAndNewOrderResponseRepository;
 import com.ozgen.telegrambinancebot.repository.OpenOrderRepository;
 import com.ozgen.telegrambinancebot.repository.OrderInfoRepository;
 import com.ozgen.telegrambinancebot.repository.OrderResponseRepository;
@@ -20,12 +22,14 @@ public class BinanceOrderService {
     private final OrderInfoRepository orderInfoRepository;
     private final OpenOrderRepository openOrderRepository;
     private final OrderResponseRepository orderResponseRepository;
+    private final CancelAndNewOrderResponseRepository cancelAndNewOrderResponseRepository;
 
     public BinanceOrderService(OrderInfoRepository orderInfoRepository, OpenOrderRepository openOrderRepository,
-                               OrderResponseRepository orderResponseRepository) {
+                               OrderResponseRepository orderResponseRepository, CancelAndNewOrderResponseRepository cancelAndNewOrderResponseRepository) {
         this.orderInfoRepository = orderInfoRepository;
         this.openOrderRepository = openOrderRepository;
         this.orderResponseRepository = orderResponseRepository;
+        this.cancelAndNewOrderResponseRepository = cancelAndNewOrderResponseRepository;
     }
 
     public List<OpenOrder> createOpenOrders(List<OpenOrder> openOrderList) {
@@ -39,6 +43,10 @@ public class BinanceOrderService {
 
     public OrderResponse createOrderResponse(OrderResponse orderResponse) {
         return this.orderResponseRepository.save(orderResponse);
+    }
+
+    public CancelAndNewOrderResponse createCancelAndNewOrderResponse(CancelAndNewOrderResponse orderResponse) {
+        return this.cancelAndNewOrderResponseRepository.save(orderResponse);
     }
 
     public OrderInfo findOrderInfo(UUID id) {
