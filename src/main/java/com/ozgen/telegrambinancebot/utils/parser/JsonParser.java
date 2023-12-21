@@ -2,6 +2,7 @@ package com.ozgen.telegrambinancebot.utils.parser;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ozgen.telegrambinancebot.model.binance.CancelAndNewOrderResponse;
 import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
 import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
 import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
@@ -17,9 +18,10 @@ public class JsonParser {
     public static TickerData parseTickerJson(String jsonString) throws Exception {
         if (isJsonArray(jsonString)) {
             return parseTickerJsonArray(jsonString);
-        } else {
+        } else if (isJsonObject(jsonString)) {
             return parseTickerJsonObj(jsonString);
         }
+        return null;
     }
 
     public static SnapshotData parseSnapshotJson(String jsonString) throws Exception {
@@ -27,17 +29,21 @@ public class JsonParser {
     }
 
     public static List<OpenOrder> parseOpenOrdersJson(String jsonString) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(jsonString, new TypeReference<List<OpenOrder>>() {});
+        return mapper.readValue(jsonString, new TypeReference<List<OpenOrder>>() {
+        });
     }
 
     public static List<OrderInfo> parseOrderInfoJson(String jsonString) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(jsonString, new TypeReference<List<OrderInfo>>() {});
+        return mapper.readValue(jsonString, new TypeReference<List<OrderInfo>>() {
+        });
     }
 
     public static OrderResponse parseOrderResponseJson(String jsonString) throws Exception {
         return mapper.readValue(jsonString, OrderResponse.class);
+    }
+
+    public static CancelAndNewOrderResponse parseCancelAndNewOrderResponseJson(String jsonString) throws Exception {
+        return mapper.readValue(jsonString, CancelAndNewOrderResponse.class);
     }
 
     public static TickerData parseTickerJsonObj(String jsonString) throws Exception {

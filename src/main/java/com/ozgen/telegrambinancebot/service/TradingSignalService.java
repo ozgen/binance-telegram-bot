@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,5 +33,13 @@ public class TradingSignalService {
 
     public List<TradingSignal> getTradingSignalsByIdList(List<UUID> uuidList){
         return this.repository.findAllByIdIn(uuidList);
+    }
+
+    public List<TradingSignal> getTradingSignalsAfterDate(Date date){
+        return this.repository.findAllByCreatedAtAfter(date);
+    }
+
+    public List<TradingSignal> getTradingSignalsAfterDateAndIsProcessIn(Date date, List<Integer> processStatuses){
+        return this.repository.findAllByCreatedAtAfterAndIsProcessedIn(date, processStatuses);
     }
 }

@@ -19,7 +19,7 @@ public class DefaultBinanceService implements BinanceAPI {
 
     public String getBTCWalletStatus() {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
-        return binanceClient.createWallet().accountStatus(parameters).toString();
+        return this.binanceClient.createWallet().accountStatus(parameters).toString();
     }
 
     public String getAccountSnapshot() {
@@ -32,13 +32,33 @@ public class DefaultBinanceService implements BinanceAPI {
     public String getOpenOrders(String symbol) {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
         parameters.put("symbol", symbol);
-        return binanceClient.createTrade().getOpenOrders(parameters).toString();
+        return this.binanceClient.createTrade().getOpenOrders(parameters).toString();
     }
 
     public String cancelOpenOrders(String symbol) {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
         parameters.put("symbol", symbol);
-        return binanceClient.createTrade().cancelOpenOrders(parameters).toString();
+        return this.binanceClient.createTrade().cancelOpenOrders(parameters).toString();
+    }
+
+    @Override
+    public String cancelAndNewOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice, Double stopLossLimit, Long cancelOrderId) {
+        LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
+        parameters.put("symbol", symbol);
+        parameters.put("side", "SELL");
+        parameters.put("type", "STOP_LOSS_LIMIT");
+        parameters.put("timeInForce", "GTC");
+        parameters.put("quantity", quantity);
+        parameters.put("price", price); // Limit price
+        parameters.put("stopPrice", stopPrice); // Stop price
+
+        // Optional: For a stop-loss limit order, this is the limit price
+        // It's the price at which the stop-loss will be executed and must be set below the stopPrice
+        // If you want to set a limit price for stop-loss, you can add this:
+        parameters.put("stopLimitPrice", stopLossLimit);
+        parameters.put("cancelReplaceMode", "STOP_ON_FAILURE");
+        parameters.put("cancelOrderId", cancelOrderId);
+        return this.binanceClient.createTrade().cancelReplace(parameters);
     }
 
     public String newOrder(String symbol, Double price, Double quantity) {
@@ -50,7 +70,7 @@ public class DefaultBinanceService implements BinanceAPI {
         parameters.put("quantity", quantity);
         parameters.put("price", price);
 
-        return binanceClient.createTrade().newOrder(parameters);
+        return this.binanceClient.createTrade().newOrder(parameters);
     }
 
     public String newOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice, Double stopLossLimit) {
@@ -68,19 +88,19 @@ public class DefaultBinanceService implements BinanceAPI {
         // If you want to set a limit price for stop-loss, you can add this:
         parameters.put("stopLimitPrice", stopLossLimit);
 
-        return binanceClient.createTrade().newOrder(parameters);
+        return this.binanceClient.createTrade().newOrder(parameters);
     }
 
     public String getTickerPrice24(String symbol) {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
         parameters.put("symbol", symbol);
         parameters.put("type", "MINI");
-        return binanceClient.createMarket().ticker24H(parameters);
+        return this.binanceClient.createMarket().ticker24H(parameters);
     }
 
     public String getCoinPrice(String symbol) {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
         parameters.put("symbol", symbol);
-        return binanceClient.createMarket().averagePrice(parameters).toString();
+        return this.binanceClient.createMarket().averagePrice(parameters).toString();
     }
 }
