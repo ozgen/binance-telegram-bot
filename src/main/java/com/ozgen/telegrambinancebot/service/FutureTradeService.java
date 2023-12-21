@@ -2,6 +2,7 @@ package com.ozgen.telegrambinancebot.service;
 
 import com.ozgen.telegrambinancebot.model.TradeStatus;
 import com.ozgen.telegrambinancebot.model.bot.FutureTrade;
+import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.repository.FutureTradeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,13 @@ public class FutureTradeService {
 
     public FutureTrade createFutureTrade(FutureTrade futureTrade) {
         return this.futureTradeRepository.save(futureTrade);
+    }
+
+    public FutureTrade createFutureTrade(TradingSignal tradingSignal, TradeStatus status) {
+        FutureTrade futureTrade = new FutureTrade();
+        futureTrade.setTradeStatus(status);
+        futureTrade.setTradeSignalId(tradingSignal.getId());
+        return this.createFutureTrade(futureTrade);
     }
 
     public List<FutureTrade> getAllFutureTradeByTradeStatus(TradeStatus tradeStatus) {

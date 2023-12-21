@@ -9,7 +9,6 @@ import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
 import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
-import com.ozgen.telegrambinancebot.model.bot.FutureTrade;
 import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.BotOrderService;
@@ -26,7 +25,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -56,44 +55,62 @@ public class BinanceOpenBuyOrderManager {
     public void processOpenBuyOrders() {
         Date searchDate = this.getSearchDate();
         List<TradingSignal> tradingSignals = this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(searchDate, List.of(ProcessStatus.SELL, ProcessStatus.BUY));
-        tradingSignals.parallelStream()
-                .forEach(tradingSignal -> {
-                    try {
-                        this.processOpenBuyOrder(tradingSignal);
-                        TimeUnit.SECONDS.sleep(5);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+
+        for (TradingSignal tradingSignal : tradingSignals) {
+            try {
+                this.processOpenBuyOrder(tradingSignal);
+                Thread.sleep(5000); // Replace with a more efficient throttling if possible
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.error("Thread interrupted: {}", e.getMessage(), e);
+            } catch (Exception e) {
+                log.error("Error processing open buy order for trading signal {}: {}", tradingSignal.getId(), e.getMessage(), e);
+                // Decide how to handle the error - log, alert, retry, etc.
+            }
+        }
     }
 
-    private void processOpenBuyOrder(TradingSignal tradingSignal) throws Exception {
+    private void processOpenBuyOrder(TradingSignal tradingSignal) {
         String symbol = tradingSignal.getSymbol();
-        List<OrderInfo> openOrders = this.binanceApiManager.getOpenOrders(symbol);
-        TickerData tickerPrice24 = this.binanceApiManager.getTickerPrice24(symbol);
-        boolean availableToBuy = TradingSignalValidator.isAvailableToBuy(tickerPrice24, tradingSignal);
-        if (!availableToBuy) {
-            log.info("this {} symbol is not available to buy.", symbol);
-            List<OpenOrder> openOrderList = this.binanceApiManager.cancelOpenOrders(symbol);
-            log.info("All orders have been canceled, orders: {}", openOrderList);
-            FutureTrade futureTrade = new FutureTrade();
-            futureTrade.setTradeStatus(TradeStatus.NOT_IN_RANGE);
-            futureTrade.setTradeSignalId(tradingSignal.getId());
-            this.futureTradeService.createFutureTrade(futureTrade);
-            return;
-        }
-        List<BuyOrder> buyOrders = openOrders.stream()
-                .map(orderInfo -> this.createCancelAndBuyOrder(tradingSignal, tickerPrice24, orderInfo))
-                .filter(buyOrder -> buyOrder != null)
-                .collect(Collectors.toList());
-        if(!buyOrders.isEmpty()){
-           buyOrders.forEach(buyOrder -> {
-               NewSellOrderEvent newSellOrderEvent = new NewSellOrderEvent(this, buyOrder);
-               this.publisher.publishEvent(newSellOrderEvent);
-               log.info("NewSellOrderEvent published successfully. NewSellOrderEvent: {}", newSellOrderEvent);
-           });
+        try {
+            List<OrderInfo> openOrders = this.binanceApiManager.getOpenOrders(symbol);
+            TickerData tickerPrice24 = this.binanceApiManager.getTickerPrice24(symbol);
+
+            if (!TradingSignalValidator.isAvailableToBuy(tickerPrice24, tradingSignal)) {
+                handleNotAvailableToBuy(tradingSignal, symbol);
+                return;
+            }
+
+            List<BuyOrder> buyOrders = processOpenOrders(tradingSignal, tickerPrice24, openOrders);
+            publishNewSellOrderEvents(buyOrders);
+        } catch (Exception e) {
+            log.error("Error processing open buy order for symbol {}: {}", symbol, e.getMessage(), e);
+            // Handle the exception as needed
         }
     }
+
+    private void handleNotAvailableToBuy(TradingSignal tradingSignal, String symbol) throws Exception {
+        log.info("Symbol {} is not available to buy, cancelling orders.", symbol);
+        List<OpenOrder> openOrderList = this.binanceApiManager.cancelOpenOrders(symbol);
+        log.info("All orders have been canceled, orders: {}", openOrderList);
+        this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.NOT_IN_RANGE);
+    }
+
+    private List<BuyOrder> processOpenOrders(TradingSignal tradingSignal, TickerData tickerPrice24, List<OrderInfo> openOrders) {
+        return openOrders.stream()
+                .map(orderInfo -> createCancelAndBuyOrder(tradingSignal, tickerPrice24, orderInfo))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    private void publishNewSellOrderEvents(List<BuyOrder> buyOrders) {
+        buyOrders.forEach(buyOrder -> {
+            NewSellOrderEvent newSellOrderEvent = new NewSellOrderEvent(this, buyOrder);
+            this.publisher.publishEvent(newSellOrderEvent);
+            log.info("Published NewSellOrderEvent for BuyOrder {}", buyOrder.getId());
+        });
+    }
+
 
     private Date getSearchDate() {
         return DateFactory.getDateBeforeInMonths(this.scheduleConfiguration.getMonthBefore());
@@ -101,31 +118,41 @@ public class BinanceOpenBuyOrderManager {
 
 
     private BuyOrder createCancelAndBuyOrder(TradingSignal tradingSignal, TickerData tickerData, OrderInfo orderInfo) {
-        Double executedCount = GenericParser.getDouble(orderInfo.getExecutedQty());
-        Double totalBuyCountCount = GenericParser.getDouble(orderInfo.getOrigQty());
-        double coinAmount = totalBuyCountCount - executedCount;
-        double stopLossLimit = GenericParser.getDouble(tradingSignal.getEntryEnd());
-        double stopLoss = PriceCalculator.calculateCoinPriceDec(stopLossLimit, this.botConfiguration.getPercentageInc());
-        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()),
-                this.botConfiguration.getPercentageInc());
         String symbol = tradingSignal.getSymbol();
-
-        boolean availableToBuy = TradingSignalValidator.isAvailableToBuy(buyPrice, tradingSignal);
-
-        if (!availableToBuy) {
-            log.info("Trade signal not in range for buying: {}", tradingSignal.getId());
-            FutureTrade futureTrade = new FutureTrade();
-            futureTrade.setTradeStatus(TradeStatus.NOT_IN_RANGE);
-            futureTrade.setTradeSignalId(tradingSignal.getId());
-            this.futureTradeService.createFutureTrade(futureTrade);
+        if (!isAvailableToBuy(tradingSignal, tickerData, symbol)) {
             return null;
         }
 
-        BuyOrder buyOrder = this.botOrderService.getBuyOrder(tradingSignal);
+        BuyOrder buyOrder = prepareBuyOrder(tradingSignal, tickerData, orderInfo, symbol);
+        processCancelAndNewOrder(tradingSignal, buyOrder, symbol, orderInfo);
+        return buyOrder;
+    }
 
+    private boolean isAvailableToBuy(TradingSignal tradingSignal, TickerData tickerData, String symbol) {
+        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()), this.botConfiguration.getPercentageInc());
+        if (!TradingSignalValidator.isAvailableToBuy(buyPrice, tradingSignal)) {
+            log.info("Trade signal not in range for buying: {}", tradingSignal.getId());
+            this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.NOT_IN_RANGE);
+            return false;
+        }
+        return true;
+    }
+
+    private BuyOrder prepareBuyOrder(TradingSignal tradingSignal, TickerData tickerData, OrderInfo orderInfo, String symbol) {
+        double coinAmount = GenericParser.getDouble(orderInfo.getOrigQty()) - GenericParser.getDouble(orderInfo.getExecutedQty());
+        double stopLossLimit = GenericParser.getDouble(tradingSignal.getEntryEnd());
+        double stopLoss = PriceCalculator.calculateCoinPriceDec(stopLossLimit, this.botConfiguration.getPercentageInc());
+        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()), this.botConfiguration.getPercentageInc());
+
+        BuyOrder buyOrder = this.botOrderService.getBuyOrder(tradingSignal).orElse(null);
         if (buyOrder == null) {
             buyOrder = new BuyOrder();
         }
+        updateBuyOrder(buyOrder, symbol, coinAmount, stopLoss, stopLossLimit, buyPrice, tradingSignal);
+        return this.botOrderService.createBuyOrder(buyOrder);
+    }
+
+    private void updateBuyOrder(BuyOrder buyOrder, String symbol, double coinAmount, double stopLoss, double stopLossLimit, double buyPrice, TradingSignal tradingSignal) {
         buyOrder.setSymbol(symbol);
         buyOrder.setCoinAmount(coinAmount);
         buyOrder.setStopLoss(stopLoss);
@@ -134,22 +161,15 @@ public class BinanceOpenBuyOrderManager {
         buyOrder.setTimes(buyOrder.getTimes() + 1);
         tradingSignal.setIsProcessed(ProcessStatus.BUY);
         buyOrder.setTradingSignal(tradingSignal);
-        buyOrder = this.botOrderService.createBuyOrder(buyOrder);
+    }
 
-        log.info("Starting to create cancel and buy orders for symbol {}", symbol);
+    private void processCancelAndNewOrder(TradingSignal tradingSignal, BuyOrder buyOrder, String symbol, OrderInfo orderInfo) {
         try {
-            log.info("Cancel and creating order  for symbol {}", symbol);
-            CancelAndNewOrderResponse cancelAndNewOrderResponse = this.binanceApiManager.cancelAndNewOrderWithStopLoss(symbol, buyPrice, coinAmount, stopLoss, stopLossLimit, orderInfo.getOrderId());
-            log.info("Order cancel and created successfully: {}", cancelAndNewOrderResponse);
+            CancelAndNewOrderResponse response = this.binanceApiManager.cancelAndNewOrderWithStopLoss(symbol, buyOrder.getBuyPrice(), buyOrder.getCoinAmount(), buyOrder.getStopLoss(), buyOrder.getStopLossLimit(), orderInfo.getOrderId());
+            log.info("Order cancel and created successfully: {}", response);
         } catch (Exception e) {
-            log.error("Failed to create order number for symbol " + symbol, e);
-            FutureTrade futureTrade = new FutureTrade();
-            futureTrade.setTradeStatus(TradeStatus.ERROR_BUY);
-            futureTrade.setTradeSignalId(tradingSignal.getId());
-            this.futureTradeService.createFutureTrade(futureTrade);
-            return null;
+            log.error("Failed to cancel and create order for symbol " + symbol, e);
+            this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.ERROR_BUY);
         }
-        log.info("Order creation process completed for symbol {}", symbol);
-        return buyOrder;
     }
 }

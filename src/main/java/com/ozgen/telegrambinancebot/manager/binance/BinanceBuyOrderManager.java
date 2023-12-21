@@ -7,7 +7,6 @@ import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
 import com.ozgen.telegrambinancebot.model.binance.SnapshotData;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
-import com.ozgen.telegrambinancebot.model.bot.FutureTrade;
 import com.ozgen.telegrambinancebot.model.events.NewBuyOrderEvent;
 import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
@@ -48,32 +47,36 @@ public class BinanceBuyOrderManager {
     public void processNewBuyOrderEvent(NewBuyOrderEvent event) {
         TradingSignal tradingSignal = event.getTradingSignal();
         TickerData tickerData = event.getTickerData();
-        SnapshotData accountSnapshot = null;
-        Double btcToUsdRate = null;
+
         try {
-            accountSnapshot = this.binanceApiManager.getAccountSnapshot();
-            btcToUsdRate = this.getBtcToUsdConversionRate();
+            SnapshotData accountSnapshot = this.binanceApiManager.getAccountSnapshot();
+            Double btcToUsdRate = this.getBtcToUsdConversionRate();
+            this.processOrder(tradingSignal, tickerData, accountSnapshot, btcToUsdRate);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("Error processing new buy order event for trading signal {}: {}", tradingSignal.getId(), e.getMessage(), e);
+            this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.ERROR_BUY);
         }
-        boolean hasAccountEnoughBtc = this.hasAccountEnoughBtc(accountSnapshot, btcToUsdRate);
-        if (!hasAccountEnoughBtc) {
-            log.warn("the account has not enough amount of {} less than {}$.", this.botConfiguration.getCurrency(),
-                    this.botConfiguration.getAmount());
-            FutureTrade futureTrade = new FutureTrade();
-            futureTrade.setTradeStatus(TradeStatus.INSUFFICIENT);
-            futureTrade.setTradeSignalId(tradingSignal.getId());
-            this.futureTradeService.createFutureTrade(futureTrade);
+    }
+
+    private void processOrder(TradingSignal tradingSignal, TickerData tickerData, SnapshotData accountSnapshot, Double btcToUsdRate) {
+        if (!this.hasAccountEnoughBtc(accountSnapshot, btcToUsdRate)) {
+            log.warn("Account does not have enough {} (less than {}$)", this.botConfiguration.getCurrency(), this.botConfiguration.getAmount());
+            this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.INSUFFICIENT);
             return;
         }
 
         BuyOrder buyOrder = this.createBuyOrder(tradingSignal, tickerData, btcToUsdRate);
         if (buyOrder != null) {
-            NewSellOrderEvent newSellOrderEvent = new NewSellOrderEvent(this, buyOrder);
-            this.publisher.publishEvent(newSellOrderEvent);
-            log.info("NewSellOrderEvent published successfully. NewSellOrderEvent: {}", newSellOrderEvent);
+            publishNewSellOrderEvent(buyOrder);
         }
     }
+
+    private void publishNewSellOrderEvent(BuyOrder buyOrder) {
+        NewSellOrderEvent newSellOrderEvent = new NewSellOrderEvent(this, buyOrder);
+        this.publisher.publishEvent(newSellOrderEvent);
+        log.info("Published NewSellOrderEvent for BuyOrder {}", buyOrder.getId());
+    }
+
 
     private double calculateCoinAmount(TickerData tickerData, double btcPriceInUsd) {
         double dollarsToInvest = this.botConfiguration.getAmount();
@@ -102,30 +105,44 @@ public class BinanceBuyOrderManager {
     }
 
     private BuyOrder createBuyOrder(TradingSignal tradingSignal, TickerData tickerData, double btcToUsdRate) {
-        double coinAmount = this.calculateCoinAmount(tickerData, btcToUsdRate);
-        double stopLossLimit = GenericParser.getDouble(tradingSignal.getEntryEnd());
-        double stopLoss = PriceCalculator.calculateCoinPriceDec(stopLossLimit, this.botConfiguration.getPercentageInc());
-        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()),
-                this.botConfiguration.getPercentageInc());
-        String symbol = tradingSignal.getSymbol();
-
-        boolean availableToBuy = TradingSignalValidator.isAvailableToBuy(buyPrice, tradingSignal);
-
-        if (!availableToBuy) {
-            log.info("Trade signal not in range for buying: {}", tradingSignal.getId());
-            FutureTrade futureTrade = new FutureTrade();
-            futureTrade.setTradeStatus(TradeStatus.NOT_IN_RANGE);
-            futureTrade.setTradeSignalId(tradingSignal.getId());
-            this.futureTradeService.createFutureTrade(futureTrade);
+        if (!this.isTradeSignalInRange(tradingSignal, tickerData)) {
+            this.handleNotInRange(tradingSignal);
             return null;
         }
 
-        BuyOrder buyOrder = this.botOrderService.getBuyOrder(tradingSignal);
+        BuyOrder buyOrder = this.initializeOrRetrieveBuyOrder(tradingSignal);
+        this.populateBuyOrderDetails(buyOrder, tradingSignal, tickerData, btcToUsdRate);
 
-        if (buyOrder == null) {
-            buyOrder = new BuyOrder();
+        if (this.createOrderInBinance(buyOrder, tradingSignal)) {
+            return this.saveBuyOrder(buyOrder);
+        } else {
+            return null;
         }
-        buyOrder.setSymbol(symbol);
+    }
+
+    private boolean isTradeSignalInRange(TradingSignal tradingSignal, TickerData tickerData) {
+        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()),
+                this.botConfiguration.getPercentageInc());
+        return TradingSignalValidator.isAvailableToBuy(buyPrice, tradingSignal);
+    }
+
+    private void handleNotInRange(TradingSignal tradingSignal) {
+        log.info("Trade signal not in range for buying: {}", tradingSignal.getId());
+        this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.NOT_IN_RANGE);
+    }
+
+    private BuyOrder initializeOrRetrieveBuyOrder(TradingSignal tradingSignal) {
+        BuyOrder buyOrder = this.botOrderService.getBuyOrder(tradingSignal).orElse(null);
+        return (buyOrder != null) ? buyOrder : new BuyOrder();
+    }
+
+    private void populateBuyOrderDetails(BuyOrder buyOrder, TradingSignal tradingSignal, TickerData tickerData, double btcToUsdRate) {
+        double coinAmount = calculateCoinAmount(tickerData, btcToUsdRate);
+        double stopLossLimit = GenericParser.getDouble(tradingSignal.getEntryEnd());
+        double stopLoss = PriceCalculator.calculateCoinPriceDec(stopLossLimit, this.botConfiguration.getPercentageInc());
+        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()), this.botConfiguration.getPercentageInc());
+
+        buyOrder.setSymbol(tradingSignal.getSymbol());
         buyOrder.setCoinAmount(coinAmount);
         buyOrder.setStopLoss(stopLoss);
         buyOrder.setStopLossLimit(stopLossLimit);
@@ -133,22 +150,24 @@ public class BinanceBuyOrderManager {
         buyOrder.setTimes(buyOrder.getTimes() + 1);
         tradingSignal.setIsProcessed(ProcessStatus.BUY);
         buyOrder.setTradingSignal(tradingSignal);
-        buyOrder = this.botOrderService.createBuyOrder(buyOrder);
-
-        log.info("Starting to create buy orders for symbol {}", symbol);
-        try {
-            log.info("Creating order  for symbol {}", symbol);
-            OrderResponse orderResponse = this.binanceApiManager.newOrderWithStopLoss(symbol, buyPrice, coinAmount, stopLoss, stopLossLimit);
-            log.info("Order created successfully: {}", orderResponse);
-        } catch (Exception e) {
-            log.error("Failed to create order number for symbol " + symbol, e);
-            FutureTrade futureTrade = new FutureTrade();
-            futureTrade.setTradeStatus(TradeStatus.ERROR_BUY);
-            futureTrade.setTradeSignalId(tradingSignal.getId());
-            this.futureTradeService.createFutureTrade(futureTrade);
-            return null;
-        }
-        log.info("Order creation process completed for symbol {}", symbol);
-        return buyOrder;
     }
+
+    private boolean createOrderInBinance(BuyOrder buyOrder, TradingSignal tradingSignal) {
+        try {
+            log.info("Creating buy order for symbol {}", buyOrder.getSymbol());
+            OrderResponse orderResponse = this.binanceApiManager.newOrderWithStopLoss(buyOrder.getSymbol(), buyOrder.getBuyPrice(), buyOrder.getCoinAmount(), buyOrder.getStopLoss(), buyOrder.getStopLossLimit());
+            log.info("Order created successfully: {}", orderResponse);
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to create buy order for symbol {}: {}", buyOrder.getSymbol(), e.getMessage(), e);
+            this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.ERROR_BUY);
+            return false;
+        }
+    }
+
+    private BuyOrder saveBuyOrder(BuyOrder buyOrder) {
+        return this.botOrderService.createBuyOrder(buyOrder);
+    }
+
+
 }
