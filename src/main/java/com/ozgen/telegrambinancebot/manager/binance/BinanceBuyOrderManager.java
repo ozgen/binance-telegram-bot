@@ -146,6 +146,7 @@ public class BinanceBuyOrderManager {
             futureTrade.setTradeStatus(TradeStatus.ERROR_BUY);
             futureTrade.setTradeSignalId(tradingSignal.getId());
             this.futureTradeService.createFutureTrade(futureTrade);
+            return null;
         }
         log.info("Order creation process completed for symbol {}", symbol);
         return buyOrder;

@@ -1,6 +1,7 @@
 package com.ozgen.telegrambinancebot.manager.binance;
 
 import com.ozgen.telegrambinancebot.adapters.binance.BinanceAPI;
+import com.ozgen.telegrambinancebot.model.binance.CancelAndNewOrderResponse;
 import com.ozgen.telegrambinancebot.service.AccountSnapshotService;
 import com.ozgen.telegrambinancebot.service.BinanceOrderService;
 import com.ozgen.telegrambinancebot.service.TickerDataService;
@@ -80,6 +81,14 @@ public class BinanceApiManager {
 
         log.info("'{}' of symbol order response data are parsed, successfully.", symbol);
         return this.binanceOrderService.createOrderResponse(orderResponse);
+    }
+
+    CancelAndNewOrderResponse cancelAndNewOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice, Double stopLossLimit, Long cancelOrderId) throws Exception {
+        String orderResponseJson = this.binanceAPI.cancelAndNewOrderWithStopLoss(symbol, price, quantity, stopPrice, stopLossLimit, cancelOrderId);
+        CancelAndNewOrderResponse orderResponse = JsonParser.parseCancelAndNewOrderResponseJson(orderResponseJson);
+
+        log.info("'{}' of symbol cancel and new order response data are parsed, successfully.", symbol);
+        return this.binanceOrderService.createCancelAndNewOrderResponse(orderResponse);
     }
 
 }
