@@ -6,6 +6,7 @@ import com.ozgen.telegrambinancebot.configuration.telegram.TelegramConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -15,17 +16,18 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import javax.annotation.PostConstruct;
 
 @Component
+@ConditionalOnProperty(name = "bot.telegram.enabled", havingValue = "true", matchIfMissing = true)
 public class TelegramBinanceBot extends TelegramLongPollingBot {
 
     private static final Logger log = LoggerFactory.getLogger(TelegramBinanceBot.class);
 
-    @Autowired
-    private TelegramMessageManager  telegramMessageManager;
+    private final TelegramMessageManager  telegramMessageManager;
 
     private final TelegramConfig telegramConfig;
 
-    public TelegramBinanceBot(TelegramConfig telegramConfig) {
+    public TelegramBinanceBot(TelegramConfig telegramConfig, TelegramMessageManager telegramMessageManager) {
         this.telegramConfig = telegramConfig;
+        this.telegramMessageManager = telegramMessageManager;
     }
 
     @Override
