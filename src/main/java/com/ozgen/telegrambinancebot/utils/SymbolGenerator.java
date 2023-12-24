@@ -30,7 +30,7 @@ public class SymbolGenerator {
 
     public static String getCoinSymbol(String symbol, String currency) {
         if (symbol == null || currency == null) {
-            return "INVALID_INPUT"; // or throw an IllegalArgumentException
+            return null; // or throw an IllegalArgumentException
         }
 
         // Check if the symbol contains the currency

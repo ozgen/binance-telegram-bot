@@ -19,6 +19,7 @@ import com.ozgen.telegrambinancebot.utils.PriceCalculator;
 import com.ozgen.telegrambinancebot.utils.SyncUtil;
 import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import com.ozgen.telegrambinancebot.utils.validators.TradingSignalValidator;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -30,6 +31,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class BinanceOpenBuyOrderManager {
 
     private static final Logger log = LoggerFactory.getLogger(BinanceOpenBuyOrderManager.class);
@@ -41,17 +43,6 @@ public class BinanceOpenBuyOrderManager {
     private final ApplicationEventPublisher publisher;
     private final ScheduleConfiguration scheduleConfiguration;
     private final BotConfiguration botConfiguration;
-
-
-    public BinanceOpenBuyOrderManager(BinanceApiManager binanceApiManager, TradingSignalService tradingSignalService, FutureTradeService futureTradeService, BotOrderService botOrderService, ApplicationEventPublisher publisher, ScheduleConfiguration scheduleConfiguration, BotConfiguration botConfiguration) {
-        this.binanceApiManager = binanceApiManager;
-        this.tradingSignalService = tradingSignalService;
-        this.futureTradeService = futureTradeService;
-        this.botOrderService = botOrderService;
-        this.publisher = publisher;
-        this.scheduleConfiguration = scheduleConfiguration;
-        this.botConfiguration = botConfiguration;
-    }
 
     public void processOpenBuyOrders() {
         Date searchDate = this.getSearchDate();
@@ -127,7 +118,7 @@ public class BinanceOpenBuyOrderManager {
     }
 
     private boolean isAvailableToBuy(TradingSignal tradingSignal, TickerData tickerData, String symbol) {
-        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()), this.botConfiguration.getPercentageInc());
+        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()).get(), this.botConfiguration.getPercentageInc());
         if (!TradingSignalValidator.isAvailableToBuy(buyPrice, tradingSignal)) {
             log.info("Trade signal not in range for buying: {}", tradingSignal.getId());
             this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.NOT_IN_RANGE);
@@ -137,10 +128,10 @@ public class BinanceOpenBuyOrderManager {
     }
 
     private BuyOrder prepareBuyOrder(TradingSignal tradingSignal, TickerData tickerData, OrderInfo orderInfo, String symbol) {
-        double coinAmount = GenericParser.getDouble(orderInfo.getOrigQty()) - GenericParser.getDouble(orderInfo.getExecutedQty());
-        double stopLossLimit = GenericParser.getDouble(tradingSignal.getEntryEnd());
+        double coinAmount = GenericParser.getDouble(orderInfo.getOrigQty()).get() - GenericParser.getDouble(orderInfo.getExecutedQty()).get();
+        double stopLossLimit = GenericParser.getDouble(tradingSignal.getEntryEnd()).get();
         double stopLoss = PriceCalculator.calculateCoinPriceDec(stopLossLimit, this.botConfiguration.getPercentageInc());
-        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()), this.botConfiguration.getPercentageInc());
+        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()).get(), this.botConfiguration.getPercentageInc());
 
         BuyOrder buyOrder = this.botOrderService.getBuyOrder(tradingSignal).orElse(null);
         if (buyOrder == null) {

@@ -29,15 +29,15 @@ public class TradingSignalValidator {
     }
 
     public static boolean isAvailableToBuy(TickerData tickerData, TradingSignal tradingSignal) {
-        Double entryStart = GenericParser.getDouble(tradingSignal.getEntryStart());
-        Double entryEnd = GenericParser.getDouble(tradingSignal.getEntryEnd());
-        Double lastPrice = GenericParser.getDouble(tickerData.getLastPrice());
+        Double entryStart = GenericParser.getDouble(tradingSignal.getEntryStart()).get();
+        Double entryEnd = GenericParser.getDouble(tradingSignal.getEntryEnd()).get();
+        Double lastPrice = GenericParser.getDouble(tickerData.getLastPrice()).get();
         return lastPrice >= entryStart && lastPrice <= entryEnd;
     }
 
     public static boolean isAvailableToBuy(double buyPrice, TradingSignal tradingSignal) {
-        Double entryStart = GenericParser.getDouble(tradingSignal.getEntryStart());
-        Double entryEnd = GenericParser.getDouble(tradingSignal.getEntryEnd());
+        Double entryStart = GenericParser.getDouble(tradingSignal.getEntryStart()).get();
+        Double entryEnd = GenericParser.getDouble(tradingSignal.getEntryEnd()).get();
         return buyPrice >= entryStart && buyPrice <= entryEnd;
     }
 }

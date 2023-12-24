@@ -1,8 +1,10 @@
 package com.ozgen.telegrambinancebot.model.events;
 
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
+import lombok.ToString;
 import org.springframework.context.ApplicationEvent;
 
+@ToString
 public class IncomingTradingSignalEvent extends ApplicationEvent {
 
     private final TradingSignal tradingSignal;
@@ -15,10 +17,4 @@ public class IncomingTradingSignalEvent extends ApplicationEvent {
         return tradingSignal;
     }
 
-    @Override
-    public String toString() {
-        return "IncomingTradingSignalEvent{" +
-                "tradingSignal=" + tradingSignal +
-                '}';
-    }
 }

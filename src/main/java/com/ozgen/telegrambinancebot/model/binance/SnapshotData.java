@@ -1,6 +1,8 @@
 package com.ozgen.telegrambinancebot.model.binance;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+import lombok.ToString;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -17,6 +19,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "snapshot_data")
+@Data
+@ToString
 public class SnapshotData {
 
     @Id
@@ -29,43 +33,6 @@ public class SnapshotData {
     @OneToMany(mappedBy = "snapshotData", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SnapshotVo> snapshotVos;
 
-    public UUID getId() {
-        return id;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public List<SnapshotVo> getSnapshotVos() {
-        return snapshotVos;
-    }
-
-    public void setSnapshotVos(List<SnapshotVo> snapshotVos) {
-        this.snapshotVos = snapshotVos;
-    }
-
-    @Override
-    public String toString() {
-        return "Snapshot{" +
-                "id=" + id +
-                ", code=" + code +
-                ", msg='" + msg + '\'' +
-                ", snapshotVos=" + snapshotVos +
-                '}';
-    }
 
     public Double getCoinValue(String assetName) {
         if (this == null || this.getSnapshotVos() == null) {
@@ -92,6 +59,8 @@ public class SnapshotData {
 
     @Entity
     @Table(name = "snapshot_vo")
+    @lombok.Data
+    @ToString
     public static class SnapshotVo {
 
         @Id
@@ -109,52 +78,12 @@ public class SnapshotData {
         @OneToOne(mappedBy = "snapshotVo", cascade = CascadeType.ALL, orphanRemoval = true)
         private Data data;
 
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        public Date getUpdateTime() {
-            return updateTime;
-        }
-
-        public void setUpdateTime(Date updateTime) {
-            this.updateTime = updateTime;
-        }
-
-        public SnapshotData getSnapshot() {
-            return snapshotData;
-        }
-
-        public void setSnapshot(SnapshotData snapshotData) {
-            this.snapshotData = snapshotData;
-        }
-
-        public Data getData() {
-            return data;
-        }
-
-        public void setData(Data data) {
-            this.data = data;
-        }
-
-        @Override
-        public String toString() {
-            return "SnapshotVo{" +
-                    "id=" + id +
-                    ", type='" + type + '\'' +
-                    ", updateTime=" + updateTime +
-                    ", snapshot=" + snapshotData +
-                    ", data=" + data +
-                    '}';
-        }
     }
 
     @Entity
     @Table(name = "data")
+    @lombok.Data
+    @ToString
     public static class Data {
         @Id
         @GeneratedValue(generator = "UUID")
@@ -168,48 +97,12 @@ public class SnapshotData {
 
         @OneToMany(mappedBy = "data", cascade = CascadeType.ALL, orphanRemoval = true)
         private List<Balance> balances;
-
-        public UUID getId() {
-            return id;
-        }
-
-        public String getTotalAssetOfBtc() {
-            return totalAssetOfBtc;
-        }
-
-        public void setTotalAssetOfBtc(String totalAssetOfBtc) {
-            this.totalAssetOfBtc = totalAssetOfBtc;
-        }
-
-        public SnapshotVo getSnapshotVo() {
-            return snapshotVo;
-        }
-
-        public void setSnapshotVo(SnapshotVo snapshotVo) {
-            this.snapshotVo = snapshotVo;
-        }
-
-        public List<Balance> getBalances() {
-            return balances;
-        }
-
-        public void setBalances(List<Balance> balances) {
-            this.balances = balances;
-        }
-
-        @Override
-        public String toString() {
-            return "Data{" +
-                    "id=" + id +
-                    ", totalAssetOfBtc='" + totalAssetOfBtc + '\'' +
-                    ", snapshotVo=" + snapshotVo +
-                    ", balances=" + balances +
-                    '}';
-        }
     }
 
     @Entity
     @Table(name = "balance")
+    @lombok.Data
+    @ToString
     public static class Balance {
         @Id
         @GeneratedValue(generator = "UUID")
@@ -223,52 +116,6 @@ public class SnapshotData {
         @JoinColumn(name = "data_id")
         private Data data;
 
-        public UUID getId() {
-            return id;
-        }
-
-        public String getAsset() {
-            return asset;
-        }
-
-        public void setAsset(String asset) {
-            this.asset = asset;
-        }
-
-        public String getFree() {
-            return free;
-        }
-
-        public void setFree(String free) {
-            this.free = free;
-        }
-
-        public String getLocked() {
-            return locked;
-        }
-
-        public void setLocked(String locked) {
-            this.locked = locked;
-        }
-
-        public Data getData() {
-            return data;
-        }
-
-        public void setData(Data data) {
-            this.data = data;
-        }
-
-        @Override
-        public String toString() {
-            return "Balance{" +
-                    "id=" + id +
-                    ", asset='" + asset + '\'' +
-                    ", free='" + free + '\'' +
-                    ", locked='" + locked + '\'' +
-                    ", data=" + data +
-                    '}';
-        }
     }
 }
 

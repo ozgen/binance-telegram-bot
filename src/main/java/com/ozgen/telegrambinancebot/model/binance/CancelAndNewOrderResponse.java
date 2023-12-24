@@ -1,5 +1,8 @@
 package com.ozgen.telegrambinancebot.model.binance;
 
+import lombok.Data;
+import lombok.ToString;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,6 +14,8 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
+@Data
+@ToString
 public class CancelAndNewOrderResponse {
     @Id
     @GeneratedValue
@@ -41,47 +46,4 @@ public class CancelAndNewOrderResponse {
         updatedAt = new Date();
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public String getCancelResult() {
-        return cancelResult;
-    }
-
-    public void setCancelResult(String cancelResult) {
-        this.cancelResult = cancelResult;
-    }
-
-    public String getNewOrderResult() {
-        return newOrderResult;
-    }
-
-    public void setNewOrderResult(String newOrderResult) {
-        this.newOrderResult = newOrderResult;
-    }
-
-    public OrderDetails getCancelResponse() {
-        return cancelResponse;
-    }
-
-    public void setCancelResponse(OrderDetails cancelResponse) {
-        this.cancelResponse = cancelResponse;
-    }
-
-    public OrderDetails getNewOrderResponse() {
-        return newOrderResponse;
-    }
-
-    public void setNewOrderResponse(OrderDetails newOrderResponse) {
-        this.newOrderResponse = newOrderResponse;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
 }
