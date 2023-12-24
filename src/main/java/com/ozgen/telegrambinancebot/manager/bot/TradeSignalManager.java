@@ -7,6 +7,7 @@ import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
 import com.ozgen.telegrambinancebot.utils.DateFactory;
 import com.ozgen.telegrambinancebot.utils.SyncUtil;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -16,18 +17,13 @@ import java.util.Date;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class TradeSignalManager {
     private static final Logger log = LoggerFactory.getLogger(TradeSignalManager.class);
 
     private final ApplicationEventPublisher publisher;
     private final TradingSignalService tradingSignalService;
     private final ScheduleConfiguration scheduleConfiguration;
-
-    public TradeSignalManager(ApplicationEventPublisher publisher, TradingSignalService tradingSignalService, ScheduleConfiguration scheduleConfiguration) {
-        this.publisher = publisher;
-        this.tradingSignalService = tradingSignalService;
-        this.scheduleConfiguration = scheduleConfiguration;
-    }
 
     public void processInitTradingSignals() {
         log.info("Processing initial trading signals...");

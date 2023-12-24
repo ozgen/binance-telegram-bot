@@ -1,5 +1,8 @@
 package com.ozgen.telegrambinancebot.model.binance;
 
+import lombok.Data;
+import lombok.ToString;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -13,6 +16,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "open_order_detail")
+@Data
+@ToString
 public class OpenOrderDetail {
 
     @Id
@@ -40,69 +45,4 @@ public class OpenOrderDetail {
         updatedAt = new Date();
     }
 
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public Long getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
-    }
-
-    public String getClientOrderId() {
-        return clientOrderId;
-    }
-
-    public void setClientOrderId(String clientOrderId) {
-        this.clientOrderId = clientOrderId;
-    }
-
-    public OpenOrder getOrder() {
-        return openOrder;
-    }
-
-    public void setOrder(OpenOrder openOrder) {
-        this.openOrder = openOrder;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    @Override
-    public String toString() {
-        return "OrderDetail{" +
-                "id=" + id +
-                ", symbol='" + symbol + '\'' +
-                ", orderId=" + orderId +
-                ", clientOrderId='" + clientOrderId + '\'' +
-                ", order=" + openOrder +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
-    }
 }

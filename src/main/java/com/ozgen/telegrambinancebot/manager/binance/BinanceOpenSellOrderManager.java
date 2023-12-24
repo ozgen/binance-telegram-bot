@@ -11,6 +11,7 @@ import com.ozgen.telegrambinancebot.service.FutureTradeService;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
 import com.ozgen.telegrambinancebot.utils.DateFactory;
 import com.ozgen.telegrambinancebot.utils.SyncUtil;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -20,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class BinanceOpenSellOrderManager {
 
     private static final Logger log = LoggerFactory.getLogger(BinanceOpenSellOrderManager.class);
@@ -31,17 +33,6 @@ public class BinanceOpenSellOrderManager {
     private final ApplicationEventPublisher publisher;
     private final ScheduleConfiguration scheduleConfiguration;
     private final BotConfiguration botConfiguration;
-
-
-    public BinanceOpenSellOrderManager(BinanceApiManager binanceApiManager, TradingSignalService tradingSignalService, FutureTradeService futureTradeService, BotOrderService botOrderService, ApplicationEventPublisher publisher, ScheduleConfiguration scheduleConfiguration, BotConfiguration botConfiguration) {
-        this.binanceApiManager = binanceApiManager;
-        this.tradingSignalService = tradingSignalService;
-        this.futureTradeService = futureTradeService;
-        this.botOrderService = botOrderService;
-        this.publisher = publisher;
-        this.scheduleConfiguration = scheduleConfiguration;
-        this.botConfiguration = botConfiguration;
-    }
 
     public void processOpenSellOrders() {
         Date searchDate = getSearchDate();

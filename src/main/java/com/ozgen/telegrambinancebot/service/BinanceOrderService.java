@@ -8,6 +8,7 @@ import com.ozgen.telegrambinancebot.repository.OrderResponseRepository;
 import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
 import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
 import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class BinanceOrderService {
     private static final Logger log = LoggerFactory.getLogger(BinanceOrderService.class);
 
@@ -24,13 +26,6 @@ public class BinanceOrderService {
     private final OrderResponseRepository orderResponseRepository;
     private final CancelAndNewOrderResponseRepository cancelAndNewOrderResponseRepository;
 
-    public BinanceOrderService(OrderInfoRepository orderInfoRepository, OpenOrderRepository openOrderRepository,
-                               OrderResponseRepository orderResponseRepository, CancelAndNewOrderResponseRepository cancelAndNewOrderResponseRepository) {
-        this.orderInfoRepository = orderInfoRepository;
-        this.openOrderRepository = openOrderRepository;
-        this.orderResponseRepository = orderResponseRepository;
-        this.cancelAndNewOrderResponseRepository = cancelAndNewOrderResponseRepository;
-    }
 
     public List<OpenOrder> createOpenOrders(List<OpenOrder> openOrderList) {
 

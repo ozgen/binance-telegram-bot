@@ -13,12 +13,14 @@ import com.ozgen.telegrambinancebot.service.FutureTradeService;
 import com.ozgen.telegrambinancebot.utils.PriceCalculator;
 import com.ozgen.telegrambinancebot.utils.SymbolGenerator;
 import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class BinanceSellOrderManager {
 
     private static final Logger log = LoggerFactory.getLogger(BinanceSellOrderManager.class);
@@ -29,15 +31,6 @@ public class BinanceSellOrderManager {
     private final FutureTradeService futureTradeService;
     private final BotOrderService botOrderService;
 
-
-    public BinanceSellOrderManager(BinanceApiManager binanceApiManager, ApplicationEventPublisher publisher, BotConfiguration botConfiguration, FutureTradeService futureTradeService, BotOrderService botOrderService) {
-        this.binanceApiManager = binanceApiManager;
-        this.publisher = publisher;
-        this.botConfiguration = botConfiguration;
-        this.futureTradeService = futureTradeService;
-        this.botOrderService = botOrderService;
-
-    }
 
     public void processNewSellOrderEvent(NewSellOrderEvent event) {
         BuyOrder buyOrder = event.getBuyOrder();
@@ -104,7 +97,7 @@ public class BinanceSellOrderManager {
 
     private SellOrder initializeSellOrder(BuyOrder buyOrder, Double coinAmount, TradingSignal tradingSignal) {
         double sellPrice = PriceCalculator.calculateCoinPriceInc(buyOrder.getBuyPrice(), botConfiguration.getProfitPercentage());
-        double stopLoss = GenericParser.getDouble(tradingSignal.getStopLoss());
+        double stopLoss = GenericParser.getDouble(tradingSignal.getStopLoss()).get();
         double stopLossLimit = PriceCalculator.calculateCoinPriceDec(stopLoss, botConfiguration.getPercentageInc());
         String sellOrderSymbol = SymbolGenerator.generateSellOrderSymbol(buyOrder.getSymbol(), botConfiguration.getCurrency());
 

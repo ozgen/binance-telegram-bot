@@ -9,6 +9,7 @@ import com.ozgen.telegrambinancebot.model.events.IncomingTradingSignalEvent;
 import com.ozgen.telegrambinancebot.utils.parser.JsonParser;
 import com.ozgen.telegrambinancebot.utils.parser.SignalParser;
 import com.ozgen.telegrambinancebot.utils.validators.TradingSignalValidator;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class TelegramMessageManager {
 
     private static final Logger log = LoggerFactory.getLogger(TelegramMessageManager.class);
@@ -29,12 +31,6 @@ public class TelegramMessageManager {
     @Autowired
     private  BinanceAPI binanceAPI;
 
-
-
-    public TelegramMessageManager(TradingSignalService tradingSignalService, ApplicationEventPublisher publisher) {
-        this.tradingSignalService = tradingSignalService;
-        this.publisher = publisher;
-    }
 
     public String parseTelegramMessage(String message){
         TradingSignal tradingSignal = SignalParser.parseSignal(message);

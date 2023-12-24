@@ -13,6 +13,7 @@ import com.ozgen.telegrambinancebot.service.BotOrderService;
 import com.ozgen.telegrambinancebot.service.FutureTradeService;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
 import com.ozgen.telegrambinancebot.utils.SyncUtil;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -25,6 +26,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class FutureTradeManager {
     private static final Logger log = LoggerFactory.getLogger(BinanceTradingSignalManager.class);
     private final BinanceApiManager binanceApiManager;
@@ -33,13 +35,6 @@ public class FutureTradeManager {
     private final BotOrderService botOrderService;
     private final ApplicationEventPublisher publisher;
 
-    public FutureTradeManager(BinanceApiManager binanceApiManager, FutureTradeService futureTradeService, TradingSignalService tradingSignalService, BotOrderService botOrderService, ApplicationEventPublisher publisher) {
-        this.binanceApiManager = binanceApiManager;
-        this.futureTradeService = futureTradeService;
-        this.tradingSignalService = tradingSignalService;
-        this.botOrderService = botOrderService;
-        this.publisher = publisher;
-    }
 
     public void processFutureTrades(TradeStatus tradeStatus) {
         if (!this.isInsufficientOrNotInRangeOrErrorBuy(tradeStatus)) {

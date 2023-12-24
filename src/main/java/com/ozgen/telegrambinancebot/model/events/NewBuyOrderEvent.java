@@ -2,8 +2,10 @@ package com.ozgen.telegrambinancebot.model.events;
 
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
+import lombok.ToString;
 import org.springframework.context.ApplicationEvent;
 
+@ToString
 public class NewBuyOrderEvent extends ApplicationEvent {
     private final TradingSignal tradingSignal;
     private final TickerData tickerData;
@@ -23,11 +25,5 @@ public class NewBuyOrderEvent extends ApplicationEvent {
         return tickerData;
     }
 
-    @Override
-    public String toString() {
-        return "NewBuyOrderEvent{" +
-                "tradingSignal=" + tradingSignal +
-                ", tickerData=" + tickerData +
-                '}';
-    }
+
 }

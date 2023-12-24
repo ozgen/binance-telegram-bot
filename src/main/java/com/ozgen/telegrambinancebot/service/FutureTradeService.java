@@ -4,6 +4,7 @@ import com.ozgen.telegrambinancebot.model.TradeStatus;
 import com.ozgen.telegrambinancebot.model.bot.FutureTrade;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.repository.FutureTradeRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class FutureTradeService {
     private static final Logger log = LoggerFactory.getLogger(FutureTradeService.class);
 
@@ -19,9 +21,6 @@ public class FutureTradeService {
     private final FutureTradeRepository futureTradeRepository;
 
 
-    public FutureTradeService(FutureTradeRepository futureTradeRepository) {
-        this.futureTradeRepository = futureTradeRepository;
-    }
 
     public FutureTrade createFutureTrade(FutureTrade futureTrade) {
         return this.futureTradeRepository.save(futureTrade);

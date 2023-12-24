@@ -11,6 +11,7 @@ import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
 import com.ozgen.telegrambinancebot.model.binance.SnapshotData;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.utils.parser.JsonParser;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class BinanceApiManager {
     private static final Logger log = LoggerFactory.getLogger(BinanceApiManager.class);
 
@@ -25,14 +27,6 @@ public class BinanceApiManager {
     private final TickerDataService tickerDataService;
     private final BinanceOrderService binanceOrderService;
     private final AccountSnapshotService accountSnapshotService;
-
-    public BinanceApiManager(BinanceAPI binanceAPI, TickerDataService tickerDataService, BinanceOrderService binanceOrderService,
-                             AccountSnapshotService accountSnapshotService) {
-        this.binanceAPI = binanceAPI;
-        this.tickerDataService = tickerDataService;
-        this.binanceOrderService = binanceOrderService;
-        this.accountSnapshotService = accountSnapshotService;
-    }
 
 
     public TickerData getTickerPrice24(String symbol) throws Exception {
