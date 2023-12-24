@@ -12,6 +12,7 @@ import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.BotOrderService;
 import com.ozgen.telegrambinancebot.service.FutureTradeService;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
+import com.ozgen.telegrambinancebot.utils.SyncUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -98,8 +99,7 @@ public class FutureTradeManager {
             return;
         }
 
-        buyOrders.parallelStream()
-                .forEach(this::publishNewSellOrderEvent);
+        buyOrders.forEach(this::publishNewSellOrderEvent);
     }
 
     private void processTradeGroup(UUID tradeSignalId, List<FutureTrade> tradeList, Map<UUID, TradingSignal> groupedSignals) {
@@ -108,6 +108,7 @@ public class FutureTradeManager {
             TickerData tickerPrice24 = this.fetchTickerPrice(tradingSignal);
             if (tickerPrice24 != null) {
                 this.publishNewBuyOrderEvent(tradingSignal, tickerPrice24);
+                SyncUtil.pauseBetweenOperations();
             }
         }
     }
@@ -124,6 +125,7 @@ public class FutureTradeManager {
     private void publishNewBuyOrderEvent(TradingSignal tradingSignal, TickerData tickerPrice24) {
         NewBuyOrderEvent newBuyOrderEvent = new NewBuyOrderEvent(this, tradingSignal, tickerPrice24);
         this.publisher.publishEvent(newBuyOrderEvent);
+        SyncUtil.pauseBetweenOperations();
     }
 
     private void publishNewSellOrderEvent(BuyOrder buyOrder) {

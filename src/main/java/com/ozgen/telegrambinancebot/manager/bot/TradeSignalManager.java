@@ -6,6 +6,7 @@ import com.ozgen.telegrambinancebot.model.events.IncomingTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
 import com.ozgen.telegrambinancebot.utils.DateFactory;
+import com.ozgen.telegrambinancebot.utils.SyncUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -29,14 +30,20 @@ public class TradeSignalManager {
     }
 
     public void processInitTradingSignals() {
+        log.info("Processing initial trading signals...");
         List<Integer> list = List.of(ProcessStatus.INIT);
         Date dateBeforeInMonths = DateFactory.getDateBeforeInMonths(this.scheduleConfiguration.getMonthBefore());
+        log.debug("Retrieving trading signals after date: {}", dateBeforeInMonths);
         List<TradingSignal> tradingSignals = this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(dateBeforeInMonths, list);
+        log.info("Found {} trading signals to process.", tradingSignals.size());
         tradingSignals.forEach(this::processTradingSignal);
     }
 
     private void processTradingSignal(TradingSignal tradingSignal) {
+        log.info("Processing trading signal: {}", tradingSignal.getId());
         IncomingTradingSignalEvent incomingTradingSignalEvent = new IncomingTradingSignalEvent(this, tradingSignal);
         this.publisher.publishEvent(incomingTradingSignalEvent);
+        log.info("Published IncomingTradingSignalEvent for Trading Signal ID: {}", tradingSignal.getId());
+        SyncUtil.pauseBetweenOperations();
     }
 }
