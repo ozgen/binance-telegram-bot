@@ -27,7 +27,6 @@ public class BinanceSellOrderManager {
     private final ApplicationEventPublisher publisher;
     private final BotConfiguration botConfiguration;
     private final FutureTradeService futureTradeService;
-
     private final BotOrderService botOrderService;
 
 
@@ -42,7 +41,7 @@ public class BinanceSellOrderManager {
 
     public void processNewSellOrderEvent(NewSellOrderEvent event) {
         BuyOrder buyOrder = event.getBuyOrder();
-        SnapshotData accountSnapshot = getAccountSnapshot();
+        SnapshotData accountSnapshot = this.getAccountSnapshot();
         if (accountSnapshot == null) {
             log.error("Failed to get account snapshot for BuyOrder ID {}", buyOrder.getId());
             return; // or handle accordingly
@@ -55,7 +54,7 @@ public class BinanceSellOrderManager {
             return;
         }
 
-        SellOrder sellOrder = createSellOrder(buyOrder, accountSnapshot, coinSymbol);
+        SellOrder sellOrder = this.createSellOrder(buyOrder, accountSnapshot, coinSymbol);
         if (sellOrder != null) {
             log.info("Sell order created successfully for BuyOrder ID {}", buyOrder.getId());
             // Additional logic if required
@@ -78,24 +77,24 @@ public class BinanceSellOrderManager {
     private SellOrder createSellOrder(BuyOrder buyOrder, SnapshotData accountSnapshot, String coinSymbol) {
         Double coinAmount = accountSnapshot.getCoinValue(coinSymbol);
         TradingSignal tradingSignal = buyOrder.getTradingSignal();
-        double expectedTotal = buyOrder.getCoinAmount() * buyOrder.getTimes();
+        double expectedTotal = buyOrder.getCoinAmount();
 
-        if (!isCoinAmountWithinExpectedRange(coinAmount, buyOrder.getCoinAmount(), expectedTotal)) {
+        if (!this.isCoinAmountWithinExpectedRange(coinAmount, expectedTotal)) {
             log.error("Coin amount not within expected range for BuyOrder ID {}", buyOrder.getId());
             // Handle or cancel requests as needed
             return null;
         }
 
-        SellOrder sellOrder = initializeSellOrder(buyOrder, coinAmount, tradingSignal);
-        executeSellOrder(sellOrder, tradingSignal);
+        SellOrder sellOrder = this.initializeSellOrder(buyOrder, coinAmount, tradingSignal);
+        this.executeSellOrder(sellOrder, tradingSignal);
         return sellOrder;
     }
 
-    private boolean isCoinAmountWithinExpectedRange(Double coinAmount, Double buyOrderAmount, double expectedTotal) {
+    private boolean isCoinAmountWithinExpectedRange(Double coinAmount,  double expectedTotal) {
         if (coinAmount.equals(expectedTotal)) {
             log.info("All buy orders completed successfully.");
             return true;
-        } else if (coinAmount > buyOrderAmount && coinAmount < expectedTotal) {
+        } else if (coinAmount > 0 && coinAmount < expectedTotal) {
             log.info("Partial buy orders completed.");
             return true;
         } else {
@@ -105,8 +104,8 @@ public class BinanceSellOrderManager {
 
     private SellOrder initializeSellOrder(BuyOrder buyOrder, Double coinAmount, TradingSignal tradingSignal) {
         double sellPrice = PriceCalculator.calculateCoinPriceInc(buyOrder.getBuyPrice(), botConfiguration.getProfitPercentage());
-        double stopLossLimit = PriceCalculator.calculateCoinPriceDec(buyOrder.getBuyPrice(), botConfiguration.getPercentageInc());
         double stopLoss = GenericParser.getDouble(tradingSignal.getStopLoss());
+        double stopLossLimit = PriceCalculator.calculateCoinPriceDec(stopLoss, botConfiguration.getPercentageInc());
         String sellOrderSymbol = SymbolGenerator.generateSellOrderSymbol(buyOrder.getSymbol(), botConfiguration.getCurrency());
 
         SellOrder sellOrder = botOrderService.getSellOrder(tradingSignal).orElse(null);

@@ -16,6 +16,7 @@ import com.ozgen.telegrambinancebot.service.FutureTradeService;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
 import com.ozgen.telegrambinancebot.utils.DateFactory;
 import com.ozgen.telegrambinancebot.utils.PriceCalculator;
+import com.ozgen.telegrambinancebot.utils.SyncUtil;
 import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import com.ozgen.telegrambinancebot.utils.validators.TradingSignalValidator;
 import org.slf4j.Logger;
@@ -59,10 +60,7 @@ public class BinanceOpenBuyOrderManager {
         for (TradingSignal tradingSignal : tradingSignals) {
             try {
                 this.processOpenBuyOrder(tradingSignal);
-                Thread.sleep(5000); // Replace with a more efficient throttling if possible
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                log.error("Thread interrupted: {}", e.getMessage(), e);
+                SyncUtil.pauseBetweenOperations();
             } catch (Exception e) {
                 log.error("Error processing open buy order for trading signal {}: {}", tradingSignal.getId(), e.getMessage(), e);
                 // Decide how to handle the error - log, alert, retry, etc.
