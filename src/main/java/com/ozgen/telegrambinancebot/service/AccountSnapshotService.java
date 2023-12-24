@@ -12,9 +12,7 @@ import java.util.UUID;
 public class AccountSnapshotService {
     private static final Logger log = LoggerFactory.getLogger(AccountSnapshotService.class);
 
-
     private final SnapshotDataRepository snapshotDataRepository;
-
 
     public AccountSnapshotService(SnapshotDataRepository snapshotDataRepository) {
         this.snapshotDataRepository = snapshotDataRepository;

@@ -10,6 +10,7 @@ import com.ozgen.telegrambinancebot.service.BotOrderService;
 import com.ozgen.telegrambinancebot.service.FutureTradeService;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
 import com.ozgen.telegrambinancebot.utils.DateFactory;
+import com.ozgen.telegrambinancebot.utils.SyncUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Component
 public class BinanceOpenSellOrderManager {
@@ -54,7 +54,7 @@ public class BinanceOpenSellOrderManager {
     private void safelyPublishNewSellOrder(BuyOrder buyOrder) {
         try {
             this.publishNewSellOrder(buyOrder);
-            this.pauseBetweenOperations();
+            SyncUtil.pauseBetweenOperations();
         } catch (Exception e) {
             log.error("Error while processing sell order for BuyOrder ID {}: {}", buyOrder.getId(), e.getMessage(), e);
             // Handle the exception as needed
@@ -65,15 +65,6 @@ public class BinanceOpenSellOrderManager {
         NewSellOrderEvent newSellOrderEvent = new NewSellOrderEvent(this, buyOrder);
         publisher.publishEvent(newSellOrderEvent);
         log.info("Published NewSellOrderEvent for BuyOrder {}", buyOrder.getId());
-    }
-
-    private void pauseBetweenOperations() {
-        try {
-            TimeUnit.SECONDS.sleep(5);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.error("Thread interrupted during pause", e);
-        }
     }
 
     private Date getSearchDate() {

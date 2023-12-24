@@ -67,7 +67,7 @@ public class BinanceBuyOrderManager {
 
         BuyOrder buyOrder = this.createBuyOrder(tradingSignal, tickerData, btcToUsdRate);
         if (buyOrder != null) {
-            publishNewSellOrderEvent(buyOrder);
+            this.publishNewSellOrderEvent(buyOrder);
         }
     }
 
