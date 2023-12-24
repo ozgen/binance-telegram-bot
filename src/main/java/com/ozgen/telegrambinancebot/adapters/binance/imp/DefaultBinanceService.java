@@ -1,21 +1,18 @@
 package com.ozgen.telegrambinancebot.adapters.binance.imp;
 
 import com.binance.connector.client.SpotClient;
-import com.binance.connector.client.impl.SpotClientImpl;
 import com.ozgen.telegrambinancebot.adapters.binance.BinanceAPI;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class DefaultBinanceService implements BinanceAPI {
 
     private final SpotClient binanceClient;
-
-    public DefaultBinanceService(SpotClientImpl spotClient) {
-        this.binanceClient = spotClient;
-    }
 
     public String getBTCWalletStatus() {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();

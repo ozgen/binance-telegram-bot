@@ -15,12 +15,14 @@ import com.ozgen.telegrambinancebot.service.FutureTradeService;
 import com.ozgen.telegrambinancebot.utils.PriceCalculator;
 import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import com.ozgen.telegrambinancebot.utils.validators.TradingSignalValidator;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class BinanceBuyOrderManager {
 
     private static final Logger log = LoggerFactory.getLogger(BinanceBuyOrderManager.class);
@@ -32,17 +34,6 @@ public class BinanceBuyOrderManager {
 
     private final BotOrderService botOrderService;
 
-
-    public BinanceBuyOrderManager(BinanceApiManager binanceApiManager, ApplicationEventPublisher publisher,
-                                  BotConfiguration botConfiguration, FutureTradeService futureTradeService,
-                                  BotOrderService botOrderService) {
-        this.binanceApiManager = binanceApiManager;
-        this.publisher = publisher;
-        this.botConfiguration = botConfiguration;
-        this.futureTradeService = futureTradeService;
-        this.botOrderService = botOrderService;
-
-    }
 
     public void processNewBuyOrderEvent(NewBuyOrderEvent event) {
         TradingSignal tradingSignal = event.getTradingSignal();
@@ -101,7 +92,7 @@ public class BinanceBuyOrderManager {
 
     private Double getBtcToUsdConversionRate() throws Exception {
         TickerData tickerPrice24 = this.binanceApiManager.getTickerPrice24(this.botConfiguration.getCurrencyRate());
-        return GenericParser.getDouble(tickerPrice24.getLastPrice());
+        return GenericParser.getDouble(tickerPrice24.getLastPrice()).get();
     }
 
     private BuyOrder createBuyOrder(TradingSignal tradingSignal, TickerData tickerData, double btcToUsdRate) {
@@ -121,7 +112,7 @@ public class BinanceBuyOrderManager {
     }
 
     private boolean isTradeSignalInRange(TradingSignal tradingSignal, TickerData tickerData) {
-        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()),
+        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()).get(),
                 this.botConfiguration.getPercentageInc());
         return TradingSignalValidator.isAvailableToBuy(buyPrice, tradingSignal);
     }
@@ -138,9 +129,9 @@ public class BinanceBuyOrderManager {
 
     private void populateBuyOrderDetails(BuyOrder buyOrder, TradingSignal tradingSignal, TickerData tickerData, double btcToUsdRate) {
         double coinAmount = calculateCoinAmount(tickerData, btcToUsdRate);
-        double stopLossLimit = GenericParser.getDouble(tradingSignal.getEntryEnd());
+        double stopLossLimit = GenericParser.getDouble(tradingSignal.getEntryEnd()).get();
         double stopLoss = PriceCalculator.calculateCoinPriceDec(stopLossLimit, this.botConfiguration.getPercentageInc());
-        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()), this.botConfiguration.getPercentageInc());
+        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()).get(), this.botConfiguration.getPercentageInc());
 
         buyOrder.setSymbol(tradingSignal.getSymbol());
         buyOrder.setCoinAmount(coinAmount);

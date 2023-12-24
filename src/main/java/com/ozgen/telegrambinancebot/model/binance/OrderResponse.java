@@ -1,13 +1,24 @@
 package com.ozgen.telegrambinancebot.model.binance;
 
+import lombok.Data;
+import lombok.ToString;
+
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
+@Data
+@ToString
 public class OrderResponse {
 
     @Id
@@ -15,9 +26,22 @@ public class OrderResponse {
     private UUID id;
     private String symbol;
     private Long orderId;
-    private Long orderListId;  // Note: In JSON it's a comment, but we'll include it for completeness
+    private Long orderListId;
     private String clientOrderId;
     private Long transactTime;
+    private String price;
+    private String origQty;
+    private String executedQty;
+    private String cummulativeQuoteQty;
+    private String status;
+    private String timeInForce;
+    private String type;
+    private String side;
+    private Long workingTime;
+    private String selfTradePreventionMode;
+    @ElementCollection
+    @CollectionTable(name = "order_fills", joinColumns = @JoinColumn(name = "order_response_id"))
+    private List<Fill> fills;
 
     private Date createdAt;
     private Date updatedAt;
@@ -28,77 +52,19 @@ public class OrderResponse {
         updatedAt = new Date();
     }
 
-    public UUID getId() {
-        return id;
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = new Date();
     }
+}
 
-    public String getSymbol() {
-        return symbol;
-    }
+@Embeddable
+@Data
+class Fill {
+    private String price;
+    private String qty;
+    private String commission;
+    private String commissionAsset;
+    private Long tradeId;
 
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public Long getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
-    }
-
-    public Long getOrderListId() {
-        return orderListId;
-    }
-
-    public void setOrderListId(Long orderListId) {
-        this.orderListId = orderListId;
-    }
-
-    public String getClientOrderId() {
-        return clientOrderId;
-    }
-
-    public void setClientOrderId(String clientOrderId) {
-        this.clientOrderId = clientOrderId;
-    }
-
-    public Long getTransactTime() {
-        return transactTime;
-    }
-
-    public void setTransactTime(Long transactTime) {
-        this.transactTime = transactTime;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    @Override
-    public String toString() {
-        return "OrderResponse{" +
-                "id=" + id +
-                ", symbol='" + symbol + '\'' +
-                ", orderId=" + orderId +
-                ", orderListId=" + orderListId +
-                ", clientOrderId='" + clientOrderId + '\'' +
-                ", transactTime=" + transactTime +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
-    }
 }

@@ -5,6 +5,7 @@ import com.ozgen.telegrambinancebot.repository.BuyOrderRepository;
 import com.ozgen.telegrambinancebot.repository.SellOrderRepository;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.bot.SellOrder;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class BotOrderService {
 
     private static final Logger log = LoggerFactory.getLogger(BotOrderService.class);
@@ -21,10 +23,6 @@ public class BotOrderService {
     private final BuyOrderRepository buyOrderRepository;
     private final SellOrderRepository sellOrderRepository;
 
-    public BotOrderService(BuyOrderRepository buyOrderRepository, SellOrderRepository sellOrderRepository) {
-        this.buyOrderRepository = buyOrderRepository;
-        this.sellOrderRepository = sellOrderRepository;
-    }
 
     @Transactional
     public BuyOrder createBuyOrder(BuyOrder buyOrder) {
