@@ -11,10 +11,7 @@ import java.util.UUID;
 @Repository
 public interface TradingSignalRepository extends JpaRepository<TradingSignal, UUID> {
 
-    TradingSignal findBySymbolAndStopLoss(String symbol, String stopLoss);
-
     List<TradingSignal> findAllByIdIn(List<UUID> uuidList);
 
-    List<TradingSignal>findAllByCreatedAtAfter(Date date);
     List<TradingSignal>findAllByCreatedAtAfterAndIsProcessedIn(Date date, List<Integer> processStatuses);
 }
