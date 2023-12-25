@@ -21,20 +21,18 @@ public class TradingSignalService {
     private final TradingSignalRepository repository;
 
     public TradingSignal saveTradingSignal(TradingSignal tradingSignal) {
-        TradingSignal saved = this.repository.save(tradingSignal);
-        return saved;
-    }
-
-    public TradingSignal findTradingSignal(String symbol, String stopLoss) {
-        return this.repository.findBySymbolAndStopLoss(symbol,stopLoss);
+        try {
+            TradingSignal saved = this.repository.save(tradingSignal);
+            log.info("TradingSignal created: {}", saved);
+            return saved;
+        } catch (Exception e) {
+            log.error("Error creating TradingSignal: {}", e.getMessage(), e);
+            return tradingSignal;
+        }
     }
 
     public List<TradingSignal> getTradingSignalsByIdList(List<UUID> uuidList){
         return this.repository.findAllByIdIn(uuidList);
-    }
-
-    public List<TradingSignal> getTradingSignalsAfterDate(Date date){
-        return this.repository.findAllByCreatedAtAfter(date);
     }
 
     public List<TradingSignal> getTradingSignalsAfterDateAndIsProcessIn(Date date, List<Integer> processStatuses){

@@ -17,6 +17,8 @@ public class SellErrorFutureTradeScheduler {
 
     @Scheduled(fixedRateString = "#{${app.bot.schedule.sellError}}")
     public void processSellErrorFutureTrades() {
+        log.info("SellErrorFutureTradeScheduler has been started");
         this.futureTradeManager.processSellErrorFutureTrades();
+        log.info("SellErrorFutureTradeScheduler has been finished");
     }
 }

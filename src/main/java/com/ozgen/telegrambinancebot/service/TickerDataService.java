@@ -7,8 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 public class TickerDataService {
@@ -18,11 +16,14 @@ public class TickerDataService {
 
 
     public TickerData createTickerData(TickerData tickerData) {
-        return this.tickerDataRepository.save(tickerData);
-    }
-
-    public TickerData findOne(UUID id) {
-        return tickerDataRepository.findById(id).orElse(null);
+        try {
+            TickerData saved = this.tickerDataRepository.save(tickerData);
+            log.info("TickerData created: {}", saved);
+            return saved;
+        } catch (Exception e) {
+            log.error("Error creating TickerData: {}", e.getMessage(), e);
+            return tickerData;
+        }
     }
 
 }

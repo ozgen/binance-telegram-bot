@@ -21,12 +21,22 @@ public class FutureTradeService {
     private final FutureTradeRepository futureTradeRepository;
 
 
-
     public FutureTrade createFutureTrade(FutureTrade futureTrade) {
-        return this.futureTradeRepository.save(futureTrade);
+        try {
+            FutureTrade saved = this.futureTradeRepository.save(futureTrade);
+            log.info("FutureTrade created: {}", saved);
+            return saved;
+        } catch (Exception e) {
+            log.error("Error creating FutureTrade: {}", e.getMessage(), e);
+            throw e; // Rethrow to handle at a higher level or use specific business logic
+        }
     }
 
     public FutureTrade createFutureTrade(TradingSignal tradingSignal, TradeStatus status) {
+        if (tradingSignal.getId() == null || status == null) {
+            log.error("trading signal is not saved before saving future trade, trading signal : {}", tradingSignal);
+            return null;
+        }
         FutureTrade futureTrade = new FutureTrade();
         futureTrade.setTradeStatus(status);
         futureTrade.setTradeSignalId(tradingSignal.getId());
@@ -37,10 +47,6 @@ public class FutureTradeService {
         return this.futureTradeRepository.findByTradeStatus(tradeStatus);
     }
 
-    public List<FutureTrade> getAllFutureTradeByTradingSignal(UUID signalId) {
-        return this.futureTradeRepository.findByTradeSignalId(signalId);
-    }
-
     public List<FutureTrade> getAllFutureTradeByTradingSignals(List<UUID> uuidList) {
         return this.futureTradeRepository.findAllByTradeSignalIdIn(uuidList);
     }
@@ -48,9 +54,4 @@ public class FutureTradeService {
     public void deleteFutureTrades(List<FutureTrade> futureTrades) {
         this.futureTradeRepository.deleteAll(futureTrades);
     }
-
-    public void deleteFutureTrade(FutureTrade futureTrades) {
-        this.futureTradeRepository.delete(futureTrades);
-    }
-
 }
