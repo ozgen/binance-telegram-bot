@@ -19,6 +19,8 @@ public class NotInRangeFutureTradeScheduler {
 
     @Scheduled(fixedRateString = "#{${app.bot.schedule.notInRange}}")
     public void processNotInRangeFutureTrades() {
+        log.info("NotInRangeFutureTradeScheduler has been started");
         this.futureTradeManager.processFutureTrades(TradeStatus.NOT_IN_RANGE);
+        log.info("NotInRangeFutureTradeScheduler has been finished");
     }
 }

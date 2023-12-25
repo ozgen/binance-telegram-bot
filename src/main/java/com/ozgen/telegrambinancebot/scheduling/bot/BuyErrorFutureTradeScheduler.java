@@ -18,6 +18,8 @@ public class BuyErrorFutureTradeScheduler {
 
     @Scheduled(fixedRateString = "#{${app.bot.schedule.buyError}}")
     public void processBuyErrorFutureTrades() {
+        log.info("BuyErrorFutureTradeScheduler has been started");
         this.futureTradeManager.processFutureTrades(TradeStatus.ERROR_BUY);
+        log.info("BuyErrorFutureTradeScheduler has been finished");
     }
 }

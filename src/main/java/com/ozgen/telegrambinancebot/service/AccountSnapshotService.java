@@ -7,8 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 public class AccountSnapshotService {
@@ -17,11 +15,13 @@ public class AccountSnapshotService {
     private final SnapshotDataRepository snapshotDataRepository;
 
     public SnapshotData createSnapshotData(SnapshotData snapshotData) {
-        return this.snapshotDataRepository.save(snapshotData);
+        try {
+            SnapshotData saved = this.snapshotDataRepository.save(snapshotData);
+            log.info("Snapshot created: {}", saved);
+            return saved;
+        } catch (Exception e) {
+            log.error("Error creating snapshot: {}", e.getMessage(), e);
+            return snapshotData;
+        }
     }
-
-    public SnapshotData findOne(UUID id) {
-        return snapshotDataRepository.findById(id).orElse(null);
-    }
-
 }

@@ -16,6 +16,8 @@ public class BinanceOpenBuyOrderScheduler {
 
     @Scheduled(fixedRateString = "#{${app.bot.schedule.openBuyOrder}}")
     public void processOpenBuyOrders() {
+        log.info("OpenBuyOrderScheduler has been started");
         this.binanceOpenBuyOrderManager.processOpenBuyOrders();
+        log.info("OpenBuyOrderScheduler has been finished");
     }
 }

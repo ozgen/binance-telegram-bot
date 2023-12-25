@@ -1,20 +1,19 @@
 package com.ozgen.telegrambinancebot.service;
 
 import com.ozgen.telegrambinancebot.model.binance.CancelAndNewOrderResponse;
+import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
+import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
+import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
 import com.ozgen.telegrambinancebot.repository.CancelAndNewOrderResponseRepository;
 import com.ozgen.telegrambinancebot.repository.OpenOrderRepository;
 import com.ozgen.telegrambinancebot.repository.OrderInfoRepository;
 import com.ozgen.telegrambinancebot.repository.OrderResponseRepository;
-import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
-import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
-import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -33,26 +32,38 @@ public class BinanceOrderService {
     }
 
     public List<OrderInfo> createOrderInfos(List<OrderInfo> orderInfoList) {
-        return this.orderInfoRepository.saveAll(orderInfoList);
+        try {
+            if (orderInfoList.isEmpty()){
+                return orderInfoList;
+            }
+            List<OrderInfo> saved = this.orderInfoRepository.saveAll(orderInfoList);
+            log.info("Order info list created: {}", saved);
+            return saved;
+        } catch (Exception e) {
+            log.error("Error saving order info list: {}", e.getMessage(), e);
+            return orderInfoList;
+        }
     }
 
     public OrderResponse createOrderResponse(OrderResponse orderResponse) {
-        return this.orderResponseRepository.save(orderResponse);
+        try {
+            OrderResponse saved = this.orderResponseRepository.save(orderResponse);
+            log.info("order response created: {}", saved);
+            return saved;
+        } catch (Exception e) {
+            log.error("Error creating order response: {}", e.getMessage(), e);
+            return orderResponse;
+        }
     }
 
     public CancelAndNewOrderResponse createCancelAndNewOrderResponse(CancelAndNewOrderResponse orderResponse) {
-        return this.cancelAndNewOrderResponseRepository.save(orderResponse);
-    }
-
-    public OrderInfo findOrderInfo(UUID id) {
-        return this.orderInfoRepository.findById(id).orElse(null);
-    }
-
-    public OrderResponse findOrderResponse(UUID id) {
-        return this.orderResponseRepository.findById(id).orElse(null);
-    }
-
-    public OpenOrder findOpenOrder(UUID id) {
-        return this.openOrderRepository.findById(id).orElse(null);
+        try {
+            CancelAndNewOrderResponse saved = this.cancelAndNewOrderResponseRepository.save(orderResponse);
+            log.info("CancelAndNewOrderResponse created: {}", saved);
+            return saved;
+        } catch (Exception e) {
+            log.error("Error creating CancelAndNewOrderResponse: {}", e.getMessage(), e);
+            return orderResponse;
+        }
     }
 }
