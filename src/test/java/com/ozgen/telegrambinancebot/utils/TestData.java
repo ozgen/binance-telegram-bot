@@ -1,10 +1,22 @@
 package com.ozgen.telegrambinancebot.utils;
 
+import com.ozgen.telegrambinancebot.model.binance.CancelAndNewOrderResponse;
+import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
+import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
+import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
+import com.ozgen.telegrambinancebot.model.binance.SnapshotData;
+import com.ozgen.telegrambinancebot.model.binance.TickerData;
+import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
+import com.ozgen.telegrambinancebot.utils.parser.JsonParser;
+import com.ozgen.telegrambinancebot.utils.parser.SignalParser;
+
+import java.util.List;
+
 public class TestData {
 
     public static String SNAPSHOT_DATA = "{\"code\":200,\"msg\":\"\",\"snapshotVos\":[{\"type\":\"spot\",\"updateTime\":1700351999000,\"data\":{\"totalAssetOfBtc\":\"0.00270573\",\"balances\":[{\"asset\":\"ADX\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"ATM\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"AUDIO\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"BCHSV\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"BNB\",\"free\":\"0.25760623\",\"locked\":\"0\"},{\"asset\":\"BTC\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"BTS\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"BUSD\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"CHESS\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"CTSI\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"DATA\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"DGB\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"DOCK\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"DUSK\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"FOR\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"FTM\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"FUN\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"GALA\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"IDEX\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"IOTX\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"KEY\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"KMD\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"MBOX\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"PEOPLE\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"REEF\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"SALT\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"SC\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"TRIBE\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"USDT\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"WAVES\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"WAXP\",\"free\":\"516.483\",\"locked\":\"0\"},{\"asset\":\"XRP\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"XVG\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"ZRX\",\"free\":\"0\",\"locked\":\"0\"}]}}]}";
     public static String TICKER_DATA = "{ \"symbol\": \"BNBBTC\", \"openPrice\": \"99.00000000\", \"highPrice\": \"100.00000000\", \"lowPrice\": \"0.10000000\", \"lastPrice\": \"4.00000200\", \"volume\": \"8913.30000000\", \"quoteVolume\": \"15.30000000\", \"openTime\": 1499783499040, \"closeTime\": 1499869899040, \"firstId\": 28385, \"lastId\": 28460, \"count\": 76 }";
-   public static String ORDER_INFO_ARRAY = "[" +
+    public static String ORDER_INFO_ARRAY = "[" +
             "{" +
             "\"symbol\": \"LTCBTC\"," +
             "\"orderId\": 1," +
@@ -220,4 +232,34 @@ public class TestData {
             + "    }"
             + "]"
             + "}";
+
+    public static String TRADING_SIGNAL = "NKNBTC\n\nENTRY: 0.00000260 - 0.00000290\n\nTP1: 0.00000315\nTP2: 0.00000360\nTP3: 0.00000432\nTP4: 0.00000486\nTP5: 0.00000550\nTP6: 0.00000666\nTP7: 0.00000741\n\nSTOP: Close weekly below 0.00000240\n\nSHARED: 18-Nov-2023 @lamatrades ✨\n\nsymbol:NKNBTC\nentry_start: 0.00000260\nentry_end: 0.00000290\nTP1: 0.00000315\nTP2: 0.00000360\nTP3: 0.00000432\nTP4: 0.00000486\nTP5: 0.00000550\nTP6: 0.00000666\nTP7: 0.00000741\nstoploss: 0.00000240";
+
+    public static TradingSignal getTradingSignal() {
+        return SignalParser.parseSignal(TRADING_SIGNAL);
+    }
+
+    public static CancelAndNewOrderResponse getCancelAndNewOrderResponse() throws Exception {
+        return JsonParser.parseCancelAndNewOrderResponseJson(CANCEL_AND_NEW_ORDER_RESPONSE);
+    }
+
+    public static List<OpenOrder> getOpenOrders() throws Exception {
+        return JsonParser.parseOpenOrdersJson(OPEN_ORDER_ARRAY);
+    }
+
+    public static List<OrderInfo> getOrderInfos() throws Exception {
+        return JsonParser.parseOrderInfoJson(ORDER_INFO_ARRAY);
+    }
+
+    public static OrderResponse getOrderResponse() throws Exception {
+        return JsonParser.parseOrderResponseJson(ORDER_RESPONSE);
+    }
+
+    public static SnapshotData getSnapshotData() throws Exception {
+        return JsonParser.parseSnapshotJson(SNAPSHOT_DATA);
+    }
+
+    public static TickerData getTickerData() throws Exception {
+        return JsonParser.parseTickerJson(TICKER_DATA);
+    }
 }
