@@ -18,6 +18,8 @@ public class InsufficientFutureTradeScheduler {
 
     @Scheduled(fixedRateString = "#{${app.bot.schedule.insufficient}}")
     public void processInsufficientFutureTrades() {
+        log.info("InsufficientFutureTradeScheduler has been started");
         this.futureTradeManager.processFutureTrades(TradeStatus.INSUFFICIENT);
+        log.info("InsufficientFutureTradeScheduler has been finished");
     }
 }

@@ -16,6 +16,8 @@ public class TradingSignalScheduler {
 
     @Scheduled(fixedRateString = "#{${app.bot.schedule.tradingSignal}}")
     public void processInitTradingSignals() {
+        log.info("TradingSignalScheduler has been started");
         this.tradeSignalManager.processInitTradingSignals();
+        log.info("TradingSignalScheduler has been finished");
     }
 }
