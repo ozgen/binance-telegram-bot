@@ -46,8 +46,7 @@ public class TelegramBinanceBot extends TelegramLongPollingBot {
 
             log.info("Received channel post \"{}\" from {}", text, chatId);
 
-            //todo change test method
-            String message = this.telegramMessageManager.testMessage();
+            String message = this.telegramMessageManager.parseTelegramMessage(text);
             SendMessage response = new SendMessage();
             response.setChatId(chatId.toString());
             response.setText(message);
