@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JsonParserTest {
@@ -56,7 +55,7 @@ class JsonParserTest {
 
         List<SnapshotData.Balance> balances = firstSnapshot.getData().getBalances();
         assertNotNull(balances);
-        assertFalse("Balances should not be empty", balances.isEmpty());
+        assertFalse( balances.isEmpty());
 
         SnapshotData.Balance firstBalance = balances.get(0);
         assertEquals("ADX", firstBalance.getAsset());

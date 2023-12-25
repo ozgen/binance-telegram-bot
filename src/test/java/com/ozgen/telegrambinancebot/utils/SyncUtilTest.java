@@ -1,8 +1,9 @@
 package com.ozgen.telegrambinancebot.utils;
 
-import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SyncUtilTest {
 
@@ -14,7 +15,7 @@ public class SyncUtilTest {
 
         // Check that the time elapsed is approximately 5 seconds
         long elapsedTime = endTime - startTime;
-        assertTrue("Elapsed time should be at least 5 seconds", elapsedTime >= 5000);
+        assertTrue(elapsedTime >= 5000);
     }
 
     @Test
@@ -33,6 +34,6 @@ public class SyncUtilTest {
         testThread.join();
 
         // Assert that the method caught an InterruptedException
-        assertTrue("Method should have caught an InterruptedException", SyncUtil.wasInterrupted);
+        assertTrue(SyncUtil.wasInterrupted);
     }
 }
