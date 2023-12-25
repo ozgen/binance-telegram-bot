@@ -9,7 +9,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -22,15 +21,11 @@ public class TradingSignal {
     @Id
     @GeneratedValue
     private UUID id;
-    @NotNull
     private String symbol;
-    @NotNull
     private String entryStart;
-    @NotNull
     private String entryEnd;
     @ElementCollection
     private List<String> takeProfits;
-    @NotNull
     private String stopLoss;
 
     private Date createdAt;
