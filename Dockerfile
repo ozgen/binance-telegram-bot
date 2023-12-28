@@ -1,14 +1,14 @@
-# Use an official Java runtime as a parent image
-FROM openjdk:11-jdk
+# For Java 11
+FROM --platform=linux/amd64 adoptopenjdk:11-jre-hotspot
 
-# Set the working directory in the container
-WORKDIR /usr/src/app
+# Refer to Maven build -> finalName
+ARG JAR_FILE=target/*.jar
 
-# Copy the current directory contents into the container at /usr/src/app
-COPY . .
+# cd /opt/app
+WORKDIR /opt/app
 
-# Build the application
-RUN mvn clean install -DskipTests
+# cp target/spring-boot-web.jar /opt/app/app.jar
+COPY ${JAR_FILE} app.jar
 
-# Run the jar file
-ENTRYPOINT ["java", "-jar", "target/binance-telegram-bot-0.0.1-SNAPSHOT.jar"]
+# java -jar /opt/app/app.jar
+ENTRYPOINT ["java","-jar","app.jar"]
