@@ -42,7 +42,7 @@ public class TradeSignalManagerTest {
     }
 
     @Test
-    void testProcessInitTradingSignals() {
+    public void testProcessInitTradingSignals() {
         // Arrange
         Date mockDate = new Date();
         when(scheduleConfiguration.getMonthBefore())
@@ -61,7 +61,7 @@ public class TradeSignalManagerTest {
     }
 
     @Test
-    void testProcessTradingSignal() {
+    public void testProcessTradingSignal() {
         // Arrange
         TradingSignal tradingSignal = new TradingSignal();
         tradingSignal.setId(UUID.randomUUID());
