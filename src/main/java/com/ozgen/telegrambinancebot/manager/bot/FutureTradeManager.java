@@ -49,7 +49,6 @@ public class FutureTradeManager {
         }
 
         this.processTrades(futureTrades);
-        this.futureTradeService.deleteFutureTrades(futureTrades);
     }
 
     public void processSellErrorFutureTrades() {
@@ -98,14 +97,19 @@ public class FutureTradeManager {
     }
 
     private void processTradeGroup(UUID tradeSignalId, List<FutureTrade> tradeList, Map<UUID, TradingSignal> groupedSignals) {
-        if (tradeList.size() == 1) {
-            TradingSignal tradingSignal = groupedSignals.get(tradeSignalId);
-            TickerData tickerPrice24 = this.fetchTickerPrice(tradingSignal);
-            if (tickerPrice24 != null) {
-                this.publishNewBuyOrderEvent(tradingSignal, tickerPrice24);
-                SyncUtil.pauseBetweenOperations();
-            }
+        if (tradeList.size() != 1) {
+            this.futureTradeService.deleteFutureTrades(tradeList);
+            return;
         }
+
+        TradingSignal tradingSignal = groupedSignals.get(tradeSignalId);
+        TickerData tickerPrice24 = this.fetchTickerPrice(tradingSignal);
+        if (tickerPrice24 != null) {
+            this.publishNewBuyOrderEvent(tradingSignal, tickerPrice24);
+            this.futureTradeService.deleteFutureTrades(tradeList);
+            SyncUtil.pauseBetweenOperations();
+        }
+
     }
 
     private TickerData fetchTickerPrice(TradingSignal tradingSignal) {

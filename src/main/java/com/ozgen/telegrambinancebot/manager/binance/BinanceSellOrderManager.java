@@ -16,7 +16,6 @@ import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,7 +25,6 @@ public class BinanceSellOrderManager {
     private static final Logger log = LoggerFactory.getLogger(BinanceSellOrderManager.class);
 
     private final BinanceApiManager binanceApiManager;
-    private final ApplicationEventPublisher publisher;
     private final BotConfiguration botConfiguration;
     private final FutureTradeService futureTradeService;
     private final BotOrderService botOrderService;
@@ -37,6 +35,7 @@ public class BinanceSellOrderManager {
         SnapshotData accountSnapshot = this.getAccountSnapshot();
         if (accountSnapshot == null) {
             log.error("Failed to get account snapshot for BuyOrder ID {}", buyOrder.getId());
+            //todo check this case is handled or not?
             return; // or handle accordingly
         }
 
@@ -53,7 +52,7 @@ public class BinanceSellOrderManager {
             // Additional logic if required
         } else {
             log.warn("Sell order creation failed for BuyOrder ID {}", buyOrder.getId());
-            // Handle failed sell order creation
+            // Handle failed sell order creation with sell error future trade schedule...
         }
     }
 
@@ -79,11 +78,11 @@ public class BinanceSellOrderManager {
         }
 
         SellOrder sellOrder = this.initializeSellOrder(buyOrder, coinAmount, tradingSignal);
-        this.executeSellOrder(sellOrder, tradingSignal);
-        return sellOrder;
+        SellOrder saved = this.executeSellOrder(sellOrder, tradingSignal);
+        return saved;
     }
 
-    private boolean isCoinAmountWithinExpectedRange(Double coinAmount,  double expectedTotal) {
+    private boolean isCoinAmountWithinExpectedRange(Double coinAmount, double expectedTotal) {
         if (coinAmount.equals(expectedTotal)) {
             log.info("All buy orders completed successfully.");
             return true;
@@ -96,12 +95,12 @@ public class BinanceSellOrderManager {
     }
 
     private SellOrder initializeSellOrder(BuyOrder buyOrder, Double coinAmount, TradingSignal tradingSignal) {
-        double sellPrice = PriceCalculator.calculateCoinPriceInc(buyOrder.getBuyPrice(), botConfiguration.getProfitPercentage());
-        double stopLoss = GenericParser.getDouble(tradingSignal.getStopLoss()).get();
-        double stopLossLimit = PriceCalculator.calculateCoinPriceDec(stopLoss, botConfiguration.getPercentageInc());
-        String sellOrderSymbol = SymbolGenerator.generateSellOrderSymbol(buyOrder.getSymbol(), botConfiguration.getCurrency());
+        double sellPrice = PriceCalculator.calculateCoinPriceInc(buyOrder.getBuyPrice(), this.botConfiguration.getProfitPercentage());
+        double stopLossLimit = GenericParser.getDouble(tradingSignal.getStopLoss()).get();
+        double stopLoss = PriceCalculator.calculateCoinPriceDec(stopLossLimit, this.botConfiguration.getPercentageInc());
+        String sellOrderSymbol = SymbolGenerator.generateSellOrderSymbol(buyOrder.getSymbol(), this.botConfiguration.getCurrency());
 
-        SellOrder sellOrder = botOrderService.getSellOrder(tradingSignal).orElse(null);
+        SellOrder sellOrder = this.botOrderService.getSellOrder(tradingSignal).orElse(null);
         if (sellOrder == null) {
             sellOrder = new SellOrder();
         }
@@ -114,18 +113,20 @@ public class BinanceSellOrderManager {
         sellOrder.setStopLossLimit(stopLossLimit);
         tradingSignal.setIsProcessed(ProcessStatus.SELL);
         sellOrder.setTradingSignal(tradingSignal);
-        sellOrder = botOrderService.createSellOrder(sellOrder);
 
         return sellOrder;
     }
 
-    private void executeSellOrder(SellOrder sellOrder, TradingSignal tradingSignal) {
+    private SellOrder executeSellOrder(SellOrder sellOrder, TradingSignal tradingSignal) {
         try {
-            binanceApiManager.newOrderWithStopLoss(sellOrder.getSymbol(), sellOrder.getSellPrice(), sellOrder.getCoinAmount(), sellOrder.getStopLoss(), sellOrder.getStopLossLimit());
+            this.binanceApiManager.newOrderWithStopLoss(sellOrder.getSymbol(), sellOrder.getSellPrice(), sellOrder.getCoinAmount(), sellOrder.getStopLoss(), sellOrder.getStopLossLimit());
             log.info("Sell order created successfully for symbol {}", sellOrder.getSymbol());
+            return this.botOrderService.createSellOrder(sellOrder);
+
         } catch (Exception e) {
             log.error("Failed to create sell order for symbol {}: {}", sellOrder.getSymbol(), e.getMessage(), e);
-            futureTradeService.createFutureTrade(tradingSignal, TradeStatus.ERROR_SELL);
+            this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.ERROR_SELL);
+            return null;
         }
     }
 }
