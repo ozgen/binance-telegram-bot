@@ -1,6 +1,7 @@
 package com.ozgen.telegrambinancebot.manager.binance;
 
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
+import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
 import com.ozgen.telegrambinancebot.model.events.IncomingTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.events.NewBuyOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
@@ -33,6 +34,7 @@ public class BinanceTradingSignalManager {
             log.info("Fetched ticker price for symbol {}: {}", symbol, tickerPrice24);
         } catch (Exception e) {
             log.error("Error occurred while fetching ticker price for symbol {}: {}", symbol, e.getMessage(), e);
+            this.processException(e);
             throw new RuntimeException("Error fetching ticker price", e);
         }
 
@@ -46,5 +48,10 @@ public class BinanceTradingSignalManager {
         } else {
             log.info("Symbol {} is not available to buy", symbol);
         }
+    }
+
+    private void processException(Exception e) {
+        ErrorEvent errorEvent = new ErrorEvent(this, e);
+        this.publisher.publishEvent(errorEvent);
     }
 }

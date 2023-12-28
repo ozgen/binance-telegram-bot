@@ -2,6 +2,7 @@ package com.ozgen.telegrambinancebot.manager.binance;
 
 
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
+import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
 import com.ozgen.telegrambinancebot.model.events.IncomingTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.events.NewBuyOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
@@ -99,7 +100,9 @@ public class BinanceTradingSignalManagerTest {
         verify(this.binanceApiManager)
                 .getTickerPrice24(SYMBOL);
         verify(this.publisher, never())
-                .publishEvent(any());
+                .publishEvent(any(NewBuyOrderEvent.class));
+        verify(this.publisher)
+                .publishEvent(any(ErrorEvent.class));
     }
 
     @Test

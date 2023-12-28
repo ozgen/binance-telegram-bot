@@ -8,6 +8,7 @@ import com.ozgen.telegrambinancebot.model.binance.SnapshotData;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.bot.FutureTrade;
+import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
 import com.ozgen.telegrambinancebot.model.events.NewBuyOrderEvent;
 import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
@@ -209,7 +210,9 @@ public class BinanceBuyOrderManagerTest {
         verify(this.binanceApiManager, never())
                 .newOrderWithStopLoss(any(), any(), any(), any(), any());
         verify(this.publisher, never())
-                .publishEvent(any());
+                .publishEvent(any(NewSellOrderEvent.class));
+        verify(this.publisher)
+                .publishEvent(any(ErrorEvent.class));
     }
 
     @Test
@@ -275,6 +278,8 @@ public class BinanceBuyOrderManagerTest {
         verify(this.botOrderService, never())
                 .createBuyOrder(any());
         verify(this.publisher, never())
-                .publishEvent(any());
+                .publishEvent(any(NewSellOrderEvent.class));
+        verify(this.publisher)
+                .publishEvent(any(ErrorEvent.class));
     }
 }
