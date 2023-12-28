@@ -20,7 +20,7 @@ jobs:
           distribution: 'adopt'
 
       - name: Run Tests
-        run: mvn test
+        run: mvn clean test
 
       - name: Set and Export Custom Version
         id: set_version
