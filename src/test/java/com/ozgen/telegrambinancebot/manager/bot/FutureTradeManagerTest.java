@@ -12,13 +12,16 @@ import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.BotOrderService;
 import com.ozgen.telegrambinancebot.service.FutureTradeService;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
+import com.ozgen.telegrambinancebot.utils.SyncUtil;
 import com.ozgen.telegrambinancebot.utils.TestData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
+import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
@@ -28,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -78,6 +82,10 @@ public class FutureTradeManagerTest {
                 .thenReturn(tradingSignals);
         when(this.binanceApiManager.getTickerPrice24(tradingSignal.getSymbol()))
                 .thenReturn(tickerData);
+        MockedStatic<SyncUtil> mockedSyncUtil = mockStatic(SyncUtil.class);
+        mockedSyncUtil.when(SyncUtil::pauseBetweenOperations)
+                .thenAnswer(invocation -> null);
+
         // Act
         this.futureTradeManager.processFutureTrades(TradeStatus.INSUFFICIENT);
 
@@ -98,6 +106,7 @@ public class FutureTradeManagerTest {
         assertEquals(tradingSignal, newBuyOrderEvent.getTradingSignal());
         verify(futureTradeService)
                 .deleteFutureTrades(futureTrades);
+        mockedSyncUtil.verify(SyncUtil::pauseBetweenOperations, VerificationModeFactory.times(2));
     }
 
     @Test
