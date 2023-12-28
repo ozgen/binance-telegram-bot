@@ -35,7 +35,7 @@ public class TradeSignalManager {
         tradingSignals.forEach(this::processTradingSignal);
     }
 
-    private void processTradingSignal(TradingSignal tradingSignal) {
+    void processTradingSignal(TradingSignal tradingSignal) {
         log.info("Processing trading signal: {}", tradingSignal.getId());
         IncomingTradingSignalEvent incomingTradingSignalEvent = new IncomingTradingSignalEvent(this, tradingSignal);
         this.publisher.publishEvent(incomingTradingSignalEvent);

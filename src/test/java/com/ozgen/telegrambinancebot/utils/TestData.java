@@ -233,7 +233,9 @@ public class TestData {
             + "]"
             + "}";
 
-    public static String TRADING_SIGNAL = "NKNBTC\n\nENTRY: 0.00000260 - 0.00000290\n\nTP1: 0.00000315\nTP2: 0.00000360\nTP3: 0.00000432\nTP4: 0.00000486\nTP5: 0.00000550\nTP6: 0.00000666\nTP7: 0.00000741\n\nSTOP: Close weekly below 0.00000240\n\nSHARED: 18-Nov-2023 @lamatrades ✨\n\nsymbol:NKNBTC\nentry_start: 0.00000260\nentry_end: 0.00000290\nTP1: 0.00000315\nTP2: 0.00000360\nTP3: 0.00000432\nTP4: 0.00000486\nTP5: 0.00000550\nTP6: 0.00000666\nTP7: 0.00000741\nstoploss: 0.00000240";
+    public static String TRADING_SIGNAL = "NKNBTC\n\nENTRY: 0.00000260 - 0.00000290\n\nTP1: 0.00000315\nTP2: 0.00000360\nTP3: 0.00000432\nTP4: 0.00000486\nTP5: 0.00000550\nTP6: 0.00000666\nTP7: 0.00000741\n\nSTOP: Close weekly below 0.00000240\n\nSHARED: 18-Nov-2023 @lamatrades ✨";
+    public static String INVALID_TRADING_SIGNAL = "NKNBTC\n\nTP1: 0.00000315\nTP2: 0.00000360\nTP3: 0.00000432\nTP4: 0.00000486\nTP5: 0.00000550\nTP6: 0.00000666\nTP7: 0.00000741\n\nSTOP: Close weekly below 0.00000240\n\nSHARED: 18-Nov-2023 @lamatrades ✨";
+
 
     public static TradingSignal getTradingSignal() {
         return SignalParser.parseSignal(TRADING_SIGNAL);

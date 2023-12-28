@@ -29,7 +29,7 @@ public class SellOrder {
     private double stopLossLimit;
     private double stopLoss;
     private double sellPrice;
-    private Integer times;
+    private int times;
     @OneToOne(cascade = CascadeType.ALL)
     private TradingSignal tradingSignal;
 

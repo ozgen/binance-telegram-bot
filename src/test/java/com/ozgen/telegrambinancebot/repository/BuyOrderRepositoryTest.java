@@ -1,5 +1,6 @@
 package com.ozgen.telegrambinancebot.repository;
 
+import com.ozgen.telegrambinancebot.model.ProcessStatus;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.utils.TestData;
@@ -36,7 +37,8 @@ public class BuyOrderRepositoryTest {
         this.tradingSignal = this.entityManager.persist(this.tradingSignal);
 
         this.buyOrder = new BuyOrder();
-        this.buyOrder.setTradingSignal(tradingSignal);
+        this.tradingSignal.setIsProcessed(ProcessStatus.SELL);
+        this.buyOrder.setTradingSignal(this.tradingSignal);
         this.buyOrder.setTimes(1);
         this.buyOrder.setBuyPrice(100d);
         this.buyOrder.setCoinAmount(20.0);
@@ -47,7 +49,10 @@ public class BuyOrderRepositoryTest {
     public void testFindByTradingSignal() {
         Optional<BuyOrder> foundOrder = this.buyOrderRepository.findByTradingSignal(this.tradingSignal);
         assertTrue(foundOrder.isPresent());
-        assertEquals(buyOrder, foundOrder.get());
+        assertEquals(this.buyOrder, foundOrder.get());
+        BuyOrder buyOrderDb = foundOrder.get();
+        assertEquals(ProcessStatus.SELL, buyOrderDb.getTradingSignal().getIsProcessed());
+
     }
 
     @Test
@@ -56,6 +61,12 @@ public class BuyOrderRepositoryTest {
         assertFalse(orders.isEmpty());
         assertEquals(1, orders.size());
         assertEquals(this.buyOrder, orders.get(0));
+    }
+
+    @Test
+    public void testFindByTradingSignalIn_withEmptyList() {
+        List<BuyOrder> orders = this.buyOrderRepository.findByTradingSignalIn(List.of());
+        assertTrue(orders.isEmpty());
     }
 }
 

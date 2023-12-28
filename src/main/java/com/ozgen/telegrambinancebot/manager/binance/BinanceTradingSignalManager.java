@@ -22,21 +22,29 @@ public class BinanceTradingSignalManager {
 
 
     public void processIncomingTradingSignalEvent(IncomingTradingSignalEvent event) {
-
         TradingSignal tradingSignal = event.getTradingSignal();
         String symbol = tradingSignal.getSymbol();
-        TickerData tickerPrice24 = null;
+
+        log.info("Processing incoming trading signal event for symbol: {}", symbol);
+
+        TickerData tickerPrice24;
         try {
             tickerPrice24 = this.binanceApiManager.getTickerPrice24(symbol);
+            log.info("Fetched ticker price for symbol {}: {}", symbol, tickerPrice24);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while fetching ticker price for symbol {}: {}", symbol, e.getMessage(), e);
+            throw new RuntimeException("Error fetching ticker price", e);
         }
+
         boolean availableToBuy = TradingSignalValidator.isAvailableToBuy(tickerPrice24, tradingSignal);
+        log.info("Availability to buy for symbol {}: {}", symbol, availableToBuy);
+
         if (availableToBuy) {
             NewBuyOrderEvent newBuyOrderEvent = new NewBuyOrderEvent(this, tradingSignal, tickerPrice24);
+            log.info("Publishing NewBuyOrderEvent for symbol {}", symbol);
             this.publisher.publishEvent(newBuyOrderEvent);
+        } else {
+            log.info("Symbol {} is not available to buy", symbol);
         }
-
     }
-
 }
