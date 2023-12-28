@@ -17,7 +17,15 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '11'
-          distribution: 'adopt'
+          distribution: 'temurin'
+          server-id: github
+          settings-path: ${{ github.workspace }}
+          cache: 'maven'
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.2
+        with:
+          maven-version: 3.8.2
 
       - name: Run Tests
         run: mvn clean test
