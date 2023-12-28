@@ -8,6 +8,7 @@ import com.ozgen.telegrambinancebot.model.binance.SnapshotData;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.bot.FutureTrade;
 import com.ozgen.telegrambinancebot.model.bot.SellOrder;
+import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
 import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.BotOrderService;
@@ -19,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Optional;
 
@@ -53,6 +55,8 @@ public class BinanceSellOrderManagerTest {
     private FutureTradeService futureTradeService;
     @Mock
     private BotOrderService botOrderService;
+    @Mock
+    private ApplicationEventPublisher publisher;
 
     @InjectMocks
     private BinanceSellOrderManager binanceSellOrderManager;
@@ -219,6 +223,8 @@ public class BinanceSellOrderManagerTest {
                 .createSellOrder(any());
         verify(this.binanceApiManager, never())
                 .newOrderWithStopLoss(any(), any(), any(), any(), any());
+        verify(this.publisher)
+                .publishEvent(any(ErrorEvent.class));
     }
 
     @Test
@@ -269,5 +275,7 @@ public class BinanceSellOrderManagerTest {
                 .createFutureTrade(this.tradingSignal, TradeStatus.ERROR_SELL);
         verify(this.botOrderService, never())
                 .createSellOrder(any());
+        verify(this.publisher)
+                .publishEvent(any(ErrorEvent.class));
     }
 }

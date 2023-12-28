@@ -9,6 +9,7 @@ import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.bot.FutureTrade;
+import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
 import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.BotOrderService;
@@ -205,7 +206,9 @@ public class BinanceOpenBuyOrderManagerTest {
         verify(this.botOrderService, never())
                 .createBuyOrder(any());
         verify(this.publisher, never())
-                .publishEvent(any());
+                .publishEvent(any(NewSellOrderEvent.class));
+        verify(this.publisher)
+                .publishEvent(any(ErrorEvent.class));
     }
 
     @Test
@@ -234,7 +237,9 @@ public class BinanceOpenBuyOrderManagerTest {
                 .cancelAndNewOrderWithStopLoss(any(), any(), any(), any(), any(), any());
 
         verify(this.publisher, never())
-                .publishEvent(any());
+                .publishEvent(any(NewSellOrderEvent.class));
+        verify(this.publisher)
+                .publishEvent(any(ErrorEvent.class));
     }
 
     @Test
@@ -304,6 +309,8 @@ public class BinanceOpenBuyOrderManagerTest {
         verify(this.futureTradeService)
                 .createFutureTrade(this.tradingSignal, TradeStatus.ERROR_BUY);
         verify(this.publisher, never())
-                .publishEvent(any());
+                .publishEvent(any(NewSellOrderEvent.class));
+        verify(this.publisher)
+                .publishEvent(any(ErrorEvent.class));
     }
 }

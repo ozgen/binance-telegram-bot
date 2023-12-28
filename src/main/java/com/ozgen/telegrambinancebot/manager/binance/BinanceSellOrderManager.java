@@ -6,6 +6,7 @@ import com.ozgen.telegrambinancebot.model.TradeStatus;
 import com.ozgen.telegrambinancebot.model.binance.SnapshotData;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.bot.SellOrder;
+import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
 import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.BotOrderService;
@@ -16,6 +17,7 @@ import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -28,6 +30,7 @@ public class BinanceSellOrderManager {
     private final BotConfiguration botConfiguration;
     private final FutureTradeService futureTradeService;
     private final BotOrderService botOrderService;
+    private final ApplicationEventPublisher publisher;
 
 
     public void processNewSellOrderEvent(NewSellOrderEvent event) {
@@ -61,6 +64,7 @@ public class BinanceSellOrderManager {
             return binanceApiManager.getAccountSnapshot();
         } catch (Exception e) {
             log.error("Error fetching account snapshot: {}", e.getMessage(), e);
+            this.processException(e);
             return null;
         }
     }
@@ -126,7 +130,13 @@ public class BinanceSellOrderManager {
         } catch (Exception e) {
             log.error("Failed to create sell order for symbol {}: {}", sellOrder.getSymbol(), e.getMessage(), e);
             this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.ERROR_SELL);
+            this.processException(e);
             return null;
         }
+    }
+
+    private void processException(Exception e) {
+        ErrorEvent errorEvent = new ErrorEvent(this, e);
+        this.publisher.publishEvent(errorEvent);
     }
 }
