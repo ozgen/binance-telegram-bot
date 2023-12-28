@@ -9,6 +9,7 @@ import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
 import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
+import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
 import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.BotOrderService;
@@ -55,6 +56,7 @@ public class BinanceOpenBuyOrderManager {
             } catch (Exception e) {
                 log.error("Error processing open buy order for trading signal {}: {}", tradingSignal.getId(), e.getMessage(), e);
                 // Decide how to handle the error - log, alert, retry, etc.
+                this.processException(e);
             }
         }
     }
@@ -75,6 +77,7 @@ public class BinanceOpenBuyOrderManager {
         } catch (Exception e) {
             log.error("Error processing open buy order for symbol {}: {}", symbol, e.getMessage(), e);
             // Handle the exception as needed
+            this.processException(e);
         }
     }
 
@@ -146,7 +149,13 @@ public class BinanceOpenBuyOrderManager {
         } catch (Exception e) {
             log.error("Failed to cancel and create order for symbol " + symbol, e);
             this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.ERROR_BUY);
+            this.processException(e);
             return null;
         }
+    }
+
+    private void processException(Exception e) {
+        ErrorEvent errorEvent = new ErrorEvent(this, e);
+        this.publisher.publishEvent(errorEvent);
     }
 }

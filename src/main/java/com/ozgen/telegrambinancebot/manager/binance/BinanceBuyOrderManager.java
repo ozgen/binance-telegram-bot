@@ -7,6 +7,7 @@ import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
 import com.ozgen.telegrambinancebot.model.binance.SnapshotData;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
+import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
 import com.ozgen.telegrambinancebot.model.events.NewBuyOrderEvent;
 import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
@@ -46,6 +47,7 @@ public class BinanceBuyOrderManager {
         } catch (Exception e) {
             log.error("Error processing new buy order event for trading signal {}: {}", tradingSignal.getId(), e.getMessage(), e);
             this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.ERROR_BUY);
+            this.processException(e);
         }
     }
 
@@ -149,11 +151,17 @@ public class BinanceBuyOrderManager {
         } catch (Exception e) {
             log.error("Failed to create buy order for symbol {}: {}", buyOrder.getSymbol(), e.getMessage(), e);
             this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.ERROR_BUY);
+            this.processException(e);
             return false;
         }
     }
 
     private BuyOrder saveBuyOrder(BuyOrder buyOrder) {
         return this.botOrderService.createBuyOrder(buyOrder);
+    }
+
+    private void processException(Exception e) {
+        ErrorEvent errorEvent = new ErrorEvent(this, e);
+        this.publisher.publishEvent(errorEvent);
     }
 }

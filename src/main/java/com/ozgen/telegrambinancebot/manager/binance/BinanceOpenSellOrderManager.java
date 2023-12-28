@@ -3,6 +3,7 @@ package com.ozgen.telegrambinancebot.manager.binance;
 import com.ozgen.telegrambinancebot.configuration.properties.ScheduleConfiguration;
 import com.ozgen.telegrambinancebot.model.ProcessStatus;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
+import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
 import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.BotOrderService;
@@ -47,6 +48,7 @@ public class BinanceOpenSellOrderManager {
             SyncUtil.pauseBetweenOperations();
         } catch (Exception e) {
             log.error("Error while processing sell order for BuyOrder ID {}: {}", buyOrder.getId(), e.getMessage(), e);
+            this.processException(e);
         }
     }
 
@@ -58,5 +60,10 @@ public class BinanceOpenSellOrderManager {
 
     private Date getSearchDate() {
         return DateFactory.getDateBeforeInMonths(this.scheduleConfiguration.getMonthBefore());
+    }
+
+    private void processException(Exception e) {
+        ErrorEvent errorEvent = new ErrorEvent(this, e);
+        this.publisher.publishEvent(errorEvent);
     }
 }
