@@ -69,17 +69,14 @@ public class BinanceBuyOrderManager {
     }
 
 
-    private double calculateCoinAmount(TickerData tickerData, double btcPriceInUsd) {
+    private double calculateCoinAmount(double buyPrice, double btcPriceInUsd) {
         double dollarsToInvest = this.botConfiguration.getAmount();
-
-        // Convert the lastPrice from String to Double
-        double coinToBtcRate = Double.parseDouble(tickerData.getLastPrice());
 
         // Calculate how much BTC you can buy with $500
         double btcAmount = dollarsToInvest / btcPriceInUsd;
 
         // Calculate how much coin you can buy with that BTC amount
-        double coinAmount = btcAmount / coinToBtcRate;
+        double coinAmount = btcAmount / buyPrice;
 
         return coinAmount;
     }
@@ -128,10 +125,10 @@ public class BinanceBuyOrderManager {
     }
 
     private void populateBuyOrderDetails(BuyOrder buyOrder, TradingSignal tradingSignal, TickerData tickerData, double btcToUsdRate) {
-        double coinAmount = calculateCoinAmount(tickerData, btcToUsdRate);
+        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()).get(), this.botConfiguration.getPercentageInc());
+        double coinAmount = this.calculateCoinAmount(buyPrice, btcToUsdRate);
         double stopLossLimit = GenericParser.getDouble(tradingSignal.getEntryEnd()).get();
         double stopLoss = PriceCalculator.calculateCoinPriceDec(stopLossLimit, this.botConfiguration.getPercentageInc());
-        double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()).get(), this.botConfiguration.getPercentageInc());
 
         buyOrder.setSymbol(tradingSignal.getSymbol());
         buyOrder.setCoinAmount(coinAmount);
@@ -159,6 +156,4 @@ public class BinanceBuyOrderManager {
     private BuyOrder saveBuyOrder(BuyOrder buyOrder) {
         return this.botOrderService.createBuyOrder(buyOrder);
     }
-
-
 }
