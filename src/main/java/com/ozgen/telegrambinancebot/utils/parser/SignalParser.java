@@ -3,40 +3,41 @@ package com.ozgen.telegrambinancebot.utils.parser;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class SignalParser {
 
-    private static final String PATTERN = "(\\w+BTC)\\s*ENTRY:\\s*(\\d+\\.\\d+)\\s*-\\s*(\\d+\\.\\d+)((?:\\s*TP\\d+:\\s*\\d+\\.\\d+)+)\\s*STOP:\\s*Close weekly\\s*below\\s*(\\d+\\.\\d+)";
-    private static final String TP_PATTERN = "(TP\\d+:\\s*(\\d+\\.\\d+))";
+
 
     public static TradingSignal parseSignal(String signalText) {
         TradingSignal tradingSignal = new TradingSignal();
+        List<String> lines = Arrays.stream(signalText.split("\\r?\\n"))
+                .filter(line -> !line.trim().isEmpty())
+                .collect(Collectors.toList());
 
-        // Remove empty lines
-        String condensedText = signalText.replaceAll("(?m)^[ \t]*\r?\n", "");
+        // Extracting the symbol
+        tradingSignal.setSymbol(lines.get(0).trim());
 
-        // Main pattern matcher
-        Pattern pattern = Pattern.compile(PATTERN, Pattern.MULTILINE);
-        Matcher matcher = pattern.matcher(condensedText);
+        String[] entryPoints = lines.get(1).substring(lines.get(1).indexOf(':') + 1).trim().split(" - ");
+        tradingSignal.setEntryStart(entryPoints[0].trim());
+        tradingSignal.setEntryEnd(entryPoints[1].trim());
 
-        if (matcher.find()) {
-            tradingSignal.setSymbol(matcher.group(1));
-            tradingSignal.setEntryStart(matcher.group(2));
-            tradingSignal.setEntryEnd(matcher.group(3));
-
-            // Parsing take profit values
-            List<String> takeProfits = new ArrayList<>();
-            Matcher tpMatcher = Pattern.compile(TP_PATTERN).matcher(condensedText);
-            while (tpMatcher.find()) {
-                takeProfits.add(tpMatcher.group(2));
+        List<String> takeProfits = new ArrayList<>();
+        for (int i = 2; i < lines.size(); i++) {
+            String line = lines.get(i);
+            if (line.startsWith("TP")) {
+                String tpValue = line.substring(line.indexOf(':') + 1).trim();
+                takeProfits.add(tpValue);
+            } else if (line.startsWith("STOP")) {
+                String[] stopParts = line.split("\\s+");
+                String stopLossValue = stopParts[stopParts.length - 1].trim();
+                tradingSignal.setStopLoss(stopLossValue);
+                break;
             }
-
-            tradingSignal.setTakeProfits(takeProfits);
-            tradingSignal.setStopLoss(matcher.group(5));
         }
+        tradingSignal.setTakeProfits(takeProfits);
 
         return tradingSignal;
     }
