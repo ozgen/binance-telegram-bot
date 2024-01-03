@@ -3,7 +3,6 @@ package com.ozgen.telegrambinancebot.manager.binance;
 
 import com.ozgen.telegrambinancebot.configuration.properties.BotConfiguration;
 import com.ozgen.telegrambinancebot.configuration.properties.ScheduleConfiguration;
-import com.ozgen.telegrambinancebot.model.TradeStatus;
 import com.ozgen.telegrambinancebot.model.binance.CancelAndNewOrderResponse;
 import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
@@ -13,7 +12,6 @@ import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
 import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.BotOrderService;
-import com.ozgen.telegrambinancebot.service.FutureTradeService;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,8 +56,6 @@ public class BinanceOpenBuyOrderManagerTest {
     private BinanceApiManager binanceApiManager;
     @Mock
     private TradingSignalService tradingSignalService;
-    @Mock
-    private FutureTradeService futureTradeService;
     @Mock
     private BotOrderService botOrderService;
     @Mock
@@ -253,8 +249,6 @@ public class BinanceOpenBuyOrderManagerTest {
                 .thenReturn(this.tickerData);
         when(this.tickerData.getLastPrice())
                 .thenReturn(LAST_PRICE_OUT_RANGE);
-        when(this.futureTradeService.createFutureTrade(this.tradingSignal, TradeStatus.NOT_IN_RANGE))
-                .thenReturn(this.futureTrade);
 
         //Act
         this.binanceOpenBuyOrderManager.processOpenBuyOrders();
@@ -289,8 +283,6 @@ public class BinanceOpenBuyOrderManagerTest {
                 .thenReturn(Optional.of(this.buyOrder));
         when(this.binanceApiManager.cancelAndNewOrderWithStopLoss(any(), any(), any(), any(), any(), any()))
                 .thenThrow(RuntimeException.class);
-        when(this.futureTradeService.createFutureTrade(this.tradingSignal, TradeStatus.ERROR_BUY))
-                .thenReturn(this.futureTrade);
 
         //Act
         this.binanceOpenBuyOrderManager.processOpenBuyOrders();
@@ -306,8 +298,6 @@ public class BinanceOpenBuyOrderManagerTest {
                 .getBuyOrder(this.tradingSignal);
         verify(this.binanceApiManager)
                 .cancelAndNewOrderWithStopLoss(any(), any(), any(), any(), any(), any());
-        verify(this.futureTradeService)
-                .createFutureTrade(this.tradingSignal, TradeStatus.ERROR_BUY);
         verify(this.publisher, never())
                 .publishEvent(any(NewSellOrderEvent.class));
         verify(this.publisher)
