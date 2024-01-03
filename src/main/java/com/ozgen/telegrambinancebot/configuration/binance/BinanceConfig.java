@@ -13,10 +13,10 @@ import java.io.IOException;
 @Profile("!test")
 public class BinanceConfig {
 
-    @Value("${binance-api-key}")
+    @Value("${binance-customer-api-key}")
     private String apiKey;
 
-    @Value("${binance-secret-key}")
+    @Value("${binance-customer-secret-key}")
     private String secretKey;
 
     @Bean

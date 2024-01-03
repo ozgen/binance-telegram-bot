@@ -29,4 +29,28 @@ class SignalParserTest {
         assertEquals("0.00000240", signal.getStopLoss());
     }
 
+    @Test
+    void testParseSignal_2() {
+        String signalText = TestData.TRADING_SIGNAL_2;
+        TradingSignal signal = SignalParser.parseSignal(signalText);
+
+        assertEquals("ATABTC", signal.getSymbol());
+        assertEquals("0.00000240", signal.getEntryStart());
+        assertEquals("0.00000280", signal.getEntryEnd());
+        assertEquals(7, signal.getTakeProfits().size());
+        assertEquals("0.00000220", signal.getStopLoss());
+    }
+
+    @Test
+    void testParseSignal_3() {
+        String signalText = TestData.TRADING_SIGNAL_3;
+        TradingSignal signal = SignalParser.parseSignal(signalText);
+
+        assertEquals("MDTBTC", signal.getSymbol());
+        assertEquals("0.00000125", signal.getEntryStart());
+        assertEquals("0.00000150", signal.getEntryEnd());
+        assertEquals(8, signal.getTakeProfits().size());
+        assertEquals("0.00000120", signal.getStopLoss());
+    }
+
 }

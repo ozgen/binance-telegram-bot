@@ -3,9 +3,7 @@ package com.ozgen.telegrambinancebot.manager.binance;
 import com.ozgen.telegrambinancebot.configuration.properties.BotConfiguration;
 import com.ozgen.telegrambinancebot.configuration.properties.ScheduleConfiguration;
 import com.ozgen.telegrambinancebot.model.ProcessStatus;
-import com.ozgen.telegrambinancebot.model.TradeStatus;
 import com.ozgen.telegrambinancebot.model.binance.CancelAndNewOrderResponse;
-import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
 import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
@@ -13,7 +11,6 @@ import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
 import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.BotOrderService;
-import com.ozgen.telegrambinancebot.service.FutureTradeService;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
 import com.ozgen.telegrambinancebot.utils.DateFactory;
 import com.ozgen.telegrambinancebot.utils.PriceCalculator;
@@ -39,7 +36,6 @@ public class BinanceOpenBuyOrderManager {
 
     private final BinanceApiManager binanceApiManager;
     private final TradingSignalService tradingSignalService;
-    private final FutureTradeService futureTradeService;
     private final BotOrderService botOrderService;
     private final ApplicationEventPublisher publisher;
     private final ScheduleConfiguration scheduleConfiguration;
@@ -68,7 +64,6 @@ public class BinanceOpenBuyOrderManager {
             TickerData tickerPrice24 = this.binanceApiManager.getTickerPrice24(symbol);
 
             if (!TradingSignalValidator.isAvailableToBuy(tickerPrice24, tradingSignal)) {
-                this.handleNotAvailableToBuy(tradingSignal, symbol);
                 return;
             }
 
@@ -79,13 +74,6 @@ public class BinanceOpenBuyOrderManager {
             // Handle the exception as needed
             this.processException(e);
         }
-    }
-
-    private void handleNotAvailableToBuy(TradingSignal tradingSignal, String symbol) throws Exception {
-        log.info("Symbol {} is not available to buy, cancelling orders.", symbol);
-        List<OpenOrder> openOrderList = this.binanceApiManager.cancelOpenOrders(symbol);
-        log.info("All orders have been canceled, orders: {}", openOrderList);
-        this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.NOT_IN_RANGE);
     }
 
     private List<BuyOrder> processOpenOrders(TradingSignal tradingSignal, TickerData tickerPrice24, List<OrderInfo> openOrders) {
@@ -112,7 +100,7 @@ public class BinanceOpenBuyOrderManager {
     private BuyOrder createCancelAndBuyOrder(TradingSignal tradingSignal, TickerData tickerData, OrderInfo orderInfo) {
         String symbol = tradingSignal.getSymbol();
         BuyOrder buyOrder = this.prepareBuyOrder(tradingSignal, tickerData, orderInfo, symbol);
-        BuyOrder saved = this.processCancelAndNewOrder(tradingSignal, buyOrder, symbol, orderInfo);
+        BuyOrder saved = this.processCancelAndNewOrder(buyOrder, symbol, orderInfo);
         return saved;
     }
 
@@ -141,14 +129,13 @@ public class BinanceOpenBuyOrderManager {
         buyOrder.setTradingSignal(tradingSignal);
     }
 
-    private BuyOrder processCancelAndNewOrder(TradingSignal tradingSignal, BuyOrder buyOrder, String symbol, OrderInfo orderInfo) {
+    private BuyOrder processCancelAndNewOrder(BuyOrder buyOrder, String symbol, OrderInfo orderInfo) {
         try {
             CancelAndNewOrderResponse response = this.binanceApiManager.cancelAndNewOrderWithStopLoss(symbol, buyOrder.getBuyPrice(), buyOrder.getCoinAmount(), buyOrder.getStopLoss(), buyOrder.getStopLossLimit(), orderInfo.getOrderId());
             log.info("Order cancel and created successfully: {}", response);
             return this.botOrderService.createBuyOrder(buyOrder);
         } catch (Exception e) {
             log.error("Failed to cancel and create order for symbol " + symbol, e);
-            this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.ERROR_BUY);
             this.processException(e);
             return null;
         }
