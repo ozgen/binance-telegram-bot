@@ -16,7 +16,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "snapshot_data")
@@ -68,7 +67,8 @@ public class SnapshotData {
 
         @Id
         @GeneratedValue(generator = "UUID")
-        private UUID id;
+        @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+        private String id;
 
         private String type;
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
@@ -90,7 +90,8 @@ public class SnapshotData {
     public static class Data {
         @Id
         @GeneratedValue(generator = "UUID")
-        private UUID id;
+        @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+        private String id;
 
         private String totalAssetOfBtc;
 
@@ -109,7 +110,8 @@ public class SnapshotData {
     public static class Balance {
         @Id
         @GeneratedValue(generator = "UUID")
-        private UUID id;
+        @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+        private String id;
 
         private String asset;
         private String free;
