@@ -5,6 +5,7 @@ import com.binance.connector.client.SpotClient;
 import com.binance.connector.client.impl.spot.Market;
 import com.binance.connector.client.impl.spot.Trade;
 import com.binance.connector.client.impl.spot.Wallet;
+import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -90,13 +91,12 @@ public class DefaultBinanceServiceTest {
         Double price = 10000.0;
         Double quantity = 1.0;
         Double stopPrice = 9500.0;
-        Double stopLossLimit = 9400.0;
         Long cancelOrderId = 12345L;
         String expectedResponse = "cancel_and_new_order_response";
         when(binanceClient.createTrade().cancelReplace(anyMap()))
                 .thenReturn(expectedResponse);
 
-        String actualResponse = service.cancelAndNewOrderWithStopLoss(symbol, price, quantity, stopPrice, stopLossLimit, cancelOrderId);
+        String actualResponse = service.cancelAndNewOrderWithStopLoss(symbol, price, quantity, stopPrice, cancelOrderId);
 
         assertEquals(expectedResponse, actualResponse);
         verify(binanceClient.createTrade())
@@ -105,10 +105,9 @@ public class DefaultBinanceServiceTest {
                                 params.get("side").equals("SELL") &&
                                 params.get("type").equals("STOP_LOSS_LIMIT") &&
                                 params.get("timeInForce").equals("GTC") &&
-                                params.get("quantity").equals(quantity) &&
-                                params.get("price").equals(price) &&
-                                params.get("stopPrice").equals(stopPrice) &&
-                                params.get("stopLimitPrice").equals(stopLossLimit) &&
+                                params.get("quantity").equals(GenericParser.getFormattedDouble(quantity)) &&
+                                params.get("price").equals(GenericParser.getFormattedDouble(price)) &&
+                                params.get("stopPrice").equals(GenericParser.getFormattedDouble(stopPrice)) &&
                                 params.get("cancelReplaceMode").equals("STOP_ON_FAILURE") &&
                                 params.get("cancelOrderId").equals(cancelOrderId)));
     }
@@ -175,25 +174,21 @@ public class DefaultBinanceServiceTest {
         Double price = 10000.0;
         Double quantity = 1.0;
         Double stopPrice = 9500.0;
-        Double stopLossLimit = 9400.0;
         String expectedResponse = "order_response";
 
-        when(binanceClient.createTrade().newOrder(anyMap()))
+        when(binanceClient.createTrade().ocoOrder(anyMap()))
                 .thenReturn(expectedResponse);
 
-        String actualResponse = service.newOrderWithStopLoss(symbol, price, quantity, stopPrice, stopLossLimit);
+        String actualResponse = service.newOrderWithStopLoss(symbol, price, quantity, stopPrice);
 
         assertEquals(expectedResponse, actualResponse);
         verify(binanceClient.createTrade())
-                .newOrder(argThat(params ->
+                .ocoOrder(argThat(params ->
                         "BTCUSDT".equals(params.get("symbol")) &&
                                 "SELL".equals(params.get("side")) &&
-                                "STOP_LOSS_LIMIT".equals(params.get("type")) &&
-                                "GTC".equals(params.get("timeInForce")) &&
-                                quantity.equals(params.get("quantity")) &&
-                                price.equals(params.get("price")) &&
-                                stopPrice.equals(params.get("stopPrice")) &&
-                                stopLossLimit.equals(params.get("stopLimitPrice"))
+                                params.get("quantity").equals(GenericParser.getFormattedDouble(quantity)) &&
+                                params.get("price").equals(GenericParser.getFormattedDouble(price)) &&
+                                params.get("stopPrice").equals(GenericParser.getFormattedDouble(stopPrice))
                 ));
     }
 

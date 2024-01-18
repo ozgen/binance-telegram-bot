@@ -120,7 +120,6 @@ public class BinanceOpenBuyOrderManagerTest {
         this.buyOrder.setBuyPrice(BUY_PRICE);
         this.buyOrder.setCoinAmount(BNB_TOTAL_AMOUNT_D);
         this.buyOrder.setStopLoss(0.012);
-        this.buyOrder.setStopLossLimit(0.013);
         this.buyOrder.setTradingSignal(this.tradingSignal);
 
         when(this.tickerData.getLastPrice())
@@ -140,7 +139,7 @@ public class BinanceOpenBuyOrderManagerTest {
                 .thenReturn(Optional.of(this.buyOrder));
         when(this.botOrderService.createBuyOrder(any(BuyOrder.class)))
                 .thenAnswer((Answer<BuyOrder>) invocation -> (BuyOrder) invocation.getArguments()[0]);
-        when(this.binanceApiManager.cancelAndNewOrderWithStopLoss(any(), any(), any(), any(), any(), any()))
+        when(this.binanceApiManager.cancelAndNewOrderWithStopLoss(any(), any(), any(), any(), any()))
                 .thenReturn(this.cancelAndNewOrderResponse);
 
         //Act
@@ -161,14 +160,13 @@ public class BinanceOpenBuyOrderManagerTest {
         BuyOrder updatedBuyOrder = buyOrderCaptor.getValue();
         double expectedBuyPrice = (Double.parseDouble(LAST_PRICE) * (PERCENTAGE_INC / 100) + Double.parseDouble(LAST_PRICE));
         double expectedCoinAmount = Double.parseDouble(BNB_TOTAL_AMOUNT) - Double.parseDouble(BNB_AMOUNT);
-        double expectedStopLoss = (Double.parseDouble(END_ENTRY) - (Double.parseDouble(END_ENTRY) * (PERCENTAGE_INC / 100)));
+        double expectedStopLoss = Double.parseDouble(END_ENTRY);
         assertEquals(expectedCoinAmount, updatedBuyOrder.getCoinAmount());
         assertEquals(expectedBuyPrice, updatedBuyOrder.getBuyPrice());
         assertEquals(expectedBuyPrice, updatedBuyOrder.getBuyPrice());
-        assertEquals(expectedStopLoss, updatedBuyOrder.getStopLoss());
-        assertEquals(Double.parseDouble(END_ENTRY), updatedBuyOrder.getStopLossLimit());
+        assertEquals(Double.parseDouble(END_ENTRY), updatedBuyOrder.getStopLoss());
         verify(this.binanceApiManager)
-                .cancelAndNewOrderWithStopLoss(SYMBOL, expectedBuyPrice, expectedCoinAmount, expectedStopLoss, Double.parseDouble(END_ENTRY), ORDER_INFO_ID);
+                .cancelAndNewOrderWithStopLoss(SYMBOL, expectedBuyPrice, expectedCoinAmount, expectedStopLoss, ORDER_INFO_ID);
         ArgumentCaptor<NewSellOrderEvent> eventCaptor = ArgumentCaptor.forClass(NewSellOrderEvent.class);
         verify(this.publisher)
                 .publishEvent(eventCaptor.capture());
@@ -230,7 +228,7 @@ public class BinanceOpenBuyOrderManagerTest {
         verify(this.botOrderService, never())
                 .createBuyOrder(any());
         verify(this.binanceApiManager, never())
-                .cancelAndNewOrderWithStopLoss(any(), any(), any(), any(), any(), any());
+                .cancelAndNewOrderWithStopLoss(any(), any(), any(), any(), any());
 
         verify(this.publisher, never())
                 .publishEvent(any(NewSellOrderEvent.class));
@@ -265,7 +263,7 @@ public class BinanceOpenBuyOrderManagerTest {
         verify(this.botOrderService, never())
                 .createBuyOrder(any());
         verify(this.binanceApiManager, never())
-                .cancelAndNewOrderWithStopLoss(any(), any(), any(), any(), any(), any());
+                .cancelAndNewOrderWithStopLoss(any(), any(), any(), any(), any());
         verify(this.publisher, never())
                 .publishEvent(any());
     }
@@ -281,7 +279,7 @@ public class BinanceOpenBuyOrderManagerTest {
                 .thenReturn(this.tickerData);
         when(this.botOrderService.getBuyOrder(this.tradingSignal))
                 .thenReturn(Optional.of(this.buyOrder));
-        when(this.binanceApiManager.cancelAndNewOrderWithStopLoss(any(), any(), any(), any(), any(), any()))
+        when(this.binanceApiManager.cancelAndNewOrderWithStopLoss(any(), any(), any(), any(), any()))
                 .thenThrow(RuntimeException.class);
 
         //Act
@@ -297,7 +295,7 @@ public class BinanceOpenBuyOrderManagerTest {
         verify(this.botOrderService)
                 .getBuyOrder(this.tradingSignal);
         verify(this.binanceApiManager)
-                .cancelAndNewOrderWithStopLoss(any(), any(), any(), any(), any(), any());
+                .cancelAndNewOrderWithStopLoss(any(), any(), any(), any(), any());
         verify(this.publisher, never())
                 .publishEvent(any(NewSellOrderEvent.class));
         verify(this.publisher)

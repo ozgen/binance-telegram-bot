@@ -42,7 +42,9 @@ public class BinanceApiManager {
         SnapshotData snapshotData = JsonParser.parseSnapshotJson(accountSnapshotJson);
 
         log.info("account snapshot data is parsed, successfully.");
-        return this.accountSnapshotService.createSnapshotData(snapshotData);
+        // todo due to thıs process takes too long, commented the saving DB operatıon
+//        return this.accountSnapshotService.createSnapshotData(snapshotData);
+        return snapshotData;
     }
 
     List<OrderInfo> getOpenOrders(String symbol) throws Exception {
@@ -69,16 +71,16 @@ public class BinanceApiManager {
         return this.binanceOrderService.createOrderResponse(orderResponse);
     }
 
-    OrderResponse newOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice, Double stopLossLimit) throws Exception {
-        String orderResponseJson = this.binanceAPI.newOrderWithStopLoss(symbol, price, quantity, stopPrice, stopLossLimit);
+    OrderResponse newOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice) throws Exception {
+        String orderResponseJson = this.binanceAPI.newOrderWithStopLoss(symbol, price, quantity, stopPrice);
         OrderResponse orderResponse = JsonParser.parseOrderResponseJson(orderResponseJson);
 
         log.info("'{}' of symbol order response data are parsed, successfully.", symbol);
         return this.binanceOrderService.createOrderResponse(orderResponse);
     }
 
-    CancelAndNewOrderResponse cancelAndNewOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice, Double stopLossLimit, Long cancelOrderId) throws Exception {
-        String orderResponseJson = this.binanceAPI.cancelAndNewOrderWithStopLoss(symbol, price, quantity, stopPrice, stopLossLimit, cancelOrderId);
+    CancelAndNewOrderResponse cancelAndNewOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice, Long cancelOrderId) throws Exception {
+        String orderResponseJson = this.binanceAPI.cancelAndNewOrderWithStopLoss(symbol, price, quantity, stopPrice, cancelOrderId);
         CancelAndNewOrderResponse orderResponse = JsonParser.parseCancelAndNewOrderResponseJson(orderResponseJson);
 
         log.info("'{}' of symbol cancel and new order response data are parsed, successfully.", symbol);

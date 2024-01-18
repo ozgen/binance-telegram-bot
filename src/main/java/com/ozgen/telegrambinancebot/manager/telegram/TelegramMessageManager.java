@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 public class TelegramMessageManager {
 
     private static final Logger log = LoggerFactory.getLogger(TelegramMessageManager.class);
-    static final String SUCCESS_MESSAGE = "Received the channel post successfully";
+    static final String SUCCESS_MESSAGE = "The post with %s has been received successfully";
     static final String FAILED_MESSAGE = "The post is not parsed.";
 
     private final TradingSignalService tradingSignalService;
@@ -39,7 +39,8 @@ public class TelegramMessageManager {
         TradingSignal saved = this.tradingSignalService.saveTradingSignal(tradingSignal);
         IncomingTradingSignalEvent event = new IncomingTradingSignalEvent(this, saved);
         this.publisher.publishEvent(event);
-        return SUCCESS_MESSAGE;
+
+        return String.format(SUCCESS_MESSAGE, saved.getSymbol());
     }
 
 //    public String testMessage(){

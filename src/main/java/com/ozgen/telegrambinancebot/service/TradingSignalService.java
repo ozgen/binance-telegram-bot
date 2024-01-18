@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +30,7 @@ public class TradingSignalService {
         }
     }
 
-    public List<TradingSignal> getTradingSignalsByIdList(List<UUID> uuidList){
+    public List<TradingSignal> getTradingSignalsByIdList(List<String> uuidList){
         return this.repository.findAllByIdIn(uuidList);
     }
 

@@ -2,6 +2,7 @@ package com.ozgen.telegrambinancebot.adapters.binance.imp;
 
 import com.binance.connector.client.SpotClient;
 import com.ozgen.telegrambinancebot.adapters.binance.BinanceAPI;
+import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -39,20 +40,17 @@ public class DefaultBinanceService implements BinanceAPI {
     }
 
     @Override
-    public String cancelAndNewOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice, Double stopLossLimit, Long cancelOrderId) {
+    public String cancelAndNewOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice, Long cancelOrderId) {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
+
         parameters.put("symbol", symbol);
         parameters.put("side", "SELL");
         parameters.put("type", "STOP_LOSS_LIMIT");
         parameters.put("timeInForce", "GTC");
-        parameters.put("quantity", quantity);
-        parameters.put("price", price); // Limit price
-        parameters.put("stopPrice", stopPrice); // Stop price
+        parameters.put("quantity",GenericParser.getFormattedDouble(quantity));
+        parameters.put("price", GenericParser.getFormattedDouble(price)); // Limit price
+        parameters.put("stopPrice", GenericParser.getFormattedDouble(stopPrice)); // Stop price
 
-        // Optional: For a stop-loss limit order, this is the limit price
-        // It's the price at which the stop-loss will be executed and must be set below the stopPrice
-        // If you want to set a limit price for stop-loss, you can add this:
-        parameters.put("stopLimitPrice", stopLossLimit);
         parameters.put("cancelReplaceMode", "STOP_ON_FAILURE");
         parameters.put("cancelOrderId", cancelOrderId);
         return this.binanceClient.createTrade().cancelReplace(parameters);
@@ -64,28 +62,22 @@ public class DefaultBinanceService implements BinanceAPI {
         parameters.put("side", "SELL");
         parameters.put("type", "LIMIT");
         parameters.put("timeInForce", "GTC");
-        parameters.put("quantity", quantity);
-        parameters.put("price", price);
+        parameters.put("quantity", GenericParser.getFormattedDouble(quantity));
+        parameters.put("price", GenericParser.getFormattedDouble(price));
 
         return this.binanceClient.createTrade().newOrder(parameters);
     }
 
-    public String newOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice, Double stopLossLimit) {
+    public String newOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice) {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
+
         parameters.put("symbol", symbol);
         parameters.put("side", "SELL");
-        parameters.put("type", "STOP_LOSS_LIMIT");
-        parameters.put("timeInForce", "GTC");
-        parameters.put("quantity", quantity);
-        parameters.put("price", price); // Limit price
-        parameters.put("stopPrice", stopPrice); // Stop price
+        parameters.put("stopPrice", GenericParser.getFormattedDouble(stopPrice));
+        parameters.put("quantity", GenericParser.getFormattedDouble(quantity));
+        parameters.put("price", GenericParser.getFormattedDouble(price));
 
-        // Optional: For a stop-loss limit order, this is the limit price
-        // It's the price at which the stop-loss will be executed and must be set below the stopPrice
-        // If you want to set a limit price for stop-loss, you can add this:
-        parameters.put("stopLimitPrice", stopLossLimit);
-
-        return this.binanceClient.createTrade().newOrder(parameters);
+        return this.binanceClient.createTrade().ocoOrder(parameters);
     }
 
     public String getTickerPrice24(String symbol) {
@@ -98,6 +90,6 @@ public class DefaultBinanceService implements BinanceAPI {
     public String getCoinPrice(String symbol) {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
         parameters.put("symbol", symbol);
-        return this.binanceClient.createMarket().averagePrice(parameters).toString();
+        return this.binanceClient.createMarket().averagePrice(parameters);
     }
 }
