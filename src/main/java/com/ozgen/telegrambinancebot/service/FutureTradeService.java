@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +46,7 @@ public class FutureTradeService {
         return this.futureTradeRepository.findByTradeStatus(tradeStatus);
     }
 
-    public List<FutureTrade> getAllFutureTradeByTradingSignals(List<UUID> uuidList) {
+    public List<FutureTrade> getAllFutureTradeByTradingSignals(List<String> uuidList) {
         return this.futureTradeRepository.findAllByTradeSignalIdIn(uuidList);
     }
 

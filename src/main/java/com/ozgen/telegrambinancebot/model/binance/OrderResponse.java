@@ -2,6 +2,7 @@ package com.ozgen.telegrambinancebot.model.binance;
 
 import lombok.Data;
 import lombok.ToString;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.ElementCollection;
@@ -14,7 +15,6 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Data
@@ -22,8 +22,9 @@ import java.util.UUID;
 public class OrderResponse {
 
     @Id
-    @GeneratedValue
-    private UUID id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    private String id;
     private String symbol;
     private Long orderId;
     private Long orderListId;

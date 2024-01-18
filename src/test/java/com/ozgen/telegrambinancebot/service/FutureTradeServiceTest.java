@@ -66,7 +66,7 @@ public class FutureTradeServiceTest {
     @Test
     public void testCreateFutureTradeWithSignalAndStatus_Success() {
         TradingSignal tradingSignal = new TradingSignal();
-        UUID signalId = UUID.randomUUID();
+        String signalId = UUID.randomUUID().toString();
         tradingSignal.setId(signalId);
         TradeStatus status = TradeStatus.ERROR_BUY;
         when(this.futureTradeRepository.save(any(FutureTrade.class)))
@@ -110,7 +110,7 @@ public class FutureTradeServiceTest {
 
     @Test
     public void testGetAllFutureTradeByTradingSignals_Success() {
-        List<UUID> uuidList = List.of(UUID.randomUUID());
+        List<String> uuidList = List.of(UUID.randomUUID().toString());
         List<FutureTrade> expectedTrades = List.of(new FutureTrade());
         when(this.futureTradeRepository.findAllByTradeSignalIdIn(uuidList))
                 .thenReturn(expectedTrades);

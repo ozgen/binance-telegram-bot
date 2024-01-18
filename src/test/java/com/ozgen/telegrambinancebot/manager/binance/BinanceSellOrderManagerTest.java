@@ -104,8 +104,6 @@ public class BinanceSellOrderManagerTest {
                 .thenReturn(BNB_TOTAL_AMOUNT);
         when(this.buyOrder.getStopLoss())
                 .thenReturn(0.012);
-        when(this.buyOrder.getStopLossLimit())
-                .thenReturn(0.13);
         when(this.buyOrder.getTradingSignal())
                 .thenReturn(this.tradingSignal);
     }
@@ -121,7 +119,7 @@ public class BinanceSellOrderManagerTest {
                 .thenReturn(Optional.empty());
         when(this.botOrderService.createSellOrder(any(SellOrder.class)))
                 .thenAnswer((Answer<SellOrder>) invocation -> (SellOrder) invocation.getArguments()[0]);
-        when(this.binanceApiManager.newOrderWithStopLoss(any(), any(), any(), any(), any()))
+        when(this.binanceApiManager.newOrderWithStopLoss(any(), any(), any(), any()))
                 .thenReturn(this.orderResponse);
         NewSellOrderEvent event = new NewSellOrderEvent(this, this.buyOrder);
 
@@ -140,11 +138,10 @@ public class BinanceSellOrderManagerTest {
         assertEquals(BNB_AMOUNT, sellOrder.getCoinAmount());
         assertEquals(SYMBOL, sellOrder.getSymbol());
         assertEquals(expectedSellPrice, sellOrder.getSellPrice());
-        assertEquals(expectedStopLoss, sellOrder.getStopLoss());
-        assertEquals(Double.parseDouble(STOPLOSS), sellOrder.getStopLossLimit());
+        assertEquals(Double.parseDouble(STOPLOSS), sellOrder.getStopLoss());
         assertEquals(this.tradingSignal, sellOrder.getTradingSignal());
         verify(this.binanceApiManager)
-                .newOrderWithStopLoss(SYMBOL, sellOrder.getSellPrice(), sellOrder.getCoinAmount(), sellOrder.getStopLoss(), sellOrder.getStopLossLimit());
+                .newOrderWithStopLoss(SYMBOL, sellOrder.getSellPrice(), sellOrder.getCoinAmount(), sellOrder.getStopLoss());
     }
 
     @Test
@@ -158,7 +155,7 @@ public class BinanceSellOrderManagerTest {
                 .thenReturn(Optional.empty());
         when(this.botOrderService.createSellOrder(any(SellOrder.class)))
                 .thenAnswer((Answer<SellOrder>) invocation -> (SellOrder) invocation.getArguments()[0]);
-        when(this.binanceApiManager.newOrderWithStopLoss(any(), any(), any(), any(), any()))
+        when(this.binanceApiManager.newOrderWithStopLoss(any(), any(), any(), any()))
                 .thenReturn(this.orderResponse);
         NewSellOrderEvent event = new NewSellOrderEvent(this, this.buyOrder);
 
@@ -177,11 +174,10 @@ public class BinanceSellOrderManagerTest {
         assertEquals(BNB_TOTAL_AMOUNT, sellOrder.getCoinAmount());
         assertEquals(SYMBOL, sellOrder.getSymbol());
         assertEquals(expectedSellPrice, sellOrder.getSellPrice());
-        assertEquals(expectedStopLoss, sellOrder.getStopLoss());
-        assertEquals(Double.parseDouble(STOPLOSS), sellOrder.getStopLossLimit());
+        assertEquals(Double.parseDouble(STOPLOSS), sellOrder.getStopLoss());
         assertEquals(this.tradingSignal, sellOrder.getTradingSignal());
         verify(this.binanceApiManager)
-                .newOrderWithStopLoss(SYMBOL, sellOrder.getSellPrice(), sellOrder.getCoinAmount(), sellOrder.getStopLoss(), sellOrder.getStopLossLimit());
+                .newOrderWithStopLoss(SYMBOL, sellOrder.getSellPrice(), sellOrder.getCoinAmount(), sellOrder.getStopLoss());
     }
 
     @Test
@@ -202,7 +198,7 @@ public class BinanceSellOrderManagerTest {
         verify(this.botOrderService, never())
                 .createSellOrder(any());
         verify(this.binanceApiManager, never())
-                .newOrderWithStopLoss(any(), any(), any(), any(), any());
+                .newOrderWithStopLoss(any(), any(), any(), any());
     }
 
     @Test
@@ -222,7 +218,7 @@ public class BinanceSellOrderManagerTest {
         verify(this.botOrderService, never())
                 .createSellOrder(any());
         verify(this.binanceApiManager, never())
-                .newOrderWithStopLoss(any(), any(), any(), any(), any());
+                .newOrderWithStopLoss(any(), any(), any(), any());
         verify(this.publisher)
                 .publishEvent(any(ErrorEvent.class));
     }
@@ -245,7 +241,7 @@ public class BinanceSellOrderManagerTest {
         verify(this.botOrderService, never())
                 .createSellOrder(any());
         verify(this.binanceApiManager, never())
-                .newOrderWithStopLoss(any(), any(), any(), any(), any());
+                .newOrderWithStopLoss(any(), any(), any(), any());
     }
 
     @Test
@@ -259,7 +255,7 @@ public class BinanceSellOrderManagerTest {
                 .thenReturn(Optional.empty());
         when(this.futureTradeService.createFutureTrade(this.tradingSignal, TradeStatus.ERROR_SELL))
                 .thenReturn(this.futureTrade);
-        when(this.binanceApiManager.newOrderWithStopLoss(any(), any(), any(), any(), any()))
+        when(this.binanceApiManager.newOrderWithStopLoss(any(), any(), any(), any()))
                 .thenThrow(RuntimeException.class);
         NewSellOrderEvent event = new NewSellOrderEvent(this, this.buyOrder);
 
@@ -270,7 +266,7 @@ public class BinanceSellOrderManagerTest {
         verify(this.botOrderService)
                 .getSellOrder(this.tradingSignal);
         verify(this.binanceApiManager)
-                .newOrderWithStopLoss(any(), any(), any(), any(), any());
+                .newOrderWithStopLoss(any(), any(), any(), any());
         verify(this.futureTradeService)
                 .createFutureTrade(this.tradingSignal, TradeStatus.ERROR_SELL);
         verify(this.botOrderService, never())

@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -63,16 +62,16 @@ public class FutureTradeManager {
     }
 
     private void processTrades(List<FutureTrade> futureTrades) {
-        List<UUID> tradingSignalIdList = futureTrades.stream()
+        List<String> tradingSignalIdList = futureTrades.stream()
                 .map(FutureTrade::getTradeSignalId)
                 .distinct()
                 .collect(Collectors.toList());
 
-        Map<UUID, List<FutureTrade>> groupedFutureTrades = this.futureTradeService.getAllFutureTradeByTradingSignals(tradingSignalIdList)
+        Map<String, List<FutureTrade>> groupedFutureTrades = this.futureTradeService.getAllFutureTradeByTradingSignals(tradingSignalIdList)
                 .stream()
                 .collect(Collectors.groupingBy(FutureTrade::getTradeSignalId));
 
-        Map<UUID, TradingSignal> groupedSignals = this.tradingSignalService.getTradingSignalsByIdList(tradingSignalIdList)
+        Map<String, TradingSignal> groupedSignals = this.tradingSignalService.getTradingSignalsByIdList(tradingSignalIdList)
                 .stream()
                 .collect(Collectors.toMap(TradingSignal::getId, Function.identity(), (existing, replacement) -> existing));
 
@@ -80,7 +79,7 @@ public class FutureTradeManager {
     }
 
     private void processSellTrades(List<FutureTrade> futureTrades) {
-        List<UUID> tradingSignalIdList = futureTrades.stream()
+        List<String> tradingSignalIdList = futureTrades.stream()
                 .map(FutureTrade::getTradeSignalId)
                 .distinct()
                 .collect(Collectors.toList());
@@ -96,7 +95,7 @@ public class FutureTradeManager {
         buyOrders.forEach(this::publishNewSellOrderEvent);
     }
 
-    private void processTradeGroup(UUID tradeSignalId, List<FutureTrade> tradeList, Map<UUID, TradingSignal> groupedSignals) {
+    private void processTradeGroup(String tradeSignalId, List<FutureTrade> tradeList, Map<String, TradingSignal> groupedSignals) {
         if (tradeList.size() != 1) {
             this.futureTradeService.deleteFutureTrades(tradeList);
             return;

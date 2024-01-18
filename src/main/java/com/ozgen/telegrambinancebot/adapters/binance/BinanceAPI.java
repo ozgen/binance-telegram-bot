@@ -11,7 +11,7 @@ public interface BinanceAPI {
 
     public String newOrder(String symbol, Double price, Double quantity);
 
-    public String newOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice, Double stopLossLimit);
+    public String newOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice);
 
     public String getTickerPrice24(String symbol);
 
@@ -19,6 +19,6 @@ public interface BinanceAPI {
 
     public String cancelOpenOrders(String symbol);
 
-    public String cancelAndNewOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice, Double stopLossLimit, Long cancelOrderId);
+    public String cancelAndNewOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice, Long cancelOrderId);
 
 }

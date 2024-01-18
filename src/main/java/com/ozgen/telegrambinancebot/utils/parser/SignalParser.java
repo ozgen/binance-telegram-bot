@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 public class SignalParser {
 
 
-
     public static TradingSignal parseSignal(String signalText) {
         TradingSignal tradingSignal = new TradingSignal();
         List<String> lines = Arrays.stream(signalText.split("\\r?\\n"))
@@ -21,8 +20,10 @@ public class SignalParser {
         tradingSignal.setSymbol(lines.get(0).trim());
 
         String[] entryPoints = lines.get(1).substring(lines.get(1).indexOf(':') + 1).trim().split(" - ");
-        tradingSignal.setEntryStart(entryPoints[0].trim());
-        tradingSignal.setEntryEnd(entryPoints[1].trim());
+        if (entryPoints.length == 2) {
+            tradingSignal.setEntryStart(entryPoints[0].trim());
+            tradingSignal.setEntryEnd(entryPoints[1].trim());
+        }
 
         List<String> takeProfits = new ArrayList<>();
         for (int i = 2; i < lines.size(); i++) {

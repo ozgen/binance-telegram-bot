@@ -3,6 +3,7 @@ package com.ozgen.telegrambinancebot.model.binance;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.ToString;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,7 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import java.util.Date;
-import java.util.UUID;
 
 @Entity
 @Data
@@ -18,8 +18,9 @@ import java.util.UUID;
 public class TickerData {
 
     @Id
-    @GeneratedValue
-    private UUID id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    private String id;
     private String symbol;
     private String openPrice;
     private String highPrice;
@@ -34,9 +35,9 @@ public class TickerData {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
     private Date closeTime;
 
-    private Integer firstId;
-    private Integer lastId;
-    private Integer count;
+    private Long firstId;
+    private Long lastId;
+    private Long count;
 
     private Date createdAt;
     private Date updatedAt;

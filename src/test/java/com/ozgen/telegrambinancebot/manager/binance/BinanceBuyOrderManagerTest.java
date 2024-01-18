@@ -42,6 +42,7 @@ public class BinanceBuyOrderManagerTest {
     private static final Double AMOUNT = 100.0;
     private static final Double PERCENTAGE_INC = 0.5;
     private static final Double PROFIT_PERCENTAGE = 6.0;
+    private static final float BINANCE_FEE_PERCENTAGE = 0.00201f;
     private static final String CURRENCY = "BTC";
     private static final Double BTC_AMOUNT = 0.1;
     private static final String BTCUSD_PRICE = "42000";
@@ -97,6 +98,8 @@ public class BinanceBuyOrderManagerTest {
                 .thenReturn(PERCENTAGE_INC);
         when(this.botConfiguration.getProfitPercentage())
                 .thenReturn(PROFIT_PERCENTAGE);
+        when(this.botConfiguration.getBinanceFeePercentage())
+                .thenReturn(BINANCE_FEE_PERCENTAGE);
 
         when(this.binanceApiManager.getTickerPrice24(CURRENCY_RATE))
                 .thenReturn(this.tickerDataBTCUSD);
@@ -115,7 +118,7 @@ public class BinanceBuyOrderManagerTest {
                 .thenReturn(BTC_AMOUNT);
         when(this.botOrderService.getBuyOrder(this.tradingSignal))
                 .thenReturn(Optional.empty());
-        when(this.binanceApiManager.newOrderWithStopLoss(any(), any(), any(), any(), any()))
+        when(this.binanceApiManager.newOrderWithStopLoss(any(), any(), any(), any()))
                 .thenReturn(this.orderResponse);
         when(this.botOrderService.createBuyOrder(any(BuyOrder.class)))
                 .thenAnswer((Answer<BuyOrder>) invocation -> (BuyOrder) invocation.getArguments()[0]);
@@ -134,17 +137,17 @@ public class BinanceBuyOrderManagerTest {
                 .createBuyOrder(buyOrderCaptor.capture());
         BuyOrder buyOrder = buyOrderCaptor.getValue();
         double expectedBuyPrice = (Double.parseDouble(LAST_PRICE) * (PERCENTAGE_INC / 100) + Double.parseDouble(LAST_PRICE));
-        double expectedCoinAmount = (AMOUNT / Double.parseDouble(BTCUSD_PRICE)) / expectedBuyPrice;
-        double expectedStopLoss = (Double.parseDouble(END_ENTRY) - (Double.parseDouble(END_ENTRY) * (PERCENTAGE_INC / 100)));
+        double binanceFee = AMOUNT * BINANCE_FEE_PERCENTAGE;
+        double expectedCoinAmount = ((AMOUNT - binanceFee) / Double.parseDouble(BTCUSD_PRICE)) / expectedBuyPrice;
+        double expectedStopLoss = Double.parseDouble(END_ENTRY);
         assertEquals(expectedCoinAmount, buyOrder.getCoinAmount());
         assertEquals(expectedBuyPrice, buyOrder.getBuyPrice());
         assertEquals(expectedBuyPrice, buyOrder.getBuyPrice());
         assertEquals(expectedStopLoss, buyOrder.getStopLoss());
-        assertEquals(Double.parseDouble(END_ENTRY), buyOrder.getStopLossLimit());
         assertEquals(this.tradingSignal, buyOrder.getTradingSignal());
         assertEquals(SYMBOL, buyOrder.getSymbol());
         verify(this.binanceApiManager)
-                .newOrderWithStopLoss(SYMBOL, expectedBuyPrice, expectedCoinAmount, expectedStopLoss, Double.parseDouble(END_ENTRY));
+                .newOrder(SYMBOL, expectedBuyPrice, expectedCoinAmount);
         ArgumentCaptor<NewSellOrderEvent> eventCaptor = ArgumentCaptor.forClass(NewSellOrderEvent.class);
         verify(this.publisher)
                 .publishEvent(eventCaptor.capture());
@@ -179,7 +182,7 @@ public class BinanceBuyOrderManagerTest {
         verify(this.botOrderService, never())
                 .createBuyOrder(any());
         verify(this.binanceApiManager, never())
-                .newOrderWithStopLoss(any(), any(), any(), any(), any());
+                .newOrder(any(), any(), any());
         verify(this.publisher, never())
                 .publishEvent(any());
     }
@@ -208,7 +211,7 @@ public class BinanceBuyOrderManagerTest {
         verify(this.botOrderService, never())
                 .createBuyOrder(any());
         verify(this.binanceApiManager, never())
-                .newOrderWithStopLoss(any(), any(), any(), any(), any());
+                .newOrderWithStopLoss(any(), any(), any(), any());
         verify(this.publisher, never())
                 .publishEvent(any(NewSellOrderEvent.class));
         verify(this.publisher)
@@ -241,7 +244,7 @@ public class BinanceBuyOrderManagerTest {
         verify(this.botOrderService, never())
                 .createBuyOrder(any());
         verify(this.binanceApiManager, never())
-                .newOrderWithStopLoss(any(), any(), any(), any(), any());
+                .newOrderWithStopLoss(any(), any(), any(), any());
         verify(this.publisher, never())
                 .publishEvent(any());
     }
@@ -257,7 +260,7 @@ public class BinanceBuyOrderManagerTest {
                 .thenReturn(BTC_AMOUNT);
         when(this.botOrderService.getBuyOrder(this.tradingSignal))
                 .thenReturn(Optional.empty());
-        when(this.binanceApiManager.newOrderWithStopLoss(any(), any(), any(), any(), any()))
+        when(this.binanceApiManager.newOrder(any(), any(), any()))
                 .thenThrow(RuntimeException.class);
         when(this.futureTradeService.createFutureTrade(this.tradingSignal, TradeStatus.ERROR_BUY))
                 .thenReturn(this.futureTrade);
@@ -272,7 +275,7 @@ public class BinanceBuyOrderManagerTest {
         verify(this.botOrderService)
                 .getBuyOrder(this.tradingSignal);
         verify(this.binanceApiManager)
-                .newOrderWithStopLoss(any(), any(), any(), any(), any());
+                .newOrder(any(), any(), any());
         verify(this.futureTradeService)
                 .createFutureTrade(this.tradingSignal, TradeStatus.ERROR_BUY);
         verify(this.botOrderService, never())

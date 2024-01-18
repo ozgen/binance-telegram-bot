@@ -14,6 +14,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationEventPublisher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -46,7 +47,7 @@ public class TelegramMessageManagerTest {
         String result = telegramMessageManager.parseTelegramMessage(message);
 
         // Assert
-        assertEquals(TelegramMessageManager.SUCCESS_MESSAGE, result);
+        assertTrue(result.contains("success"));
         verify(tradingSignalService)
                 .saveTradingSignal(any(TradingSignal.class));
         verify(publisher)

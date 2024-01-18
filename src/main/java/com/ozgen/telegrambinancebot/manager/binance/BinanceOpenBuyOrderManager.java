@@ -106,23 +106,21 @@ public class BinanceOpenBuyOrderManager {
 
     private BuyOrder prepareBuyOrder(TradingSignal tradingSignal, TickerData tickerData, OrderInfo orderInfo, String symbol) {
         double coinAmount = GenericParser.getDouble(orderInfo.getOrigQty()).get() - GenericParser.getDouble(orderInfo.getExecutedQty()).get();
-        double stopLossLimit = GenericParser.getDouble(tradingSignal.getEntryEnd()).get();
-        double stopLoss = PriceCalculator.calculateCoinPriceDec(stopLossLimit, this.botConfiguration.getPercentageInc());
+        double stopLoss = GenericParser.getDouble(tradingSignal.getEntryEnd()).get();
         double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()).get(), this.botConfiguration.getPercentageInc());
 
         BuyOrder buyOrder = this.botOrderService.getBuyOrder(tradingSignal).orElse(null);
         if (buyOrder == null) {
             buyOrder = new BuyOrder();
         }
-        this.updateBuyOrder(buyOrder, symbol, coinAmount, stopLoss, stopLossLimit, buyPrice, tradingSignal);
+        this.updateBuyOrder(buyOrder, symbol, coinAmount, stopLoss, buyPrice, tradingSignal);
         return buyOrder;
     }
 
-    private void updateBuyOrder(BuyOrder buyOrder, String symbol, double coinAmount, double stopLoss, double stopLossLimit, double buyPrice, TradingSignal tradingSignal) {
+    private void updateBuyOrder(BuyOrder buyOrder, String symbol, double coinAmount, double stopLoss, double buyPrice, TradingSignal tradingSignal) {
         buyOrder.setSymbol(symbol);
         buyOrder.setCoinAmount(coinAmount);
         buyOrder.setStopLoss(stopLoss);
-        buyOrder.setStopLossLimit(stopLossLimit);
         buyOrder.setBuyPrice(buyPrice);
         buyOrder.setTimes(buyOrder.getTimes() + 1);
         tradingSignal.setIsProcessed(ProcessStatus.BUY);
@@ -131,7 +129,7 @@ public class BinanceOpenBuyOrderManager {
 
     private BuyOrder processCancelAndNewOrder(BuyOrder buyOrder, String symbol, OrderInfo orderInfo) {
         try {
-            CancelAndNewOrderResponse response = this.binanceApiManager.cancelAndNewOrderWithStopLoss(symbol, buyOrder.getBuyPrice(), buyOrder.getCoinAmount(), buyOrder.getStopLoss(), buyOrder.getStopLossLimit(), orderInfo.getOrderId());
+            CancelAndNewOrderResponse response = this.binanceApiManager.cancelAndNewOrderWithStopLoss(symbol, buyOrder.getBuyPrice(), buyOrder.getCoinAmount(), buyOrder.getStopLoss(), orderInfo.getOrderId());
             log.info("Order cancel and created successfully: {}", response);
             return this.botOrderService.createBuyOrder(buyOrder);
         } catch (Exception e) {

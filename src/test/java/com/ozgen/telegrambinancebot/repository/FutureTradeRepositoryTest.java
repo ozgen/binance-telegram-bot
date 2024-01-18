@@ -26,12 +26,12 @@ public class FutureTradeRepositoryTest {
     private FutureTradeRepository futureTradeRepository;
 
     private FutureTrade trade1, trade2, trade3;
-    private UUID signalId1, signalId2;
+    private String signalId1, signalId2;
 
     @BeforeEach
     public void setUp() {
-        this.signalId1 = UUID.randomUUID();
-        this.signalId2 = UUID.randomUUID();
+        this.signalId1 = UUID.randomUUID().toString();
+        this.signalId2 = UUID.randomUUID().toString();
 
         this.trade1 = new FutureTrade();
         this.trade1.setTradeStatus(TradeStatus.INSUFFICIENT);

@@ -64,7 +64,7 @@ public class TradeSignalManagerTest {
     public void testProcessTradingSignal() {
         // Arrange
         TradingSignal tradingSignal = new TradingSignal();
-        tradingSignal.setId(UUID.randomUUID());
+        tradingSignal.setId(UUID.randomUUID().toString());
 
         // Act
         tradeSignalManager.processTradingSignal(tradingSignal);

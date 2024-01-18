@@ -61,7 +61,7 @@ public class TradingSignalServiceTest {
 
     @Test
     public void testGetTradingSignalsByIdList_Success() {
-        List<UUID> uuidList = List.of(UUID.randomUUID());
+        List<String> uuidList = List.of(UUID.randomUUID().toString());
         List<TradingSignal> expectedSignals = List.of(new TradingSignal());
         when(this.tradingSignalRepository.findAllByIdIn(uuidList))
                 .thenReturn(expectedSignals);

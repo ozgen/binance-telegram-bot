@@ -6,12 +6,11 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 @Repository
-public interface TradingSignalRepository extends JpaRepository<TradingSignal, UUID> {
+public interface TradingSignalRepository extends JpaRepository<TradingSignal, String> {
 
-    List<TradingSignal> findAllByIdIn(List<UUID> uuidList);
+    List<TradingSignal> findAllByIdIn(List<String> uuidList);
 
     List<TradingSignal>findAllByCreatedAtAfterAndIsProcessedIn(Date date, List<Integer> processStatuses);
 }
