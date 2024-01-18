@@ -66,7 +66,7 @@ public class FutureTradeManagerTest {
     public void testProcessFutureTrades_withInsufficientStatus() throws Exception {
         // Arrange
         TradeStatus tradeStatus = TradeStatus.INSUFFICIENT;
-        UUID tradingSignalId = UUID.randomUUID();
+        String tradingSignalId = UUID.randomUUID().toString();
         FutureTrade futureTrade = new FutureTrade();
         futureTrade.setTradeStatus(tradeStatus);
         futureTrade.setTradeSignalId(tradingSignalId);
@@ -136,7 +136,7 @@ public class FutureTradeManagerTest {
     public void testProcessFutureTrades_withInsufficientStatusAndDuplicateFutureTrades() throws Exception {
         // Arrange
         TradeStatus tradeStatus = TradeStatus.INSUFFICIENT;
-        UUID tradingSignalId = UUID.randomUUID();
+        String tradingSignalId = UUID.randomUUID().toString();
         FutureTrade futureTrade = new FutureTrade();
         futureTrade.setTradeStatus(tradeStatus);
         futureTrade.setTradeSignalId(tradingSignalId);
@@ -177,7 +177,7 @@ public class FutureTradeManagerTest {
     public void testProcessFutureTrades_withInsufficientStatusWithNullTickerData() throws Exception {
         // Arrange
         TradeStatus tradeStatus = TradeStatus.INSUFFICIENT;
-        UUID tradingSignalId = UUID.randomUUID();
+        String tradingSignalId = UUID.randomUUID().toString();
         FutureTrade futureTrade = new FutureTrade();
         futureTrade.setTradeStatus(tradeStatus);
         futureTrade.setTradeSignalId(tradingSignalId);
@@ -215,7 +215,7 @@ public class FutureTradeManagerTest {
     public void testProcessSellErrorFutureTrades_withSellErrorFutureTrades(){
         // Arrange
         TradeStatus tradeStatus = TradeStatus.ERROR_SELL;
-        UUID tradingSignalId = UUID.randomUUID();
+        String tradingSignalId = UUID.randomUUID().toString();
         FutureTrade futureTrade = new FutureTrade();
         futureTrade.setTradeStatus(tradeStatus);
         futureTrade.setTradeSignalId(tradingSignalId);
@@ -252,7 +252,7 @@ public class FutureTradeManagerTest {
     public void testProcessSellErrorFutureTrades_withSellErrorFutureTradesAndEmptyBuyOrderList(){
         // Arrange
         TradeStatus tradeStatus = TradeStatus.ERROR_SELL;
-        UUID tradingSignalId = UUID.randomUUID();
+        String tradingSignalId = UUID.randomUUID().toString();
         FutureTrade futureTrade = new FutureTrade();
         futureTrade.setTradeStatus(tradeStatus);
         futureTrade.setTradeSignalId(tradingSignalId);

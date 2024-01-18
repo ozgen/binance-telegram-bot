@@ -2,6 +2,7 @@ package com.ozgen.telegrambinancebot.model.telegram;
 
 import lombok.Data;
 import lombok.ToString;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -11,7 +12,6 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Data
@@ -19,8 +19,9 @@ import java.util.UUID;
 public class TradingSignal {
 
     @Id
-    @GeneratedValue
-    private UUID id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    private String id;
     private String symbol;
     private String entryStart;
     private String entryEnd;

@@ -6,12 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.UUID;
 
 @Repository
-public interface FutureTradeRepository extends JpaRepository<FutureTrade, UUID> {
+public interface FutureTradeRepository extends JpaRepository<FutureTrade, String> {
 
     List<FutureTrade> findByTradeStatus(TradeStatus tradeStatus);
-    List<FutureTrade> findByTradeSignalId(UUID tradingSignalId);
-    List<FutureTrade> findAllByTradeSignalIdIn(List<UUID> tradingSignalIdList);
+    List<FutureTrade> findByTradeSignalId(String tradingSignalId);
+    List<FutureTrade> findAllByTradeSignalIdIn(List<String> tradingSignalIdList);
 }

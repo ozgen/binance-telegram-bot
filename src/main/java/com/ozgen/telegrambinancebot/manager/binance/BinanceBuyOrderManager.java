@@ -73,12 +73,16 @@ public class BinanceBuyOrderManager {
 
     private double calculateCoinAmount(double buyPrice, double btcPriceInUsd) {
         double dollarsToInvest = this.botConfiguration.getAmount();
+        float binanceFeePercentage = this.botConfiguration.getBinanceFeePercentage();
 
         // Calculate how much BTC you can buy with $500
         double btcAmount = dollarsToInvest / btcPriceInUsd;
 
+        double binanceFee = btcAmount * binanceFeePercentage;
+
+
         // Calculate how much coin you can buy with that BTC amount
-        double coinAmount = btcAmount / buyPrice;
+        double coinAmount = (btcAmount - binanceFee) / buyPrice;
 
         return coinAmount;
     }
@@ -129,13 +133,11 @@ public class BinanceBuyOrderManager {
     private void populateBuyOrderDetails(BuyOrder buyOrder, TradingSignal tradingSignal, TickerData tickerData, double btcToUsdRate) {
         double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()).get(), this.botConfiguration.getPercentageInc());
         double coinAmount = this.calculateCoinAmount(buyPrice, btcToUsdRate);
-        double stopLossLimit = GenericParser.getDouble(tradingSignal.getEntryEnd()).get();
-        double stopLoss = PriceCalculator.calculateCoinPriceDec(stopLossLimit, this.botConfiguration.getPercentageInc());
+        double stopLoss = GenericParser.getDouble(tradingSignal.getEntryEnd()).get();
 
         buyOrder.setSymbol(tradingSignal.getSymbol());
         buyOrder.setCoinAmount(coinAmount);
         buyOrder.setStopLoss(stopLoss);
-        buyOrder.setStopLossLimit(stopLossLimit);
         buyOrder.setBuyPrice(buyPrice);
         buyOrder.setTimes(buyOrder.getTimes() + 1);
         tradingSignal.setIsProcessed(ProcessStatus.BUY);
@@ -145,7 +147,7 @@ public class BinanceBuyOrderManager {
     private boolean createOrderInBinance(BuyOrder buyOrder, TradingSignal tradingSignal) {
         try {
             log.info("Creating buy order for symbol {}", buyOrder.getSymbol());
-            OrderResponse orderResponse = this.binanceApiManager.newOrderWithStopLoss(buyOrder.getSymbol(), buyOrder.getBuyPrice(), buyOrder.getCoinAmount(), buyOrder.getStopLoss(), buyOrder.getStopLossLimit());
+            OrderResponse orderResponse = this.binanceApiManager.newOrder(buyOrder.getSymbol(), buyOrder.getBuyPrice(), buyOrder.getCoinAmount());
             log.info("Order created successfully: {}", orderResponse);
             return true;
         } catch (Exception e) {

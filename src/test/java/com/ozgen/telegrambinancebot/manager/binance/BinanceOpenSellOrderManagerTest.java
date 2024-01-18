@@ -79,7 +79,6 @@ public class BinanceOpenSellOrderManagerTest {
         this.buyOrder.setBuyPrice(BUY_PRICE);
         this.buyOrder.setCoinAmount(BNB_TOTAL_AMOUNT);
         this.buyOrder.setStopLoss(0.012);
-        this.buyOrder.setStopLossLimit(0.013);
         this.buyOrder.setTradingSignal(this.tradingSignal);
     }
 

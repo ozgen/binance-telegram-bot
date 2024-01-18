@@ -11,7 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Data
@@ -20,7 +19,7 @@ public class OrderInfo {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    private UUID id;
+    private String id;
 
     private String symbol;
 

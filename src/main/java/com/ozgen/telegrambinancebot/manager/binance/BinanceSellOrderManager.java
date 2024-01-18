@@ -39,7 +39,7 @@ public class BinanceSellOrderManager {
         if (accountSnapshot == null) {
             log.error("Failed to get account snapshot for BuyOrder ID {}", buyOrder.getId());
             //todo check this case is handled or not?
-            return; // or handle accordingly
+            return;
         }
 
         String coinSymbol = SymbolGenerator.getCoinSymbol(buyOrder.getSymbol(), botConfiguration.getCurrency());
@@ -100,8 +100,7 @@ public class BinanceSellOrderManager {
 
     private SellOrder initializeSellOrder(BuyOrder buyOrder, Double coinAmount, TradingSignal tradingSignal) {
         double sellPrice = PriceCalculator.calculateCoinPriceInc(buyOrder.getBuyPrice(), this.botConfiguration.getProfitPercentage());
-        double stopLossLimit = GenericParser.getDouble(tradingSignal.getStopLoss()).get();
-        double stopLoss = PriceCalculator.calculateCoinPriceDec(stopLossLimit, this.botConfiguration.getPercentageInc());
+        double stopLoss = GenericParser.getDouble(tradingSignal.getStopLoss()).get();
         String sellOrderSymbol = SymbolGenerator.generateSellOrderSymbol(buyOrder.getSymbol(), this.botConfiguration.getCurrency());
 
         SellOrder sellOrder = this.botOrderService.getSellOrder(tradingSignal).orElse(null);
@@ -114,7 +113,6 @@ public class BinanceSellOrderManager {
         sellOrder.setCoinAmount(coinAmount);
         sellOrder.setTimes(sellOrder.getTimes() + 1);
         sellOrder.setStopLoss(stopLoss);
-        sellOrder.setStopLossLimit(stopLossLimit);
         tradingSignal.setIsProcessed(ProcessStatus.SELL);
         sellOrder.setTradingSignal(tradingSignal);
 
@@ -123,7 +121,7 @@ public class BinanceSellOrderManager {
 
     private SellOrder executeSellOrder(SellOrder sellOrder, TradingSignal tradingSignal) {
         try {
-            this.binanceApiManager.newOrderWithStopLoss(sellOrder.getSymbol(), sellOrder.getSellPrice(), sellOrder.getCoinAmount(), sellOrder.getStopLoss(), sellOrder.getStopLossLimit());
+            this.binanceApiManager.newOrderWithStopLoss(sellOrder.getSymbol(), sellOrder.getSellPrice(), sellOrder.getCoinAmount(), sellOrder.getStopLoss());
             log.info("Sell order created successfully for symbol {}", sellOrder.getSymbol());
             return this.botOrderService.createSellOrder(sellOrder);
 

@@ -3,6 +3,7 @@ package com.ozgen.telegrambinancebot.model.binance;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.ToString;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -25,7 +26,8 @@ public class SnapshotData {
 
     @Id
     @GeneratedValue(generator = "UUID")
-    private UUID id;
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    private String id;
 
     private int code;
     private String msg;
@@ -35,8 +37,9 @@ public class SnapshotData {
 
 
     public Double getCoinValue(String assetName) {
+        Double result = 0.0;
         if (this == null || this.getSnapshotVos() == null) {
-            return 0.0;
+            return result;
         }
 
         for (SnapshotData.SnapshotVo snapshotVo : this.getSnapshotVos()) {
@@ -45,7 +48,7 @@ public class SnapshotData {
                 for (SnapshotData.Balance balance : data.getBalances()) {
                     if (assetName.equals(balance.getAsset())) {
                         try {
-                            return Double.parseDouble(balance.getFree());
+                            result += Double.parseDouble(balance.getFree());
                         } catch (NumberFormatException e) {
                             e.printStackTrace();
                             // Handle parse error
@@ -54,7 +57,7 @@ public class SnapshotData {
                 }
             }
         }
-        return 0.0;
+        return result;
     }
 
     @Entity
