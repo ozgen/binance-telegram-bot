@@ -32,4 +32,30 @@ public class GenericParserTest {
         Optional<Double> result = GenericParser.getDouble(nullString);
         assertFalse(result.isPresent());
     }
+
+    @Test
+    public void testGetFormattedDoubleWithNormalValues() {
+        assertEquals(123.0, GenericParser.getFormattedDouble(123.4567), "Normal value should be formatted correctly.");
+        assertEquals(0.1235, GenericParser.getFormattedDouble(0.123456789), "Value should be rounded to 6 decimal places.");
+    }
+
+    @Test
+    public void testGetFormattedDoubleWithZero() {
+        assertEquals(0.0, GenericParser.getFormattedDouble(0.0), "Zero should be formatted correctly.");
+    }
+
+    @Test
+    public void testGetFormattedDoubleWithVerySmallValue() {
+        assertEquals(0.00000001, GenericParser.getFormattedDouble(0.00000001), "Very small value should be formatted correctly.");
+    }
+
+    @Test
+    public void testGetFormattedDoubleWithVeryLargeValue() {
+        assertEquals(12345678.0, GenericParser.getFormattedDouble(12345678.0), "Very large value should be formatted correctly.");
+    }
+
+    @Test
+    public void testGetFormattedDoubleWithNull() {
+        assertEquals(0.0, GenericParser.getFormattedDouble(null), "Null should return 0.0.");
+    }
 }
