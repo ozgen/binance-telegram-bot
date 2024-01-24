@@ -3,8 +3,8 @@ package com.ozgen.telegrambinancebot.manager.binance;
 
 import com.ozgen.telegrambinancebot.configuration.properties.BotConfiguration;
 import com.ozgen.telegrambinancebot.model.TradeStatus;
+import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
-import com.ozgen.telegrambinancebot.model.binance.SnapshotData;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.bot.FutureTrade;
@@ -23,6 +23,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,7 +70,7 @@ public class BinanceBuyOrderManagerTest {
     @Mock
     private TradingSignal tradingSignal;
     @Mock
-    private SnapshotData snapshotData;
+    private AssetBalance assetBalance;
     @Mock
     private OrderResponse orderResponse;
     @Mock
@@ -112,10 +113,12 @@ public class BinanceBuyOrderManagerTest {
         // Arrange
         when(this.tickerData.getLastPrice())
                 .thenReturn(LAST_PRICE);
-        when(this.binanceApiManager.getAccountSnapshot())
-                .thenReturn(this.snapshotData);
-        when(this.snapshotData.getCoinValue(CURRENCY))
-                .thenReturn(BTC_AMOUNT);
+        when(this.binanceApiManager.getUserAsset())
+                .thenReturn(List.of(this.assetBalance));
+        when(this.assetBalance.getAsset())
+                .thenReturn(CURRENCY);
+        when(this.assetBalance.getFree())
+                .thenReturn(String.valueOf(BTC_AMOUNT));
         when(this.botOrderService.getBuyOrder(this.tradingSignal))
                 .thenReturn(Optional.empty());
         when(this.binanceApiManager.newOrderWithStopLoss(any(), any(), any(), any()))
@@ -129,7 +132,7 @@ public class BinanceBuyOrderManagerTest {
 
         // Assert
         verify(this.binanceApiManager)
-                .getAccountSnapshot();
+                .getUserAsset();
         verify(this.botOrderService)
                 .getBuyOrder(this.tradingSignal);
         ArgumentCaptor<BuyOrder> buyOrderCaptor = ArgumentCaptor.forClass(BuyOrder.class);
@@ -161,10 +164,13 @@ public class BinanceBuyOrderManagerTest {
         // Arrange
         when(this.tickerData.getLastPrice())
                 .thenReturn(LAST_PRICE);
-        when(this.binanceApiManager.getAccountSnapshot())
-                .thenReturn(this.snapshotData);
-        when(this.snapshotData.getCoinValue(CURRENCY))
-                .thenReturn(0.00001);
+        when(this.binanceApiManager.getUserAsset())
+                .thenReturn(List.of(this.assetBalance));
+        when(this.assetBalance.getAsset())
+                .thenReturn(CURRENCY);
+        when(this.assetBalance.getFree())
+                .thenReturn(String.valueOf(0.00001));
+
         when(this.futureTradeService.createFutureTrade(this.tradingSignal, TradeStatus.INSUFFICIENT))
                 .thenReturn(this.futureTrade);
         NewBuyOrderEvent event = new NewBuyOrderEvent(this, this.tradingSignal, this.tickerData);
@@ -174,7 +180,7 @@ public class BinanceBuyOrderManagerTest {
 
         // Assert
         verify(this.binanceApiManager)
-                .getAccountSnapshot();
+                .getUserAsset();
         verify(this.futureTradeService)
                 .createFutureTrade(this.tradingSignal, TradeStatus.INSUFFICIENT);
         verify(this.botOrderService, never())
@@ -192,7 +198,7 @@ public class BinanceBuyOrderManagerTest {
         // Arrange
         when(this.tickerData.getLastPrice())
                 .thenReturn(LAST_PRICE);
-        when(this.binanceApiManager.getAccountSnapshot())
+        when(this.binanceApiManager.getUserAsset())
                 .thenThrow(RuntimeException.class);
         when(this.futureTradeService.createFutureTrade(this.tradingSignal, TradeStatus.ERROR_BUY))
                 .thenReturn(this.futureTrade);
@@ -203,7 +209,7 @@ public class BinanceBuyOrderManagerTest {
 
         // Assert
         verify(this.binanceApiManager)
-                .getAccountSnapshot();
+                .getUserAsset();
         verify(this.futureTradeService)
                 .createFutureTrade(this.tradingSignal, TradeStatus.ERROR_BUY);
         verify(this.botOrderService, never())
@@ -223,10 +229,12 @@ public class BinanceBuyOrderManagerTest {
         // Arrange
         when(this.tickerData.getLastPrice())
                 .thenReturn(LAST_PRICE_OUT_RANGE);
-        when(this.binanceApiManager.getAccountSnapshot())
-                .thenReturn(this.snapshotData);
-        when(this.snapshotData.getCoinValue(CURRENCY))
-                .thenReturn(BTC_AMOUNT);
+        when(this.binanceApiManager.getUserAsset())
+                .thenReturn(List.of(this.assetBalance));
+        when(this.assetBalance.getAsset())
+                .thenReturn(CURRENCY);
+        when(this.assetBalance.getFree())
+                .thenReturn(String.valueOf(BTC_AMOUNT));
         when(this.futureTradeService.createFutureTrade(this.tradingSignal, TradeStatus.NOT_IN_RANGE))
                 .thenReturn(this.futureTrade);
         NewBuyOrderEvent event = new NewBuyOrderEvent(this, this.tradingSignal, this.tickerData);
@@ -236,7 +244,7 @@ public class BinanceBuyOrderManagerTest {
 
         // Assert
         verify(this.binanceApiManager)
-                .getAccountSnapshot();
+                .getUserAsset();
         verify(this.futureTradeService)
                 .createFutureTrade(this.tradingSignal, TradeStatus.NOT_IN_RANGE);
         verify(this.botOrderService, never())
@@ -254,10 +262,12 @@ public class BinanceBuyOrderManagerTest {
         // Arrange
         when(this.tickerData.getLastPrice())
                 .thenReturn(LAST_PRICE);
-        when(this.binanceApiManager.getAccountSnapshot())
-                .thenReturn(this.snapshotData);
-        when(this.snapshotData.getCoinValue(CURRENCY))
-                .thenReturn(BTC_AMOUNT);
+        when(this.binanceApiManager.getUserAsset())
+                .thenReturn(List.of(this.assetBalance));
+        when(this.assetBalance.getAsset())
+                .thenReturn(CURRENCY);
+        when(this.assetBalance.getFree())
+                .thenReturn(String.valueOf(BTC_AMOUNT));
         when(this.botOrderService.getBuyOrder(this.tradingSignal))
                 .thenReturn(Optional.empty());
         when(this.binanceApiManager.newOrder(any(), any(), any()))
@@ -271,7 +281,7 @@ public class BinanceBuyOrderManagerTest {
 
         // Assert
         verify(this.binanceApiManager)
-                .getAccountSnapshot();
+                .getUserAsset();
         verify(this.botOrderService)
                 .getBuyOrder(this.tradingSignal);
         verify(this.binanceApiManager)

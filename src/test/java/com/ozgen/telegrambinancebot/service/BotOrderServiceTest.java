@@ -6,6 +6,7 @@ import com.ozgen.telegrambinancebot.model.bot.SellOrder;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.repository.BuyOrderRepository;
 import com.ozgen.telegrambinancebot.repository.SellOrderRepository;
+import com.ozgen.telegrambinancebot.repository.TradingSignalRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -26,6 +27,8 @@ public class BotOrderServiceTest {
     private BuyOrderRepository buyOrderRepository;
     @Mock
     private SellOrderRepository sellOrderRepository;
+    @Mock
+    private TradingSignalRepository tradingSignalRepository;
 
     @InjectMocks
     private BotOrderService botOrderService;
@@ -38,6 +41,8 @@ public class BotOrderServiceTest {
     @Test
     public void testCreateBuyOrder_Success() {
         BuyOrder buyOrder = new BuyOrder();
+        TradingSignal tradingSignal = new TradingSignal();
+        buyOrder.setTradingSignal(tradingSignal);
         when(this.buyOrderRepository.save(any(BuyOrder.class)))
                 .thenReturn(buyOrder);
 
@@ -47,22 +52,30 @@ public class BotOrderServiceTest {
         assertEquals(buyOrder, result);
         verify(this.buyOrderRepository)
                 .save(buyOrder);
+        verify(this.tradingSignalRepository)
+                .save(tradingSignal);
     }
 
     @Test
     public void testCreateBuyOrder_Failure() {
         BuyOrder buyOrder = new BuyOrder();
+        TradingSignal tradingSignal = new TradingSignal();
+        buyOrder.setTradingSignal(tradingSignal);
         when(this.buyOrderRepository.save(any(BuyOrder.class)))
                 .thenThrow(new RuntimeException("Test exception"));
 
         assertThrows(RuntimeException.class, () -> this.botOrderService.createBuyOrder(buyOrder));
         verify(this.buyOrderRepository)
                 .save(buyOrder);
+        verify(this.tradingSignalRepository)
+                .save(tradingSignal);
     }
 
     @Test
     public void testCreateSellOrder_Success() {
         SellOrder sellOrder = new SellOrder();
+        TradingSignal tradingSignal = new TradingSignal();
+        sellOrder.setTradingSignal(tradingSignal);
         when(this.sellOrderRepository.save(any(SellOrder.class)))
                 .thenReturn(sellOrder);
 
@@ -72,17 +85,23 @@ public class BotOrderServiceTest {
         assertEquals(sellOrder, result);
         verify(this.sellOrderRepository)
                 .save(sellOrder);
+        verify(this.tradingSignalRepository)
+                .save(tradingSignal);
     }
 
     @Test
     public void testCreateSellOrder_Failure() {
         SellOrder sellOrder = new SellOrder();
+        TradingSignal tradingSignal = new TradingSignal();
+        sellOrder.setTradingSignal(tradingSignal);
         when(this.sellOrderRepository.save(any(SellOrder.class)))
                 .thenThrow(new RuntimeException("Test exception"));
 
         assertThrows(RuntimeException.class, () -> this.botOrderService.createSellOrder(sellOrder));
         verify(this.sellOrderRepository)
                 .save(sellOrder);
+        verify(this.tradingSignalRepository)
+                .save(tradingSignal);
     }
 
     @Test
@@ -92,7 +111,7 @@ public class BotOrderServiceTest {
         when(this.buyOrderRepository.findByTradingSignal(signal))
                 .thenReturn(Optional.of(buyOrder));
 
-        Optional<BuyOrder> result =  this.botOrderService.getBuyOrder(signal);
+        Optional<BuyOrder> result = this.botOrderService.getBuyOrder(signal);
 
         assertTrue(result.isPresent());
         assertEquals(buyOrder, result.get());
@@ -106,7 +125,7 @@ public class BotOrderServiceTest {
         when(this.buyOrderRepository.findByTradingSignal(signal))
                 .thenReturn(Optional.empty());
 
-        Optional<BuyOrder> result =  this.botOrderService.getBuyOrder(signal);
+        Optional<BuyOrder> result = this.botOrderService.getBuyOrder(signal);
 
         assertFalse(result.isPresent());
         verify(buyOrderRepository)
@@ -119,7 +138,7 @@ public class BotOrderServiceTest {
         when(this.buyOrderRepository.findByTradingSignal(signal))
                 .thenThrow(new RuntimeException("Test exception"));
 
-        Optional<BuyOrder> result =  this.botOrderService.getBuyOrder(signal);
+        Optional<BuyOrder> result = this.botOrderService.getBuyOrder(signal);
 
         assertFalse(result.isPresent());
         verify(buyOrderRepository)

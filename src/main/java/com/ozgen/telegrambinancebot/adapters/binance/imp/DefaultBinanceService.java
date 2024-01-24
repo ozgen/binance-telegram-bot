@@ -40,16 +40,15 @@ public class DefaultBinanceService implements BinanceAPI {
     }
 
     @Override
-    public String cancelAndNewOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice, Long cancelOrderId) {
+    public String cancelAndNewOrder(String symbol, Double price, Double quantity, Long cancelOrderId) {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
 
         parameters.put("symbol", symbol);
-        parameters.put("side", "SELL");
-        parameters.put("type", "STOP_LOSS_LIMIT");
+        parameters.put("side", "BUY");
+        parameters.put("type", "LIMIT");
         parameters.put("timeInForce", "GTC");
         parameters.put("quantity",GenericParser.getFormattedDouble(quantity));
         parameters.put("price", GenericParser.getFormattedDouble(price)); // Limit price
-        parameters.put("stopPrice", GenericParser.getFormattedDouble(stopPrice)); // Stop price
 
         parameters.put("cancelReplaceMode", "STOP_ON_FAILURE");
         parameters.put("cancelOrderId", cancelOrderId);
@@ -57,9 +56,9 @@ public class DefaultBinanceService implements BinanceAPI {
     }
 
     public String newOrder(String symbol, Double price, Double quantity) {
-        LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
+        Map<String, Object> parameters = new LinkedHashMap<>();
         parameters.put("symbol", symbol);
-        parameters.put("side", "SELL");
+        parameters.put("side", "BUY");
         parameters.put("type", "LIMIT");
         parameters.put("timeInForce", "GTC");
         parameters.put("quantity", GenericParser.getFormattedDouble(quantity));
@@ -72,7 +71,7 @@ public class DefaultBinanceService implements BinanceAPI {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
 
         parameters.put("symbol", symbol);
-        parameters.put("side", "SELL");
+        parameters.put("side", "BUY");
         parameters.put("stopPrice", GenericParser.getFormattedDouble(stopPrice));
         parameters.put("quantity", GenericParser.getFormattedDouble(quantity));
         parameters.put("price", GenericParser.getFormattedDouble(price));
@@ -91,5 +90,10 @@ public class DefaultBinanceService implements BinanceAPI {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
         parameters.put("symbol", symbol);
         return this.binanceClient.createMarket().averagePrice(parameters);
+    }
+
+    public String getUserAsset() {
+        LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
+        return this.binanceClient.createWallet().getUserAsset(parameters);
     }
 }
