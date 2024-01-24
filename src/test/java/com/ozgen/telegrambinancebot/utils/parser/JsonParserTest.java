@@ -1,18 +1,21 @@
 package com.ozgen.telegrambinancebot.utils.parser;
 
 
-import com.ozgen.telegrambinancebot.utils.TestData;
+import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.model.binance.CancelAndNewOrderResponse;
 import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
 import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
 import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
-import com.ozgen.telegrambinancebot.model.binance.SnapshotData;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
+import com.ozgen.telegrambinancebot.utils.TestData;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JsonParserTest {
 
@@ -28,6 +31,14 @@ class JsonParserTest {
     }
 
     @Test
+    void testJsonAssetsParsing_withValidJson() throws Exception {
+        String json = TestData.ASSETS_DATA;
+        List<AssetBalance> assets = JsonParser.parseAssetBalanceJson(json);
+
+        assertNotNull(assets);
+    }
+
+    @Test
     void testJsonArrayParsing_withValidJson() throws Exception {
         String json = "[{ \"symbol\": \"BNBBTC\", \"openPrice\": \"99.00000000\", \"highPrice\": \"100.00000000\", \"lowPrice\": \"0.10000000\", \"lastPrice\": \"4.00000200\", \"volume\": \"8913.30000000\", \"quoteVolume\": \"15.30000000\", \"openTime\": 1499783499040, \"closeTime\": 1499869899040, \"firstId\": 28385, \"lastId\": 28460, \"count\": 76 }]";
         TickerData tickerData = JsonParser.parseTickerJson(json);
@@ -38,31 +49,31 @@ class JsonParserTest {
         assertEquals(28385, tickerData.getFirstId());
     }
 
-    @Test
-    public void testParseSnapshotJson_withValidJson() throws Exception {
-        String jsonString = TestData.SNAPSHOT_DATA;
-
-        SnapshotData result = JsonParser.parseSnapshotJson(jsonString);
-
-        assertNotNull(result);
-        assertNotNull(result.getSnapshotVos());
-        assertFalse(result.getSnapshotVos().isEmpty());
-
-        SnapshotData.SnapshotVo firstSnapshot = result.getSnapshotVos().get(0);
-        assertEquals("spot", firstSnapshot.getType());
-        assertNotNull(firstSnapshot.getData());
-        assertEquals("0.00270573", firstSnapshot.getData().getTotalAssetOfBtc());
-
-        List<SnapshotData.Balance> balances = firstSnapshot.getData().getBalances();
-        assertNotNull(balances);
-        assertFalse( balances.isEmpty());
-
-        SnapshotData.Balance firstBalance = balances.get(0);
-        assertEquals("ADX", firstBalance.getAsset());
-        assertEquals("0", firstBalance.getFree());
-        assertEquals("0", firstBalance.getLocked());
-
-    }
+//    @Test
+//    public void testParseSnapshotJson_withValidJson() throws Exception {
+//        String jsonString = TestData.SNAPSHOT_DATA;
+//
+//        SnapshotData result = JsonParser.parseSnapshotJson(jsonString);
+//
+//        assertNotNull(result);
+//        assertNotNull(result.getSnapshotVos());
+//        assertFalse(result.getSnapshotVos().isEmpty());
+//
+//        SnapshotData.SnapshotVo firstSnapshot = result.getSnapshotVos().get(0);
+//        assertEquals("spot", firstSnapshot.getType());
+//        assertNotNull(firstSnapshot.getData());
+//        assertEquals("0.00270573", firstSnapshot.getData().getTotalAssetOfBtc());
+//
+//        List<SnapshotData.Balance> balances = firstSnapshot.getData().getBalances();
+//        assertNotNull(balances);
+//        assertFalse( balances.isEmpty());
+//
+//        SnapshotData.Balance firstBalance = balances.get(0);
+//        assertEquals("ADX", firstBalance.getAsset());
+//        assertEquals("0", firstBalance.getFree());
+//        assertEquals("0", firstBalance.getLocked());
+//
+//    }
 
     @Test
     public void testParseOpenInfoJson_withValidJson() throws Exception {

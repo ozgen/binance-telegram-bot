@@ -1,5 +1,6 @@
 package com.ozgen.telegrambinancebot.utils;
 
+import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.model.binance.CancelAndNewOrderResponse;
 import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
 import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
@@ -15,6 +16,9 @@ import java.util.List;
 public class TestData {
 
     public static String SNAPSHOT_DATA = "{\"code\":200,\"msg\":\"\",\"snapshotVos\":[{\"type\":\"spot\",\"updateTime\":1700351999000,\"data\":{\"totalAssetOfBtc\":\"0.00270573\",\"balances\":[{\"asset\":\"ADX\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"ATM\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"AUDIO\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"BCHSV\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"BNB\",\"free\":\"0.25760623\",\"locked\":\"0\"},{\"asset\":\"BTC\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"BTS\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"BUSD\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"CHESS\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"CTSI\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"DATA\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"DGB\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"DOCK\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"DUSK\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"FOR\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"FTM\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"FUN\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"GALA\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"IDEX\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"IOTX\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"KEY\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"KMD\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"MBOX\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"PEOPLE\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"REEF\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"SALT\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"SC\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"TRIBE\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"USDT\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"WAVES\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"WAXP\",\"free\":\"516.483\",\"locked\":\"0\"},{\"asset\":\"XRP\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"XVG\",\"free\":\"0\",\"locked\":\"0\"},{\"asset\":\"ZRX\",\"free\":\"0\",\"locked\":\"0\"}]}}]}";
+
+    public static String ASSETS_DATA = "[{\"asset\":\"BNB\",\"free\":\"0.00004272\",\"locked\":\"0\",\"freeze\":\"0\",\"withdrawing\":\"0\",\"ipoable\":\"0\",\"btcValuation\":\"0\"},{\"asset\":\"BTC\",\"free\":\"0.00131558\",\"locked\":\"0.0025008\",\"freeze\":\"0\",\"withdrawing\":\"0\",\"ipoable\":\"0\",\"btcValuation\":\"0\"},{\"asset\":\"GO\",\"free\":\"0.278\",\"locked\":\"0\",\"freeze\":\"0\",\"withdrawing\":\"0\",\"ipoable\":\"0\",\"btcValuation\":\"0\"},{\"asset\":\"NFT\",\"free\":\"3230135.199035\",\"locked\":\"0\",\"freeze\":\"0\",\"withdrawing\":\"0\",\"ipoable\":\"0\",\"btcValuation\":\"0\"},{\"asset\":\"PEPE\",\"free\":\"0.88\",\"locked\":\"0\",\"freeze\":\"0\",\"withdrawing\":\"0\",\"ipoable\":\"0\",\"btcValuation\":\"0\"},{\"asset\":\"POND\",\"free\":\"5317752.55704\",\"locked\":\"0\",\"freeze\":\"0\",\"withdrawing\":\"0\",\"ipoable\":\"0\",\"btcValuation\":\"0\"},{\"asset\":\"USDT\",\"free\":\"0.04207198\",\"locked\":\"0\",\"freeze\":\"0\",\"withdrawing\":\"0\",\"ipoable\":\"0\",\"btcValuation\":\"0\"}]";
+
     public static String TICKER_DATA = "{ \"symbol\": \"BNBBTC\", \"openPrice\": \"99.00000000\", \"highPrice\": \"100.00000000\", \"lowPrice\": \"0.10000000\", \"lastPrice\": \"4.00000200\", \"volume\": \"8913.30000000\", \"quoteVolume\": \"15.30000000\", \"openTime\": 1499783499040, \"closeTime\": 1499869899040, \"firstId\": 28385, \"lastId\": 28460, \"count\": 76 }";
     public static String ORDER_INFO_ARRAY = "[" +
             "{" +
@@ -278,5 +282,9 @@ public class TestData {
 
     public static TickerData getTickerData() throws Exception {
         return JsonParser.parseTickerJson(TICKER_DATA);
+    }
+
+    public static List<AssetBalance> getAssets() throws Exception {
+        return JsonParser.parseAssetBalanceJson(ASSETS_DATA);
     }
 }

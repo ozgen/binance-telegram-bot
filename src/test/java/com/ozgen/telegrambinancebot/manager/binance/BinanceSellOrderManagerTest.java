@@ -3,8 +3,8 @@ package com.ozgen.telegrambinancebot.manager.binance;
 
 import com.ozgen.telegrambinancebot.configuration.properties.BotConfiguration;
 import com.ozgen.telegrambinancebot.model.TradeStatus;
+import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
-import com.ozgen.telegrambinancebot.model.binance.SnapshotData;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.bot.FutureTrade;
 import com.ozgen.telegrambinancebot.model.bot.SellOrder;
@@ -22,6 +22,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,7 +67,7 @@ public class BinanceSellOrderManagerTest {
     @Mock
     private TradingSignal tradingSignal;
     @Mock
-    private SnapshotData snapshotData;
+    private AssetBalance assetBalance;
     @Mock
     private OrderResponse orderResponse;
     @Mock
@@ -111,10 +112,12 @@ public class BinanceSellOrderManagerTest {
     @Test
     void testProcessNewSellOrderEvent_Success() throws Exception {
         // Arrange
-        when(this.binanceApiManager.getAccountSnapshot())
-                .thenReturn(this.snapshotData);
-        when(this.snapshotData.getCoinValue(BNB))
-                .thenReturn(BNB_AMOUNT);
+        when(this.binanceApiManager.getUserAsset())
+                .thenReturn(List.of(this.assetBalance));
+        when(this.assetBalance.getAsset())
+                .thenReturn(BNB);
+        when(this.assetBalance.getFree())
+                .thenReturn(String.valueOf(BNB_AMOUNT));
         when(this.botOrderService.getSellOrder(this.tradingSignal))
                 .thenReturn(Optional.empty());
         when(this.botOrderService.createSellOrder(any(SellOrder.class)))
@@ -128,7 +131,6 @@ public class BinanceSellOrderManagerTest {
 
         // Assert
         double expectedSellPrice = (BUY_PRICE * (PROFIT_PERCENTAGE / 100) + BUY_PRICE);
-        double expectedStopLoss = (Double.parseDouble(STOPLOSS) - (Double.parseDouble(STOPLOSS) * (PERCENTAGE_INC / 100)));
         verify(this.botOrderService)
                 .getSellOrder(this.tradingSignal);
         ArgumentCaptor<SellOrder> sellOrderCaptor = ArgumentCaptor.forClass(SellOrder.class);
@@ -147,10 +149,12 @@ public class BinanceSellOrderManagerTest {
     @Test
     void testProcessNewSellOrderEvent_Success_withTotal() throws Exception {
         // Arrange
-        when(this.binanceApiManager.getAccountSnapshot())
-                .thenReturn(this.snapshotData);
-        when(this.snapshotData.getCoinValue(BNB))
-                .thenReturn(BNB_TOTAL_AMOUNT);
+        when(this.binanceApiManager.getUserAsset())
+                .thenReturn(List.of(this.assetBalance));
+        when(this.assetBalance.getAsset())
+                .thenReturn(BNB);
+        when(this.assetBalance.getFree())
+                .thenReturn(String.valueOf(BNB_TOTAL_AMOUNT));
         when(this.botOrderService.getSellOrder(this.tradingSignal))
                 .thenReturn(Optional.empty());
         when(this.botOrderService.createSellOrder(any(SellOrder.class)))
@@ -164,7 +168,6 @@ public class BinanceSellOrderManagerTest {
 
         // Assert
         double expectedSellPrice = (BUY_PRICE * (PROFIT_PERCENTAGE / 100) + BUY_PRICE);
-        double expectedStopLoss = (Double.parseDouble(STOPLOSS) - (Double.parseDouble(STOPLOSS) * (PERCENTAGE_INC / 100)));
         verify(this.botOrderService)
                 .getSellOrder(this.tradingSignal);
         ArgumentCaptor<SellOrder> sellOrderCaptor = ArgumentCaptor.forClass(SellOrder.class);
@@ -183,10 +186,13 @@ public class BinanceSellOrderManagerTest {
     @Test
     void testProcessNewSellOrderEvent_with0CoinAmount() throws Exception {
         // Arrange
-        when(this.binanceApiManager.getAccountSnapshot())
-                .thenReturn(this.snapshotData);
-        when(this.snapshotData.getCoinValue(BNB))
-                .thenReturn(0.0);
+        when(this.binanceApiManager.getUserAsset())
+                .thenReturn(List.of(this.assetBalance));
+        when(this.assetBalance.getAsset())
+                .thenReturn(BNB);
+        when(this.assetBalance.getFree())
+                .thenReturn(String.valueOf(0.0));
+
         NewSellOrderEvent event = new NewSellOrderEvent(this, this.buyOrder);
 
         //Act
@@ -202,9 +208,9 @@ public class BinanceSellOrderManagerTest {
     }
 
     @Test
-    void testProcessNewSellOrderEvent_withSnapshotApiException() throws Exception {
+    void testProcessNewSellOrderEvent_withAssetApiException() throws Exception {
         // Arrange
-        when(this.binanceApiManager.getAccountSnapshot())
+        when(this.binanceApiManager.getUserAsset())
                 .thenThrow(RuntimeException.class);
 
         NewSellOrderEvent event = new NewSellOrderEvent(this, this.buyOrder);
@@ -219,8 +225,6 @@ public class BinanceSellOrderManagerTest {
                 .createSellOrder(any());
         verify(this.binanceApiManager, never())
                 .newOrderWithStopLoss(any(), any(), any(), any());
-        verify(this.publisher)
-                .publishEvent(any(ErrorEvent.class));
     }
 
     @Test
@@ -228,8 +232,8 @@ public class BinanceSellOrderManagerTest {
         // Arrange
         when(this.buyOrder.getSymbol())
                 .thenReturn("BNBBT");
-        when(this.binanceApiManager.getAccountSnapshot())
-                .thenReturn(this.snapshotData);
+        when(this.binanceApiManager.getUserAsset())
+                .thenReturn(List.of(this.assetBalance));
         NewSellOrderEvent event = new NewSellOrderEvent(this, this.buyOrder);
 
         //Act
@@ -247,10 +251,12 @@ public class BinanceSellOrderManagerTest {
     @Test
     void testProcessNewSellOrderEvent_withNewOrderWithStopLossApiException() throws Exception {
         // Arrange
-        when(this.binanceApiManager.getAccountSnapshot())
-                .thenReturn(this.snapshotData);
-        when(this.snapshotData.getCoinValue(BNB))
-                .thenReturn(BNB_AMOUNT);
+        when(this.binanceApiManager.getUserAsset())
+                .thenReturn(List.of(this.assetBalance));
+        when(this.assetBalance.getAsset())
+                .thenReturn(BNB);
+        when(this.assetBalance.getFree())
+                .thenReturn(String.valueOf(BNB_AMOUNT));
         when(this.botOrderService.getSellOrder(this.tradingSignal))
                 .thenReturn(Optional.empty());
         when(this.futureTradeService.createFutureTrade(this.tradingSignal, TradeStatus.ERROR_SELL))

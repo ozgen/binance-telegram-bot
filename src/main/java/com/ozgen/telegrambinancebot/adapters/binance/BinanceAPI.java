@@ -19,6 +19,7 @@ public interface BinanceAPI {
 
     public String cancelOpenOrders(String symbol);
 
-    public String cancelAndNewOrderWithStopLoss(String symbol, Double price, Double quantity, Double stopPrice, Long cancelOrderId);
+    public String cancelAndNewOrder(String symbol, Double price, Double quantity, Long cancelOrderId);
 
+    public String getUserAsset();
 }

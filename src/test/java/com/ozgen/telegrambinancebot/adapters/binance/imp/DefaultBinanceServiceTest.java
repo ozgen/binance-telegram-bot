@@ -90,24 +90,22 @@ public class DefaultBinanceServiceTest {
         String symbol = "BTCUSDT";
         Double price = 10000.0;
         Double quantity = 1.0;
-        Double stopPrice = 9500.0;
         Long cancelOrderId = 12345L;
         String expectedResponse = "cancel_and_new_order_response";
         when(binanceClient.createTrade().cancelReplace(anyMap()))
                 .thenReturn(expectedResponse);
 
-        String actualResponse = service.cancelAndNewOrderWithStopLoss(symbol, price, quantity, stopPrice, cancelOrderId);
+        String actualResponse = service.cancelAndNewOrder(symbol, price, quantity, cancelOrderId);
 
         assertEquals(expectedResponse, actualResponse);
         verify(binanceClient.createTrade())
                 .cancelReplace(argThat(params ->
                         params.containsKey("symbol") && params.get("symbol").equals(symbol) &&
-                                params.get("side").equals("SELL") &&
-                                params.get("type").equals("STOP_LOSS_LIMIT") &&
+                                params.get("side").equals("BUY") &&
+                                params.get("type").equals("LIMIT") &&
                                 params.get("timeInForce").equals("GTC") &&
                                 params.get("quantity").equals(GenericParser.getFormattedDouble(quantity)) &&
                                 params.get("price").equals(GenericParser.getFormattedDouble(price)) &&
-                                params.get("stopPrice").equals(GenericParser.getFormattedDouble(stopPrice)) &&
                                 params.get("cancelReplaceMode").equals("STOP_ON_FAILURE") &&
                                 params.get("cancelOrderId").equals(cancelOrderId)));
     }
@@ -128,7 +126,7 @@ public class DefaultBinanceServiceTest {
         verify(binanceClient.createTrade())
                 .newOrder(argThat(params ->
                         "BTCUSDT".equals(params.get("symbol")) &&
-                                "SELL".equals(params.get("side")) &&
+                                "BUY".equals(params.get("side")) &&
                                 "LIMIT".equals(params.get("type")) &&
                                 "GTC".equals(params.get("timeInForce")) &&
                                 price.equals(params.get("price")) &&
@@ -185,7 +183,7 @@ public class DefaultBinanceServiceTest {
         verify(binanceClient.createTrade())
                 .ocoOrder(argThat(params ->
                         "BTCUSDT".equals(params.get("symbol")) &&
-                                "SELL".equals(params.get("side")) &&
+                                "BUY".equals(params.get("side")) &&
                                 params.get("quantity").equals(GenericParser.getFormattedDouble(quantity)) &&
                                 params.get("price").equals(GenericParser.getFormattedDouble(price)) &&
                                 params.get("stopPrice").equals(GenericParser.getFormattedDouble(stopPrice))
@@ -201,6 +199,18 @@ public class DefaultBinanceServiceTest {
                 .thenReturn(expectedResponse);
 
         String actualResponse = service.getOpenOrders(symbol);
+
+        assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    void testGetUserAssets() {
+        String expectedResponse = "open_orders_response";
+
+        when(binanceClient.createWallet().getUserAsset(anyMap()))
+                .thenReturn(expectedResponse);
+
+        String actualResponse = service.getUserAsset();
 
         assertEquals(expectedResponse, actualResponse);
     }

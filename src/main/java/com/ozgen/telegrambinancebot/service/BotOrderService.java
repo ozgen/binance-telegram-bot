@@ -5,6 +5,7 @@ import com.ozgen.telegrambinancebot.repository.BuyOrderRepository;
 import com.ozgen.telegrambinancebot.repository.SellOrderRepository;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.bot.SellOrder;
+import com.ozgen.telegrambinancebot.repository.TradingSignalRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +23,13 @@ public class BotOrderService {
 
     private final BuyOrderRepository buyOrderRepository;
     private final SellOrderRepository sellOrderRepository;
+    private final TradingSignalRepository tradingSignalRepository;
 
 
     @Transactional
     public BuyOrder createBuyOrder(BuyOrder buyOrder) {
         try {
+            this.tradingSignalRepository.save(buyOrder.getTradingSignal());
             BuyOrder savedOrder = buyOrderRepository.save(buyOrder);
             log.info("Buy order created: {}", savedOrder);
             return savedOrder;
@@ -39,6 +42,7 @@ public class BotOrderService {
     @Transactional
     public SellOrder createSellOrder(SellOrder sellOrder) {
         try {
+            this.tradingSignalRepository.save(sellOrder.getTradingSignal());
             SellOrder savedOrder = sellOrderRepository.save(sellOrder);
             log.info("Sell order created: {}", savedOrder);
             return savedOrder;

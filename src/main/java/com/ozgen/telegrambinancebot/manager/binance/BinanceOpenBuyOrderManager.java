@@ -129,7 +129,7 @@ public class BinanceOpenBuyOrderManager {
 
     private BuyOrder processCancelAndNewOrder(BuyOrder buyOrder, String symbol, OrderInfo orderInfo) {
         try {
-            CancelAndNewOrderResponse response = this.binanceApiManager.cancelAndNewOrderWithStopLoss(symbol, buyOrder.getBuyPrice(), buyOrder.getCoinAmount(), buyOrder.getStopLoss(), orderInfo.getOrderId());
+            CancelAndNewOrderResponse response = this.binanceApiManager.cancelAndNewOrderWithStopLoss(symbol, buyOrder.getBuyPrice(), buyOrder.getCoinAmount(), orderInfo.getOrderId());
             log.info("Order cancel and created successfully: {}", response);
             return this.botOrderService.createBuyOrder(buyOrder);
         } catch (Exception e) {

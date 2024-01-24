@@ -3,7 +3,7 @@ package com.ozgen.telegrambinancebot.manager.binance;
 import com.ozgen.telegrambinancebot.configuration.properties.BotConfiguration;
 import com.ozgen.telegrambinancebot.model.ProcessStatus;
 import com.ozgen.telegrambinancebot.model.TradeStatus;
-import com.ozgen.telegrambinancebot.model.binance.SnapshotData;
+import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.bot.SellOrder;
 import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class BinanceSellOrderManager {
@@ -35,8 +37,8 @@ public class BinanceSellOrderManager {
 
     public void processNewSellOrderEvent(NewSellOrderEvent event) {
         BuyOrder buyOrder = event.getBuyOrder();
-        SnapshotData accountSnapshot = this.getAccountSnapshot();
-        if (accountSnapshot == null) {
+        List<AssetBalance> assets = this.getUserAssets();
+        if (assets == null || assets.isEmpty()) {
             log.error("Failed to get account snapshot for BuyOrder ID {}", buyOrder.getId());
             //todo check this case is handled or not?
             return;
@@ -49,7 +51,7 @@ public class BinanceSellOrderManager {
             return;
         }
 
-        SellOrder sellOrder = this.createSellOrder(buyOrder, accountSnapshot, coinSymbol);
+        SellOrder sellOrder = this.createSellOrder(buyOrder, assets, coinSymbol);
         if (sellOrder != null) {
             log.info("Sell order created successfully for BuyOrder ID {}", buyOrder.getId());
             // Additional logic if required
@@ -59,19 +61,19 @@ public class BinanceSellOrderManager {
         }
     }
 
-    private SnapshotData getAccountSnapshot() {
+    private List<AssetBalance> getUserAssets() {
         try {
-            return binanceApiManager.getAccountSnapshot();
+            return binanceApiManager.getUserAsset();
         } catch (Exception e) {
-            log.error("Error fetching account snapshot: {}", e.getMessage(), e);
+            log.error("Error fetching user assets: {}", e.getMessage(), e);
             this.processException(e);
             return null;
         }
     }
 
 
-    private SellOrder createSellOrder(BuyOrder buyOrder, SnapshotData accountSnapshot, String coinSymbol) {
-        Double coinAmount = accountSnapshot.getCoinValue(coinSymbol);
+    private SellOrder createSellOrder(BuyOrder buyOrder, List<AssetBalance> assets, String coinSymbol) {
+        Double coinAmount = GenericParser.getAssetFromSymbol(assets, coinSymbol);
         TradingSignal tradingSignal = buyOrder.getTradingSignal();
         double expectedTotal = buyOrder.getCoinAmount();
 

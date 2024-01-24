@@ -7,16 +7,15 @@ import com.ozgen.telegrambinancebot.service.TradingSignalService;
 import com.ozgen.telegrambinancebot.utils.parser.SignalParser;
 import com.ozgen.telegrambinancebot.utils.validators.TradingSignalValidator;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class TelegramMessageManager {
 
-    private static final Logger log = LoggerFactory.getLogger(TelegramMessageManager.class);
     static final String SUCCESS_MESSAGE = "The post with %s has been received successfully";
     static final String FAILED_MESSAGE = "The post is not parsed.";
 

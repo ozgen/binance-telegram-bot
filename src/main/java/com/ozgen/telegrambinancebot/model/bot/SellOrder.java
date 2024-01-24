@@ -30,7 +30,7 @@ public class SellOrder {
     private double stopLoss;
     private double sellPrice;
     private int times;
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.MERGE)
     private TradingSignal tradingSignal;
 
     private Date createdAt;
