@@ -1,15 +1,12 @@
-package com.ozgen.telegrambinancebot.model.bot;
+package com.ozgen.telegrambinancebot.model.binance;
 
-import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import lombok.Data;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import java.util.Date;
@@ -17,21 +14,20 @@ import java.util.Date;
 @Entity
 @Data
 @ToString
-public class BuyOrder {
+public class AssetBalance {
 
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
+    private String asset;
+    private String free;
+    private String locked;
+    private String freeze;
+    private String withdrawing;
+    private String ipoable;
+    private String btcValuation;
 
-    private String symbol;
-
-    private double coinAmount;
-    private double stopLoss;
-    private double buyPrice;
-    private int times;
-    @OneToOne(cascade = CascadeType.MERGE)
-    private TradingSignal tradingSignal;
 
     private Date createdAt;
     private Date updatedAt;
@@ -47,4 +43,5 @@ public class BuyOrder {
     protected void onUpdate() {
         updatedAt = new Date();
     }
+
 }

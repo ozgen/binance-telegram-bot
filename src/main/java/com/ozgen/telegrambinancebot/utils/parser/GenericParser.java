@@ -1,7 +1,10 @@
 package com.ozgen.telegrambinancebot.utils.parser;
 
+import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.Optional;
 
 public class GenericParser {
@@ -32,6 +35,18 @@ public class GenericParser {
 
         // Convert back to double
         return bd.doubleValue();
+    }
+
+    public static double getAssetFromSymbol(List<AssetBalance> assets, String symbol) {
+        Optional<AssetBalance> targetBalance = assets.stream()
+                .filter(assetBalance -> symbol.equals(assetBalance.getAsset()))
+                .findFirst();
+        if (targetBalance.isPresent()) {
+            String freeValue = targetBalance.get().getFree();
+            return GenericParser.getDouble(freeValue).get();
+        } else {
+            return 0.0;
+        }
     }
 }
 

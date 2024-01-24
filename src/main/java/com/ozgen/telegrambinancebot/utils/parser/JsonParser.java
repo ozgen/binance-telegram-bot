@@ -2,6 +2,7 @@ package com.ozgen.telegrambinancebot.utils.parser;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.model.binance.CancelAndNewOrderResponse;
 import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
 import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
@@ -35,6 +36,11 @@ public class JsonParser {
 
     public static List<OrderInfo> parseOrderInfoJson(String jsonString) throws Exception {
         return mapper.readValue(jsonString, new TypeReference<List<OrderInfo>>() {
+        });
+    }
+
+    public static List<AssetBalance> parseAssetBalanceJson(String jsonString) throws Exception {
+        return mapper.readValue(jsonString, new TypeReference<List<AssetBalance>>() {
         });
     }
 

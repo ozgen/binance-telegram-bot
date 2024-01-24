@@ -3,8 +3,8 @@ package com.ozgen.telegrambinancebot.manager.binance;
 import com.ozgen.telegrambinancebot.configuration.properties.BotConfiguration;
 import com.ozgen.telegrambinancebot.model.ProcessStatus;
 import com.ozgen.telegrambinancebot.model.TradeStatus;
+import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
-import com.ozgen.telegrambinancebot.model.binance.SnapshotData;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
@@ -17,16 +17,16 @@ import com.ozgen.telegrambinancebot.utils.PriceCalculator;
 import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import com.ozgen.telegrambinancebot.utils.validators.TradingSignalValidator;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class BinanceBuyOrderManager {
-
-    private static final Logger log = LoggerFactory.getLogger(BinanceBuyOrderManager.class);
 
     private final BinanceApiManager binanceApiManager;
     private final ApplicationEventPublisher publisher;
@@ -41,9 +41,9 @@ public class BinanceBuyOrderManager {
         TickerData tickerData = event.getTickerData();
 
         try {
-            SnapshotData accountSnapshot = this.binanceApiManager.getAccountSnapshot();
+            List<AssetBalance> assets = this.binanceApiManager.getUserAsset();
             Double btcToUsdRate = this.getBtcToUsdConversionRate();
-            this.processOrder(tradingSignal, tickerData, accountSnapshot, btcToUsdRate);
+            this.processOrder(tradingSignal, tickerData, assets, btcToUsdRate);
         } catch (Exception e) {
             log.error("Error processing new buy order event for trading signal {}: {}", tradingSignal.getId(), e.getMessage(), e);
             this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.ERROR_BUY);
@@ -51,8 +51,8 @@ public class BinanceBuyOrderManager {
         }
     }
 
-    private void processOrder(TradingSignal tradingSignal, TickerData tickerData, SnapshotData accountSnapshot, Double btcToUsdRate) {
-        if (!this.hasAccountEnoughBtc(accountSnapshot, btcToUsdRate)) {
+    private void processOrder(TradingSignal tradingSignal, TickerData tickerData, List<AssetBalance> assets, Double btcToUsdRate) {
+        if (!this.hasAccountEnoughBtc(assets, btcToUsdRate)) {
             log.warn("Account does not have enough {} (less than {}$)", this.botConfiguration.getCurrency(), this.botConfiguration.getAmount());
             this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.INSUFFICIENT);
             return;
@@ -87,8 +87,8 @@ public class BinanceBuyOrderManager {
         return coinAmount;
     }
 
-    private boolean hasAccountEnoughBtc(SnapshotData accountSnapshot, Double btcToUsdRate) {
-        Double btcAmount = accountSnapshot.getCoinValue(this.botConfiguration.getCurrency());
+    private boolean hasAccountEnoughBtc(List<AssetBalance> assets, Double btcToUsdRate) {
+        Double btcAmount = GenericParser.getAssetFromSymbol(assets, this.botConfiguration.getCurrency());
         Double totalAccountValueInUsd = btcAmount * btcToUsdRate;
         return totalAccountValueInUsd >= this.botConfiguration.getAmount();
     }

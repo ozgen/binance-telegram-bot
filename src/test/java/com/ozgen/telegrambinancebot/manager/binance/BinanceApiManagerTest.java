@@ -2,13 +2,13 @@ package com.ozgen.telegrambinancebot.manager.binance;
 
 
 import com.ozgen.telegrambinancebot.adapters.binance.BinanceAPI;
+import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.model.binance.CancelAndNewOrderResponse;
 import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
 import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
 import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
-import com.ozgen.telegrambinancebot.model.binance.SnapshotData;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
-import com.ozgen.telegrambinancebot.service.AccountSnapshotService;
+import com.ozgen.telegrambinancebot.service.AssetBalanceService;
 import com.ozgen.telegrambinancebot.service.BinanceOrderService;
 import com.ozgen.telegrambinancebot.service.TickerDataService;
 import com.ozgen.telegrambinancebot.utils.TestData;
@@ -41,7 +41,7 @@ public class BinanceApiManagerTest {
     private  BinanceOrderService binanceOrderService;
 
     @Mock
-    private  AccountSnapshotService accountSnapshotService;
+    private AssetBalanceService assetBalanceService;
 
     @InjectMocks
     private BinanceApiManager binanceApiManager;
@@ -87,40 +87,40 @@ public class BinanceApiManagerTest {
                 .createTickerData(any(TickerData.class));
     }
 
-    @Test
-    void testGetAccountSnapshot_Success() throws Exception {
-        // Arrange
-        String snapshotDataJson = TestData.SNAPSHOT_DATA;
-        when(this.binanceAPI.getAccountSnapshot())
-                .thenReturn(snapshotDataJson);
-        when(this.accountSnapshotService.createSnapshotData(any(SnapshotData.class)))
-                .thenAnswer((Answer<SnapshotData>) invocation -> (SnapshotData) invocation.getArguments()[0]);
+//    @Test
+//    void testGetAccountSnapshot_Success() throws Exception {
+//        // Arrange
+//        String snapshotDataJson = TestData.SNAPSHOT_DATA;
+//        when(this.binanceAPI.getAccountSnapshot())
+//                .thenReturn(snapshotDataJson);
+////        when(this.accountSnapshotService.createSnapshotData(any(SnapshotData.class)))
+////                .thenAnswer((Answer<SnapshotData>) invocation -> (SnapshotData) invocation.getArguments()[0]);
+//
+//        // Act
+//        SnapshotData result = this.binanceApiManager.getAccountSnapshot();
+//
+//        // Assert
+//        verify(this.binanceAPI)
+//                .getAccountSnapshot();
+////        verify(this.accountSnapshotService)
+////                .createSnapshotData(any(SnapshotData.class));
+//        assertNotNull(result);
+//    }
 
-        // Act
-        SnapshotData result = this.binanceApiManager.getAccountSnapshot();
-
-        // Assert
-        verify(this.binanceAPI)
-                .getAccountSnapshot();
-//        verify(this.accountSnapshotService)
-//                .createSnapshotData(any(SnapshotData.class));
-        assertNotNull(result);
-    }
-
-    @Test
-    void testGetAccountSnapshot_ApiException() throws Exception {
-        // Arrange
-        String snapshotDataJson = TestData.SNAPSHOT_DATA;
-        when(this.binanceAPI.getAccountSnapshot())
-                .thenThrow(new RuntimeException("API call failed"));
-
-        // Act & Assert
-        assertThrows(Exception.class, () -> this.binanceApiManager.getAccountSnapshot());
-        verify(this.binanceAPI)
-                .getAccountSnapshot();
-        verify(this.accountSnapshotService, never())
-                .createSnapshotData(any(SnapshotData.class));
-    }
+//    @Test
+//    void testGetAccountSnapshot_ApiException() throws Exception {
+//        // Arrange
+//        String snapshotDataJson = TestData.SNAPSHOT_DATA;
+//        when(this.binanceAPI.getAccountSnapshot())
+//                .thenThrow(new RuntimeException("API call failed"));
+//
+//        // Act & Assert
+//        assertThrows(Exception.class, () -> this.binanceApiManager.getAccountSnapshot());
+//        verify(this.binanceAPI)
+//                .getAccountSnapshot();
+////        verify(this.accountSnapshotService, never())
+////                .createSnapshotData(any(SnapshotData.class));
+//    }
 
     @Test
     void testGetOpenOrders_Success() throws Exception {
@@ -242,20 +242,19 @@ public class BinanceApiManagerTest {
         String symbol = "BTCUSDT";
         Double price = 10000.0;
         Double quantity = 1.0;
-        Double stopPrice = 9500.0;
         Long cancelOrderId = 1l;
         String orderResponseJson = TestData.CANCEL_AND_NEW_ORDER_RESPONSE;
-        when(this.binanceAPI.cancelAndNewOrderWithStopLoss(symbol, price, quantity, stopPrice, cancelOrderId))
+        when(this.binanceAPI.cancelAndNewOrder(symbol, price, quantity, cancelOrderId))
                 .thenReturn(orderResponseJson);
         when(this.binanceOrderService.createCancelAndNewOrderResponse(any(CancelAndNewOrderResponse.class)))
                 .thenAnswer((Answer<CancelAndNewOrderResponse>) invocation -> (CancelAndNewOrderResponse) invocation.getArguments()[0]);
 
         // Act
-        CancelAndNewOrderResponse result = this.binanceApiManager.cancelAndNewOrderWithStopLoss(symbol, price, quantity, stopPrice, cancelOrderId);
+        CancelAndNewOrderResponse result = this.binanceApiManager.cancelAndNewOrderWithStopLoss(symbol, price, quantity, cancelOrderId);
 
         // Assert
         verify(this.binanceAPI)
-                .cancelAndNewOrderWithStopLoss(symbol, price, quantity, stopPrice, cancelOrderId);
+                .cancelAndNewOrder(symbol, price, quantity, cancelOrderId);
         verify(this.binanceOrderService)
                 .createCancelAndNewOrderResponse(any(CancelAndNewOrderResponse.class));
         assertNotNull(result);
@@ -267,15 +266,14 @@ public class BinanceApiManagerTest {
         String symbol = "BTCUSDT";
         Double price = 10000.0;
         Double quantity = 1.0;
-        Double stopPrice = 9500.0;
         Long cancelOrderId = 1l;
-        when(this.binanceAPI.cancelAndNewOrderWithStopLoss(symbol, price, quantity, stopPrice, cancelOrderId))
+        when(this.binanceAPI.cancelAndNewOrder(symbol, price, quantity, cancelOrderId))
                 .thenThrow(new RuntimeException("API call failed"));
 
         // Act & Assert
-        assertThrows(Exception.class, () -> this.binanceApiManager.cancelAndNewOrderWithStopLoss(symbol, price, quantity, stopPrice, cancelOrderId));
+        assertThrows(Exception.class, () -> this.binanceApiManager.cancelAndNewOrderWithStopLoss(symbol, price, quantity, cancelOrderId));
         verify(this.binanceAPI)
-                .cancelAndNewOrderWithStopLoss(symbol, price, quantity, stopPrice, cancelOrderId);
+                .cancelAndNewOrder(symbol, price, quantity, cancelOrderId);
         verify(this.binanceOrderService, never())
                 .createCancelAndNewOrderResponse(any(CancelAndNewOrderResponse.class));
     }
@@ -318,5 +316,40 @@ public class BinanceApiManagerTest {
                 .newOrder(symbol, price, quantity);
         verify(this.binanceOrderService, never())
                 .createOrderResponse(any(OrderResponse.class));
+    }
+
+    @Test
+    void testGetUserAsset_Success() throws Exception {
+        // Arrange
+
+        String assetsData = TestData.ASSETS_DATA;
+        when(this.binanceAPI.getUserAsset())
+                .thenReturn(assetsData);
+        when(this.assetBalanceService.createAssetBalances(anyList()))
+                .thenAnswer((Answer<List>) invocation -> (List) invocation.getArguments()[0]);
+
+        // Act
+        List<AssetBalance> assets = this.binanceApiManager.getUserAsset();
+
+        // Assert
+        verify(this.binanceAPI)
+                .getUserAsset();
+        verify(this.assetBalanceService)
+                .createAssetBalances(anyList());
+        assertNotNull(assets);
+    }
+
+    @Test
+    void testGetUserAsset_ApiException() {
+        // Arrange
+        when(this.binanceAPI.getUserAsset())
+                .thenThrow(new RuntimeException("API call failed"));
+
+        // Act & Assert
+        assertThrows(Exception.class, () -> this.binanceApiManager.getUserAsset());
+        verify(this.binanceAPI)
+                .getUserAsset();
+        verify(this.assetBalanceService, never())
+                .createAssetBalances(anyList());
     }
 }

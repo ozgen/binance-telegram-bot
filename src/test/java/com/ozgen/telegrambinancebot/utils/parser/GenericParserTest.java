@@ -1,8 +1,11 @@
 package com.ozgen.telegrambinancebot.utils.parser;
 
 
+import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
+import com.ozgen.telegrambinancebot.utils.TestData;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,5 +60,11 @@ public class GenericParserTest {
     @Test
     public void testGetFormattedDoubleWithNull() {
         assertEquals(0.0, GenericParser.getFormattedDouble(null), "Null should return 0.0.");
+    }
+
+    @Test
+    public void testGetAssetFromSymbol() throws Exception {
+        List<AssetBalance> assets = TestData.getAssets();
+        assertEquals(0.00004272, GenericParser.getAssetFromSymbol(assets, "BNB"));
     }
 }
