@@ -3,8 +3,7 @@ package com.ozgen.telegrambinancebot.adapters.telegram;
 
 import com.ozgen.telegrambinancebot.configuration.telegram.TelegramErrorConfig;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -17,9 +16,8 @@ import javax.annotation.PostConstruct;
 @Component
 @ConditionalOnProperty(name = "bot.telegram.error.enabled", havingValue = "true", matchIfMissing = true)
 @RequiredArgsConstructor
+@Slf4j
 public class TelegramErrorBot extends TelegramLongPollingBot {
-
-    private static final Logger log = LoggerFactory.getLogger(TelegramErrorBot.class);
 
     private final TelegramErrorConfig telegramConfig;
 

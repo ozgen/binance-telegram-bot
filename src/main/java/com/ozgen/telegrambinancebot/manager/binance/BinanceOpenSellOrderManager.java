@@ -11,8 +11,7 @@ import com.ozgen.telegrambinancebot.service.TradingSignalService;
 import com.ozgen.telegrambinancebot.utils.DateFactory;
 import com.ozgen.telegrambinancebot.utils.SyncUtil;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -21,9 +20,8 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class BinanceOpenSellOrderManager {
-
-    private static final Logger log = LoggerFactory.getLogger(BinanceOpenSellOrderManager.class);
 
     private final TradingSignalService tradingSignalService;
     private final BotOrderService botOrderService;
@@ -32,7 +30,7 @@ public class BinanceOpenSellOrderManager {
 
     public void processOpenSellOrders() {
         Date searchDate = getSearchDate();
-        List<TradingSignal> tradingSignals = this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(searchDate, List.of(ProcessStatus.SELL));
+        List<TradingSignal> tradingSignals = this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(searchDate, List.of(ProcessStatus.BUY));
         if (tradingSignals.isEmpty()){
             log.info("No trading signal has been detected.");
             return;

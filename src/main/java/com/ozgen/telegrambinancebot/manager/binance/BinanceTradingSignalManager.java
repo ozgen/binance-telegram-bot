@@ -7,16 +7,14 @@ import com.ozgen.telegrambinancebot.model.events.NewBuyOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.utils.validators.TradingSignalValidator;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class BinanceTradingSignalManager {
-
-    private static final Logger log = LoggerFactory.getLogger(BinanceTradingSignalManager.class);
 
     private final BinanceApiManager binanceApiManager;
     private final ApplicationEventPublisher publisher;
