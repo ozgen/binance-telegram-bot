@@ -71,12 +71,14 @@ public class DefaultBinanceService implements BinanceAPI {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
 
         parameters.put("symbol", symbol);
-        parameters.put("side", "BUY");
+        parameters.put("side", "SELL");
+        parameters.put("type", "STOP_LOSS_LIMIT");
+        parameters.put("timeInForce", "GTC");
         parameters.put("stopPrice", GenericParser.getFormattedDouble(stopPrice));
         parameters.put("quantity", GenericParser.getFormattedDouble(quantity));
         parameters.put("price", GenericParser.getFormattedDouble(price));
 
-        return this.binanceClient.createTrade().ocoOrder(parameters);
+        return this.binanceClient.createTrade().newOrder(parameters);
     }
 
     public String getTickerPrice24(String symbol) {

@@ -12,16 +12,15 @@ import com.ozgen.telegrambinancebot.service.BinanceOrderService;
 import com.ozgen.telegrambinancebot.service.TickerDataService;
 import com.ozgen.telegrambinancebot.utils.parser.JsonParser;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class BinanceApiManager {
-    private static final Logger log = LoggerFactory.getLogger(BinanceApiManager.class);
 
     private final BinanceAPI binanceAPI;
     private final TickerDataService tickerDataService;

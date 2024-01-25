@@ -3,17 +3,15 @@ package com.ozgen.telegrambinancebot.adapters.events;
 import com.ozgen.telegrambinancebot.manager.binance.BinanceSellOrderManager;
 import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class NewSellOrderEventListener implements ApplicationListener<NewSellOrderEvent> {
 
-
-    private static final Logger log = LoggerFactory.getLogger(NewSellOrderEventListener.class);
 
     private final BinanceSellOrderManager binanceSellOrderManager;
 
