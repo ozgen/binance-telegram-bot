@@ -66,14 +66,50 @@ Configure the application using environment variables or a `.env` file. Here are
 - `app.bot.schedule.openBuyOrder`: Schedule interval for open buy orders in ms
 - `app.bot.schedule.monthBefore`: Number of months before for date calculations
 
+#### New Configuration for Telegram Error Reporting
+- `bot.telegram.error.enabled`: Set to `true` to enable error reporting on Telegram.
+
 ### Running the Bot
 Start the bot with:
 ```bash
 java -jar target/binance-telegram-bot-0.0.1-SNAPSHOT.jar
 ```
 
+
 ## Usage
-The bot listens to specified Telegram channels for trading signals and acts on Binance accordingly.
+The bot monitors specified Telegram channels for trading signals and executes corresponding trades on Binance. Here's an example of a trading signal the bot can process:
+
+```
+Trading Signal Example:
+NKNBTC
+
+ENTRY: 0.00000260 - 0.00000290
+
+TP1: 0.00000315
+TP2: 0.00000360
+TP3: 0.00000432
+TP4: 0.00000486
+TP5: 0.00000550
+TP6: 0.00000666
+TP7: 0.00000741
+
+STOP: Close weekly below 0.00000240
+```
+
+## Test Coverage
+
+### Running Tests
+Execute the test suite using Maven:
+```bash
+mvn test
+```
+
+### Coverage Reporting
+After running the tests, generate a coverage report using JaCoCo (Java Code Coverage Library):
+```bash
+mvn jacoco:report
+```
+The coverage report can be found in `target/site/jacoco/index.html`. Open it in a web browser to view detailed coverage statistics.
 
 ## License
 This project is licensed under the MIT License - see [LICENSE.md](LICENSE.md) for details.
