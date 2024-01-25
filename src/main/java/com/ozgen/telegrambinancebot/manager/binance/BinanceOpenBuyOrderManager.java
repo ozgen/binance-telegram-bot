@@ -18,8 +18,7 @@ import com.ozgen.telegrambinancebot.utils.SyncUtil;
 import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import com.ozgen.telegrambinancebot.utils.validators.TradingSignalValidator;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -30,9 +29,9 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class BinanceOpenBuyOrderManager {
 
-    private static final Logger log = LoggerFactory.getLogger(BinanceOpenBuyOrderManager.class);
 
     private final BinanceApiManager binanceApiManager;
     private final TradingSignalService tradingSignalService;

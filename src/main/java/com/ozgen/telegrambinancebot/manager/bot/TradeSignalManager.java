@@ -8,8 +8,7 @@ import com.ozgen.telegrambinancebot.service.TradingSignalService;
 import com.ozgen.telegrambinancebot.utils.DateFactory;
 import com.ozgen.telegrambinancebot.utils.SyncUtil;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -18,8 +17,8 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class TradeSignalManager {
-    private static final Logger log = LoggerFactory.getLogger(TradeSignalManager.class);
 
     private final ApplicationEventPublisher publisher;
     private final TradingSignalService tradingSignalService;

@@ -15,8 +15,7 @@ import com.ozgen.telegrambinancebot.utils.PriceCalculator;
 import com.ozgen.telegrambinancebot.utils.SymbolGenerator;
 import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -24,9 +23,8 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class BinanceSellOrderManager {
-
-    private static final Logger log = LoggerFactory.getLogger(BinanceSellOrderManager.class);
 
     private final BinanceApiManager binanceApiManager;
     private final BotConfiguration botConfiguration;
@@ -89,7 +87,7 @@ public class BinanceSellOrderManager {
     }
 
     private boolean isCoinAmountWithinExpectedRange(Double coinAmount, double expectedTotal) {
-        if (coinAmount.equals(expectedTotal)) {
+        if (coinAmount >= expectedTotal) {
             log.info("All buy orders completed successfully.");
             return true;
         } else if (coinAmount > 0 && coinAmount < expectedTotal) {
@@ -103,7 +101,7 @@ public class BinanceSellOrderManager {
     private SellOrder initializeSellOrder(BuyOrder buyOrder, Double coinAmount, TradingSignal tradingSignal) {
         double sellPrice = PriceCalculator.calculateCoinPriceInc(buyOrder.getBuyPrice(), this.botConfiguration.getProfitPercentage());
         double stopLoss = GenericParser.getDouble(tradingSignal.getStopLoss()).get();
-        String sellOrderSymbol = SymbolGenerator.generateSellOrderSymbol(buyOrder.getSymbol(), this.botConfiguration.getCurrency());
+        String sellOrderSymbol = buyOrder.getSymbol();
 
         SellOrder sellOrder = this.botOrderService.getSellOrder(tradingSignal).orElse(null);
         if (sellOrder == null) {

@@ -1,7 +1,6 @@
 package com.ozgen.telegrambinancebot.manager.bot;
 
 import com.ozgen.telegrambinancebot.manager.binance.BinanceApiManager;
-import com.ozgen.telegrambinancebot.manager.binance.BinanceTradingSignalManager;
 import com.ozgen.telegrambinancebot.model.TradeStatus;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
@@ -14,8 +13,7 @@ import com.ozgen.telegrambinancebot.service.FutureTradeService;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
 import com.ozgen.telegrambinancebot.utils.SyncUtil;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -26,8 +24,8 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class FutureTradeManager {
-    private static final Logger log = LoggerFactory.getLogger(BinanceTradingSignalManager.class);
     private final BinanceApiManager binanceApiManager;
     private final FutureTradeService futureTradeService;
     private final TradingSignalService tradingSignalService;

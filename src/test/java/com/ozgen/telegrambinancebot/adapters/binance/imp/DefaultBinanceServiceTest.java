@@ -174,17 +174,18 @@ public class DefaultBinanceServiceTest {
         Double stopPrice = 9500.0;
         String expectedResponse = "order_response";
 
-        when(binanceClient.createTrade().ocoOrder(anyMap()))
+        when(binanceClient.createTrade().newOrder(anyMap()))
                 .thenReturn(expectedResponse);
 
         String actualResponse = service.newOrderWithStopLoss(symbol, price, quantity, stopPrice);
 
         assertEquals(expectedResponse, actualResponse);
         verify(binanceClient.createTrade())
-                .ocoOrder(argThat(params ->
+                .newOrder(argThat(params ->
                         "BTCUSDT".equals(params.get("symbol")) &&
-                                "BUY".equals(params.get("side")) &&
-                                params.get("quantity").equals(GenericParser.getFormattedDouble(quantity)) &&
+                                "SELL".equals(params.get("side")) &&
+                                "STOP_LOSS_LIMIT".equals(params.get("type")) &&
+                                "GTC".equals(params.get("timeInForce")) &&                                params.get("quantity").equals(GenericParser.getFormattedDouble(quantity)) &&
                                 params.get("price").equals(GenericParser.getFormattedDouble(price)) &&
                                 params.get("stopPrice").equals(GenericParser.getFormattedDouble(stopPrice))
                 ));
