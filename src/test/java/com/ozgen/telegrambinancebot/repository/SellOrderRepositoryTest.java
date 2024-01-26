@@ -10,9 +10,11 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.TestPropertySource;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
@@ -43,6 +45,13 @@ public class SellOrderRepositoryTest {
         Optional<SellOrder> foundOrder = this.sellOrderRepository.findByTradingSignal(this.tradingSignal);
         assertTrue(foundOrder.isPresent());
         assertEquals(this.sellOrder, foundOrder.get());
+    }
+
+    @Test
+    public void testFindByTradingSignalIn() {
+        List<SellOrder> foundOrder = this.sellOrderRepository.findByTradingSignalIn(List.of(this.tradingSignal));
+        assertFalse(foundOrder.isEmpty());
+        assertEquals(1, foundOrder.size());
     }
 }
 
