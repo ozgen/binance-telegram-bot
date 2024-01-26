@@ -213,4 +213,32 @@ public class BotOrderServiceTest {
         verify(buyOrderRepository)
                 .findByTradingSignalIn(signals);
     }
+
+    @Test
+    public void testGetSellOrders_Success() {
+        List<TradingSignal> signals = List.of(new TradingSignal());
+        List<SellOrder> expectedOrders = List.of(new SellOrder());
+        when(this.sellOrderRepository.findByTradingSignalIn(signals))
+                .thenReturn(expectedOrders);
+
+        List<SellOrder> result = this.botOrderService.getSellOrders(signals);
+
+        assertNotNull(result);
+        assertEquals(expectedOrders, result);
+        verify(this.sellOrderRepository)
+                .findByTradingSignalIn(signals);
+    }
+
+    @Test
+    public void testGetSellOrders_Exception() {
+        List<TradingSignal> signals = List.of(new TradingSignal());
+        when(this.sellOrderRepository.findByTradingSignalIn(signals))
+                .thenThrow(new RuntimeException("Test exception"));
+
+        List<SellOrder> result = this.botOrderService.getSellOrders(signals);
+
+        assertTrue(result.isEmpty());
+        verify(this.sellOrderRepository)
+                .findByTradingSignalIn(signals);
+    }
 }
