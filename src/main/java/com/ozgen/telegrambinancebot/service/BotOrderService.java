@@ -84,4 +84,15 @@ public class BotOrderService {
             return List.of(); // Return an empty list in case of error
         }
     }
+
+    public List<SellOrder> getSellOrders(List<TradingSignal> tradingSignals) {
+        try {
+            List<SellOrder> sellOrders = sellOrderRepository.findByTradingSignalIn(tradingSignals);
+            log.info("Retrieved {} sell orders for trading signals", sellOrders.size());
+            return sellOrders;
+        } catch (Exception e) {
+            log.error("Error retrieving buy orders: {}", e.getMessage(), e);
+            return List.of(); // Return an empty list in case of error
+        }
+    }
 }

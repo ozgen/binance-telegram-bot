@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -50,9 +51,11 @@ public class BinanceApiManager {
     List<OrderInfo> getOpenOrders(String symbol) throws Exception {
         String openOrdersJson = this.binanceAPI.getOpenOrders(symbol);
         List<OrderInfo> orderInfoList = JsonParser.parseOrderInfoJson(openOrdersJson);
-
+        List<OrderInfo> infoList = orderInfoList.stream()
+                .filter(orderInfo -> "BUY".equals(orderInfo.getSide()))
+                .collect(Collectors.toList());
         log.info("'{}' of symbol open orders data are parsed, successfully.", symbol);
-        return this.binanceOrderService.createOrderInfos(orderInfoList);
+        return this.binanceOrderService.createOrderInfos(infoList);
     }
 
     List<OpenOrder> cancelOpenOrders(String symbol) throws Exception {
