@@ -8,12 +8,14 @@ import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
+import com.ozgen.telegrambinancebot.model.events.InfoEvent;
 import com.ozgen.telegrambinancebot.model.events.NewBuyOrderEvent;
 import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.BotOrderService;
 import com.ozgen.telegrambinancebot.service.FutureTradeService;
 import com.ozgen.telegrambinancebot.utils.PriceCalculator;
+import com.ozgen.telegrambinancebot.utils.SyncUtil;
 import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import com.ozgen.telegrambinancebot.utils.validators.TradingSignalValidator;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +62,8 @@ public class BinanceBuyOrderManager {
 
         BuyOrder buyOrder = this.createBuyOrder(tradingSignal, tickerData, btcToUsdRate);
         if (buyOrder != null) {
+            this.sendBuyOrderInfoMessage(buyOrder);
+            SyncUtil.pauseBetweenOperations();
             this.publishNewSellOrderEvent(buyOrder);
         }
     }
@@ -165,5 +169,10 @@ public class BinanceBuyOrderManager {
     private void processException(Exception e) {
         ErrorEvent errorEvent = new ErrorEvent(this, e);
         this.publisher.publishEvent(errorEvent);
+    }
+
+    private void sendBuyOrderInfoMessage(BuyOrder buyOrder) {
+        InfoEvent infoEvent = new InfoEvent(this, buyOrder.toString());
+        this.publisher.publishEvent(infoEvent);
     }
 }
