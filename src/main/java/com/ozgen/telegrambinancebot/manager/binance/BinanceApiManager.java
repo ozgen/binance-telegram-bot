@@ -55,6 +55,10 @@ public class BinanceApiManager {
                 .filter(orderInfo -> "BUY".equals(orderInfo.getSide()))
                 .collect(Collectors.toList());
         log.info("'{}' of symbol open orders data are parsed, successfully.", symbol);
+        if (infoList.isEmpty()) {
+            log.info("'{}' of symbol has 0 open orders", symbol);
+            return infoList;
+        }
         return this.binanceOrderService.createOrderInfos(infoList);
     }
 

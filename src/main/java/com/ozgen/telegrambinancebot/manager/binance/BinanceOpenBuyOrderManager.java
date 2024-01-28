@@ -60,6 +60,9 @@ public class BinanceOpenBuyOrderManager {
         String symbol = tradingSignal.getSymbol();
         try {
             List<OrderInfo> openOrders = this.binanceApiManager.getOpenOrders(symbol);
+            if(openOrders.isEmpty()) {
+                return;
+            }
             TickerData tickerPrice24 = this.binanceApiManager.getTickerPrice24(symbol);
 
             if (!TradingSignalValidator.isAvailableToBuy(tickerPrice24, tradingSignal)) {

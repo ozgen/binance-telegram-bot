@@ -29,6 +29,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -152,7 +153,7 @@ public class BinanceBuyOrderManagerTest {
         verify(this.binanceApiManager)
                 .newOrder(SYMBOL, expectedBuyPrice, expectedCoinAmount);
         ArgumentCaptor<NewSellOrderEvent> eventCaptor = ArgumentCaptor.forClass(NewSellOrderEvent.class);
-        verify(this.publisher)
+        verify(this.publisher, times(2))
                 .publishEvent(eventCaptor.capture());
         NewSellOrderEvent newSellOrderEvent = eventCaptor.getValue();
         BuyOrder eventBuyOrder = newSellOrderEvent.getBuyOrder();
