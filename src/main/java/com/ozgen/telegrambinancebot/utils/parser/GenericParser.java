@@ -31,7 +31,7 @@ public class GenericParser {
         decimalPlaces = Math.min(decimalPlaces, 8); // Set a maximum limit for decimal places
 
         // Use BigDecimal for precise rounding
-        bd = bd.setScale(decimalPlaces, RoundingMode.HALF_UP);
+        bd = bd.setScale(decimalPlaces, RoundingMode.DOWN);
 
         // Convert back to double
         return bd.doubleValue();

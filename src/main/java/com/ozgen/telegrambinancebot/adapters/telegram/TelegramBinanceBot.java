@@ -24,6 +24,8 @@ public class TelegramBinanceBot extends TelegramLongPollingBot {
 
     private final TelegramConfig telegramConfig;
 
+    private Long channelId = null;
+
     @Override
     public String getBotToken() {
         return this.telegramConfig.getTelegramApiToken();
@@ -39,14 +41,14 @@ public class TelegramBinanceBot extends TelegramLongPollingBot {
         if (update.hasChannelPost()) {
             // Handle channel post
             Message channelPost = update.getChannelPost();
-            Long chatId = channelPost.getChatId();
+            this.channelId = channelPost.getChatId();
             String text = channelPost.getText();
 
-            log.info("Received channel post \"{}\" from {}", text, chatId);
+            log.info("Received channel post \"{}\" from {}", text, this.channelId);
 
             String message = this.telegramMessageManager.parseTelegramMessage(text);
             SendMessage response = new SendMessage();
-            response.setChatId(chatId.toString());
+            response.setChatId(this.channelId.toString());
             response.setText(message);
             try {
                 execute(response);
@@ -59,5 +61,9 @@ public class TelegramBinanceBot extends TelegramLongPollingBot {
     @PostConstruct
     public void start() {
         log.info("username: {}, token: {}", telegramConfig.getBotUserName(), telegramConfig.getTelegramApiToken());
+    }
+
+    public Long getChannelId() {
+        return channelId;
     }
 }

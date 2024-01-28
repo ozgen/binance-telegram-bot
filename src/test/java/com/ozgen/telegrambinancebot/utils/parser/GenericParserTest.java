@@ -39,7 +39,7 @@ public class GenericParserTest {
     @Test
     public void testGetFormattedDoubleWithNormalValues() {
         assertEquals(123.0, GenericParser.getFormattedDouble(123.4567), "Normal value should be formatted correctly.");
-        assertEquals(0.1235, GenericParser.getFormattedDouble(0.123456789), "Value should be rounded to 6 decimal places.");
+        assertEquals(0.1234, GenericParser.getFormattedDouble(0.123456789), "Value should be rounded to 6 decimal places.");
     }
 
     @Test

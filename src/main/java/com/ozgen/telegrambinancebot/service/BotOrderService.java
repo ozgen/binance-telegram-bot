@@ -1,5 +1,6 @@
 package com.ozgen.telegrambinancebot.service;
 
+import com.ozgen.telegrambinancebot.model.ProcessStatus;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.repository.BuyOrderRepository;
 import com.ozgen.telegrambinancebot.repository.SellOrderRepository;
@@ -42,7 +43,9 @@ public class BotOrderService {
     @Transactional
     public SellOrder createSellOrder(SellOrder sellOrder) {
         try {
-            this.tradingSignalRepository.save(sellOrder.getTradingSignal());
+            TradingSignal tradingSignal = sellOrder.getTradingSignal();
+            tradingSignal.setIsProcessed(ProcessStatus.SELL);
+            this.tradingSignalRepository.save(tradingSignal);
             SellOrder savedOrder = sellOrderRepository.save(sellOrder);
             log.info("Sell order created: {}", savedOrder);
             return savedOrder;

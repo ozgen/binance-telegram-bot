@@ -7,6 +7,7 @@ import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.bot.SellOrder;
 import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
+import com.ozgen.telegrambinancebot.model.events.InfoEvent;
 import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.BotOrderService;
@@ -51,6 +52,7 @@ public class BinanceSellOrderManager {
 
         SellOrder sellOrder = this.createSellOrder(buyOrder, assets, coinSymbol);
         if (sellOrder != null) {
+            this.sendSellOrderInfoMessage(sellOrder);
             log.info("Sell order created successfully for BuyOrder ID {}", buyOrder.getId());
             // Additional logic if required
         } else {
@@ -136,5 +138,10 @@ public class BinanceSellOrderManager {
     private void processException(Exception e) {
         ErrorEvent errorEvent = new ErrorEvent(this, e);
         this.publisher.publishEvent(errorEvent);
+    }
+
+    private void sendSellOrderInfoMessage(SellOrder sellOrder) {
+        InfoEvent infoEvent = new InfoEvent(this, sellOrder.toString());
+        this.publisher.publishEvent(infoEvent);
     }
 }

@@ -21,6 +21,7 @@ import org.mockito.stubbing.Answer;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,7 +39,7 @@ public class BinanceApiManagerTest {
     private TickerDataService tickerDataService;
 
     @Mock
-    private  BinanceOrderService binanceOrderService;
+    private BinanceOrderService binanceOrderService;
 
     @Mock
     private AssetBalanceService assetBalanceService;
@@ -141,6 +142,27 @@ public class BinanceApiManagerTest {
         verify(this.binanceOrderService)
                 .createOrderInfos(anyList());
         assertNotNull(result);
+    }
+
+    @Test
+    void testGetOpenOrders_withSellOpenOrders_SuccessReturnEmptyList() throws Exception {
+        // Arrange
+        String symbol = "BNBBTC";
+        String openOrderJson = TestData.ORDER_INFO_ARRAY_SELL;
+        when(this.binanceAPI.getOpenOrders(symbol))
+                .thenReturn(openOrderJson);
+        when(this.binanceOrderService.createOrderInfos(anyList()))
+                .thenAnswer((Answer<List>) invocation -> (List) invocation.getArguments()[0]);
+
+        // Act
+        List<OrderInfo> result = this.binanceApiManager.getOpenOrders(symbol);
+
+        // Assert
+        verify(this.binanceAPI)
+                .getOpenOrders(symbol);
+        verify(this.binanceOrderService, never())
+                .createOrderInfos(anyList());
+        assertEquals(0, result.size());
     }
 
     @Test
