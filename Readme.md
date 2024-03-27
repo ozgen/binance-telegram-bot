@@ -34,7 +34,6 @@ Configure the application using environment variables or a `.env` file. Here are
 - `spring.datasource.password`: Azure database password
 
 #### Azure Keyvault Configuration
-- `azure.keyvault.enabled`: Enable Azure keyvault (`true` or `false`)
 - `azure.keyvault.uri`: Azure keyvault URI
 - `azure.keyvault.client-id`: Azure keyvault client ID
 - `azure.keyvault.client-key`: Azure keyvault client key
