@@ -39,17 +39,18 @@ jobs:
       - name: Build with Maven
         run: mvn package
 
-      - name: Build Docker Image
-        run: docker build -t binance-telegram-bot:$CUSTOM_VERSION .
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-      - name: Build and Push Docker Image
+      - name: Build Docker Image
         run: |
           IMAGE_ID=docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/binance-telegram-bot
+          echo "IMAGE_ID=$IMAGE_ID" >> $GITHUB_ENV
           docker build -t $IMAGE_ID:${{ env.CUSTOM_VERSION }} .
-          docker push $IMAGE_ID:${{ env.CUSTOM_VERSION }}
+
+      - name: Push Docker Image
+        run: |
+          docker push ${{ env.IMAGE_ID }}:${{ env.CUSTOM_VERSION }}
