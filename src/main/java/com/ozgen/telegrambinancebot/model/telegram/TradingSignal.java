@@ -1,11 +1,14 @@
 package com.ozgen.telegrambinancebot.model.telegram;
 
+import com.ozgen.telegrambinancebot.model.TradingStrategy;
 import lombok.Data;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
@@ -28,6 +31,9 @@ public class TradingSignal {
     @ElementCollection
     private List<String> takeProfits;
     private String stopLoss;
+    @Enumerated(EnumType.STRING)
+    private TradingStrategy strategy;
+    private String investAmount;
 
     private Date createdAt;
 
@@ -36,6 +42,7 @@ public class TradingSignal {
     private int isProcessed;
 
     public TradingSignal() {
+        this.strategy = TradingStrategy.DEFAULT;
     }
 
     @PrePersist

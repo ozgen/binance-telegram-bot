@@ -1,5 +1,6 @@
 package com.ozgen.telegrambinancebot.service;
 
+import com.ozgen.telegrambinancebot.model.TradingStrategy;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.repository.TradingSignalRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,11 +31,19 @@ public class TradingSignalService {
         }
     }
 
-    public List<TradingSignal> getTradingSignalsByIdList(List<String> uuidList){
-        return this.repository.findAllByIdIn(uuidList);
+    public List<TradingSignal> getTradingSignalsByIdList(List<String> uuidList) {
+        return this.repository.findAllByIdInAndStrategyIn(uuidList, List.of(TradingStrategy.DEFAULT));
     }
 
-    public List<TradingSignal> getTradingSignalsAfterDateAndIsProcessIn(Date date, List<Integer> processStatuses){
-        return this.repository.findAllByCreatedAtAfterAndIsProcessedIn(date, processStatuses);
+    public List<TradingSignal> getDefaultTradingSignalsAfterDateAndIsProcessIn(Date date, List<Integer> processStatuses) {
+        return this.repository.findAllByCreatedAtAfterAndIsProcessedInAndStrategyIn(date, processStatuses, List.of(TradingStrategy.DEFAULT));
+    }
+
+    public List<TradingSignal> getSellLaterTradingSignalsAfterDateAndIsProcessIn(Date date, List<Integer> processStatuses) {
+        return this.repository.findAllByCreatedAtAfterAndIsProcessedInAndStrategyIn(date, processStatuses, List.of(TradingStrategy.SELL_LATER));
+    }
+
+    public List<TradingSignal> getAllTradingSignalsAfterDateAndIsProcessIn(Date date, List<Integer> processStatuses) {
+        return this.repository.findAllByCreatedAtAfterAndIsProcessedInAndStrategyIn(date, processStatuses, List.of(TradingStrategy.DEFAULT, TradingStrategy.SELL_LATER));
     }
 }

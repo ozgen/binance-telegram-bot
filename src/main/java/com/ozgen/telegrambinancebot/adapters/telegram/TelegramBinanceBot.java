@@ -20,7 +20,7 @@ import javax.annotation.PostConstruct;
 @Slf4j
 public class TelegramBinanceBot extends TelegramLongPollingBot {
 
-    private final TelegramMessageManager  telegramMessageManager;
+    private final TelegramMessageManager telegramMessageManager;
 
     private final TelegramConfig telegramConfig;
 

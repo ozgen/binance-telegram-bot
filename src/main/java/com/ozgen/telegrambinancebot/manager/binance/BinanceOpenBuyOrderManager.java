@@ -42,7 +42,7 @@ public class BinanceOpenBuyOrderManager {
 
     public void processOpenBuyOrders() {
         Date searchDate = this.getSearchDate();
-        List<TradingSignal> tradingSignals = this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(searchDate, List.of(ProcessStatus.SELL, ProcessStatus.BUY));
+        List<TradingSignal> tradingSignals = this.tradingSignalService.getDefaultTradingSignalsAfterDateAndIsProcessIn(searchDate, List.of(ProcessStatus.SELL, ProcessStatus.BUY));
 
         for (TradingSignal tradingSignal : tradingSignals) {
             try {

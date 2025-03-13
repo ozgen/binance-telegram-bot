@@ -1,6 +1,7 @@
 package com.ozgen.telegrambinancebot.service;
 
 
+import com.ozgen.telegrambinancebot.model.TradingStrategy;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.repository.TradingSignalRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,15 +63,16 @@ public class TradingSignalServiceTest {
     @Test
     public void testGetTradingSignalsByIdList_Success() {
         List<String> uuidList = List.of(UUID.randomUUID().toString());
+        List<TradingStrategy> strategies = List.of(TradingStrategy.DEFAULT);
         List<TradingSignal> expectedSignals = List.of(new TradingSignal());
-        when(this.tradingSignalRepository.findAllByIdIn(uuidList))
+        when(this.tradingSignalRepository.findAllByIdInAndStrategyIn(uuidList, strategies))
                 .thenReturn(expectedSignals);
 
         List<TradingSignal> result = this.tradingSignalService.getTradingSignalsByIdList(uuidList);
 
         assertEquals(expectedSignals, result);
         verify(this.tradingSignalRepository)
-                .findAllByIdIn(uuidList);
+                .findAllByIdInAndStrategyIn(uuidList, strategies);
     }
 
     @Test
@@ -78,14 +80,47 @@ public class TradingSignalServiceTest {
         Date date = new Date();
         List<Integer> processStatuses = List.of(1, 2); // Example status codes
         List<TradingSignal> expectedSignals = List.of(new TradingSignal());
-        when(this.tradingSignalRepository.findAllByCreatedAtAfterAndIsProcessedIn(date, processStatuses))
+        List<TradingStrategy> strategies = List.of(TradingStrategy.DEFAULT);
+        when(this.tradingSignalRepository.findAllByCreatedAtAfterAndIsProcessedInAndStrategyIn(date, processStatuses, strategies))
                 .thenReturn(expectedSignals);
 
-        List<TradingSignal> result = this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(date, processStatuses);
+        List<TradingSignal> result = this.tradingSignalService.getDefaultTradingSignalsAfterDateAndIsProcessIn(date, processStatuses);
 
         assertEquals(expectedSignals, result);
         verify(this.tradingSignalRepository)
-                .findAllByCreatedAtAfterAndIsProcessedIn(date, processStatuses);
+                .findAllByCreatedAtAfterAndIsProcessedInAndStrategyIn(date, processStatuses, strategies);
+    }
+
+    @Test
+    public void testGetAllTradingSignalsAfterDateAndIsProcessIn_Success() {
+        Date date = new Date();
+        List<Integer> processStatuses = List.of(1, 2); // Example status codes
+        List<TradingSignal> expectedSignals = List.of(new TradingSignal());
+        List<TradingStrategy> strategies = List.of(TradingStrategy.DEFAULT, TradingStrategy.SELL_LATER);
+        when(this.tradingSignalRepository.findAllByCreatedAtAfterAndIsProcessedInAndStrategyIn(date, processStatuses, strategies))
+                .thenReturn(expectedSignals);
+
+        List<TradingSignal> result = this.tradingSignalService.getAllTradingSignalsAfterDateAndIsProcessIn(date, processStatuses);
+
+        assertEquals(expectedSignals, result);
+        verify(this.tradingSignalRepository)
+                .findAllByCreatedAtAfterAndIsProcessedInAndStrategyIn(date, processStatuses, strategies);
+    }
+
+    @Test
+    public void testGetSellLaterTradingSignalsAfterDateAndIsProcessIn_Success() {
+        Date date = new Date();
+        List<Integer> processStatuses = List.of(1, 2); // Example status codes
+        List<TradingSignal> expectedSignals = List.of(new TradingSignal());
+        List<TradingStrategy> strategies = List.of( TradingStrategy.SELL_LATER);
+        when(this.tradingSignalRepository.findAllByCreatedAtAfterAndIsProcessedInAndStrategyIn(date, processStatuses, strategies))
+                .thenReturn(expectedSignals);
+
+        List<TradingSignal> result = this.tradingSignalService.getSellLaterTradingSignalsAfterDateAndIsProcessIn(date, processStatuses);
+
+        assertEquals(expectedSignals, result);
+        verify(this.tradingSignalRepository)
+                .findAllByCreatedAtAfterAndIsProcessedInAndStrategyIn(date, processStatuses, strategies);
     }
 }
 

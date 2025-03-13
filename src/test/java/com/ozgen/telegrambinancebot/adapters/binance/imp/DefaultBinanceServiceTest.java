@@ -185,7 +185,7 @@ public class DefaultBinanceServiceTest {
                         "BTCUSDT".equals(params.get("symbol")) &&
                                 "SELL".equals(params.get("side")) &&
                                 "STOP_LOSS_LIMIT".equals(params.get("type")) &&
-                                "GTC".equals(params.get("timeInForce")) &&                                params.get("quantity").equals(GenericParser.getFormattedDouble(quantity)) &&
+                                "GTC".equals(params.get("timeInForce")) && params.get("quantity").equals(GenericParser.getFormattedDouble(quantity)) &&
                                 params.get("price").equals(GenericParser.getFormattedDouble(price)) &&
                                 params.get("stopPrice").equals(GenericParser.getFormattedDouble(stopPrice))
                 ));

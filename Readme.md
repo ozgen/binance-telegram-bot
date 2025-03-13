@@ -63,6 +63,7 @@ Configure the application using environment variables or a `.env` file. Here are
 - `app.bot.schedule.tradingSignal`: Schedule interval for trading signals in ms
 - `app.bot.schedule.openSellOrder`: Schedule interval for open sell orders in ms
 - `app.bot.schedule.openBuyOrder`: Schedule interval for open buy orders in ms
+- `app.bot.schedule.sellLater`: Schedule interval for sell later orders in ms
 - `app.bot.schedule.monthBefore`: Number of months before for date calculations
 
 #### New Configuration for Telegram Error Reporting
@@ -138,6 +139,61 @@ TP7: 0.00000741
 
 STOP: Close weekly below 0.00000240
 ```
+
+
+## **Optional Parameters: Invest Amount & Sell Later Strategy**
+The bot allows **two optional parameters** in trading signals:
+- **INVEST** → Specifies how much to invest in the trade.
+- **STRATEGY: SELL_LATER** → Delays selling until a future condition is met.
+
+### ** How It Works**
+| Parameter  | Description                                                                                                                                        |
+|------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `INVEST`   | Defines the amount allocated for the trade (e.g., `"0.0001 BTC"`). If omitted, the bot will use the default investment settings.                   |
+| `STRATEGY` | If set to `SELL_LATER`, the bot will **not** immediately sell when profit targets (TPs) are reached. Instead, it will wait for a future condition. |
+
+### **Example Signal with Optional Parameters**
+```
+Trading Signal Example:
+NKNBTC
+
+ENTRY: 0.00000260 - 0.00000290
+
+TP1: 0.00000315
+TP2: 0.00000360
+TP3: 0.00000432
+TP4: 0.00000486
+TP5: 0.00000550
+TP6: 0.00000666
+TP7: 0.00000741
+
+STOP: Close weekly below 0.00000240
+
+# Optional Parameters
+INVEST: 0.001  
+STRATEGY: SELL_LATER
+```
+
+### **Behavior of `SELL_LATER` Strategy**
+- Normally, the bot **automatically sells** when a TP level is reached.
+- If `SELL_LATER` is set:
+    1. The bot **holds the asset** instead of selling at TP levels.
+    2. The sell order will be **triggered later** based on other conditions (e.g., price spikes, custom alerts).
+
+### How to Use These Parameters
+| Scenario | Expected Bot Behavior                           |
+|------------|-------------------------------------------------|
+| **No `INVEST` value** | Uses the default investment configuration.      |
+| **INVEST set** | Overrides the default investment amount.        |
+| **No `SELL_LATER`** | The bot sells at the defined profit percentage. |
+| **`SELL_LATER` enabled** | The bot holds the asset and delays selling.     |
+
+---
+
+### **Why Use These Options?**
+- **INVEST** → Gives you flexibility to **change investment size per trade**.
+- **SELL_LATER** → Useful for **longer-term holds** instead of auto-selling.
+---
 
 ## Test Coverage
 
