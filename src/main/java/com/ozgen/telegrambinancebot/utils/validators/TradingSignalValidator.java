@@ -22,9 +22,6 @@ public class TradingSignalValidator {
         if (tradingSignal.getStopLoss() == null || tradingSignal.getStopLoss().isEmpty()) {
             return false;
         }
-        if (tradingSignal.getTakeProfits().isEmpty()) {
-            return false;
-        }
         return true;
     }
 

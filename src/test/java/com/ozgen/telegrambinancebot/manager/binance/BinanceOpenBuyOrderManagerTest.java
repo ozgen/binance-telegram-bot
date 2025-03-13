@@ -129,7 +129,7 @@ public class BinanceOpenBuyOrderManagerTest {
     @Test
     public void testProcessOpenBuyOrders_Success() throws Exception {
         // Arrange
-        when(this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(any(), anyList()))
+        when(this.tradingSignalService.getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), anyList()))
                 .thenReturn(List.of(this.tradingSignal));
         when(this.binanceApiManager.getOpenOrders(SYMBOL))
                 .thenReturn(List.of(this.orderInfo));
@@ -147,7 +147,7 @@ public class BinanceOpenBuyOrderManagerTest {
 
         // Assert
         verify(this.tradingSignalService)
-                .getTradingSignalsAfterDateAndIsProcessIn(any(), anyList());
+                .getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), anyList());
         verify(this.binanceApiManager)
                 .getOpenOrders(SYMBOL);
         verify(this.binanceApiManager)
@@ -177,7 +177,7 @@ public class BinanceOpenBuyOrderManagerTest {
     @Test
     public void testProcessOpenBuyOrders_withTickerDataApiException() throws Exception {
         // Arrange
-        when(this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(any(), anyList()))
+        when(this.tradingSignalService.getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), anyList()))
                 .thenReturn(List.of(this.tradingSignal));
         when(this.binanceApiManager.getOpenOrders(SYMBOL))
                 .thenReturn(List.of(this.orderInfo));
@@ -189,7 +189,7 @@ public class BinanceOpenBuyOrderManagerTest {
 
         // Assert
         verify(this.tradingSignalService)
-                .getTradingSignalsAfterDateAndIsProcessIn(any(), anyList());
+                .getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), anyList());
         verify(this.binanceApiManager)
                 .getOpenOrders(SYMBOL);
         verify(this.binanceApiManager)
@@ -207,7 +207,7 @@ public class BinanceOpenBuyOrderManagerTest {
     @Test
     public void testProcessOpenBuyOrders_withOpenOrdersApiException() throws Exception {
         // Arrange
-        when(this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(any(), anyList()))
+        when(this.tradingSignalService.getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), anyList()))
                 .thenReturn(List.of(this.tradingSignal));
         when(this.binanceApiManager.getOpenOrders(SYMBOL))
                 .thenThrow(RuntimeException.class);
@@ -217,7 +217,7 @@ public class BinanceOpenBuyOrderManagerTest {
 
         // Assert
         verify(this.tradingSignalService)
-                .getTradingSignalsAfterDateAndIsProcessIn(any(), anyList());
+                .getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), anyList());
         verify(this.binanceApiManager)
                 .getOpenOrders(SYMBOL);
         verify(this.binanceApiManager, never())
@@ -238,7 +238,7 @@ public class BinanceOpenBuyOrderManagerTest {
     @Test
     public void testProcessOpenBuyOrders_withNotAvailableToBuy() throws Exception {
         // Arrange
-        when(this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(any(), anyList()))
+        when(this.tradingSignalService.getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), anyList()))
                 .thenReturn(List.of(this.tradingSignal));
         when(this.binanceApiManager.getOpenOrders(SYMBOL))
                 .thenReturn(List.of(this.orderInfo));
@@ -252,7 +252,7 @@ public class BinanceOpenBuyOrderManagerTest {
 
         // Assert
         verify(this.tradingSignalService)
-                .getTradingSignalsAfterDateAndIsProcessIn(any(), anyList());
+                .getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), anyList());
         verify(this.binanceApiManager)
                 .getOpenOrders(SYMBOL);
         verify(this.binanceApiManager)
@@ -270,7 +270,7 @@ public class BinanceOpenBuyOrderManagerTest {
     @Test
     public void testProcessOpenBuyOrders_withCancelAndNewOrderWithStopLossApiException() throws Exception {
         // Arrange
-        when(this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(any(), anyList()))
+        when(this.tradingSignalService.getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), anyList()))
                 .thenReturn(List.of(this.tradingSignal));
         when(this.binanceApiManager.getOpenOrders(SYMBOL))
                 .thenReturn(List.of(this.orderInfo));
@@ -286,7 +286,7 @@ public class BinanceOpenBuyOrderManagerTest {
 
         // Assert
         verify(this.tradingSignalService)
-                .getTradingSignalsAfterDateAndIsProcessIn(any(), anyList());
+                .getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), anyList());
         verify(this.binanceApiManager)
                 .getOpenOrders(SYMBOL);
         verify(this.binanceApiManager)

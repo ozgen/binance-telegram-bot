@@ -9,14 +9,11 @@ import com.ozgen.telegrambinancebot.model.events.NewSellOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.BotOrderService;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
-import com.ozgen.telegrambinancebot.utils.SyncUtil;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -25,7 +22,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -100,7 +96,7 @@ public class BinanceOpenSellOrderManagerTest {
     @Test
     public void testProcessOpenSellOrders_Success() {
         // Arrange
-        when(this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.BUY))))
+        when(this.tradingSignalService.getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.BUY))))
                 .thenReturn(List.of(this.tradingSignal));
         when(this.botOrderService.getBuyOrders(argThat(list -> list.contains(this.tradingSignal))))
                 .thenReturn(List.of(this.buyOrder));
@@ -110,7 +106,7 @@ public class BinanceOpenSellOrderManagerTest {
 
         // Assert
         verify(this.tradingSignalService)
-                .getTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.BUY)));
+                .getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.BUY)));
         verify(this.botOrderService)
                 .getBuyOrders(argThat(list -> list.contains(this.tradingSignal)));
         ArgumentCaptor<NewSellOrderEvent> eventCaptor = ArgumentCaptor.forClass(NewSellOrderEvent.class);
@@ -123,7 +119,7 @@ public class BinanceOpenSellOrderManagerTest {
     @Test
     public void testProcessOpenSellOrders_withEmptyBuyOrders() {
         // Arrange
-        when(this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.BUY))))
+        when(this.tradingSignalService.getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.BUY))))
                 .thenReturn(List.of(this.tradingSignal));
         when(this.botOrderService.getBuyOrders(argThat(list -> list.contains(this.tradingSignal))))
                 .thenReturn(List.of());
@@ -133,7 +129,7 @@ public class BinanceOpenSellOrderManagerTest {
 
         // Assert
         verify(this.tradingSignalService)
-                .getTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.BUY)));
+                .getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.BUY)));
         verify(this.botOrderService)
                 .getBuyOrders(argThat(list -> list.contains(this.tradingSignal)));
         verify(this.publisher, never())
@@ -143,7 +139,7 @@ public class BinanceOpenSellOrderManagerTest {
     @Test
     public void testProcessOpenSellOrders_withEmptyTradingSignalList() {
         // Arrange
-        when(this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.BUY))))
+        when(this.tradingSignalService.getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.BUY))))
                 .thenReturn(List.of());
 
         // Act
@@ -151,7 +147,7 @@ public class BinanceOpenSellOrderManagerTest {
 
         // Assert
         verify(this.tradingSignalService)
-                .getTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.BUY)));
+                .getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.BUY)));
         verify(this.botOrderService, never())
                 .getBuyOrders(any());
         verify(this.publisher, never())
@@ -159,40 +155,9 @@ public class BinanceOpenSellOrderManagerTest {
     }
 
     @Test
-    @Disabled
-    public void testProcessOpenSellOrders_withException() {
-        // Arrange
-        MockedStatic<SyncUtil> mockedSyncUtil = mockStatic(SyncUtil.class);
-        try {
-            when(this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL))))
-                    .thenReturn(List.of(this.tradingSignal));
-            when(this.botOrderService.getBuyOrders(argThat(list -> list.contains(this.tradingSignal))))
-                    .thenReturn(List.of(this.buyOrder));
-            RuntimeException testException = new RuntimeException("Test Exception");
-            mockedSyncUtil.when(SyncUtil::pauseBetweenOperations).thenThrow(testException);
-
-            // Act
-            this.binanceOpenSellOrderManager.processOpenSellOrders();
-
-            // Assert
-            verify(this.tradingSignalService)
-                    .getTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL)));
-            verify(this.botOrderService)
-                    .getBuyOrders(argThat(list -> list.contains(this.tradingSignal)));
-            ArgumentCaptor<NewSellOrderEvent> eventCaptor = ArgumentCaptor.forClass(NewSellOrderEvent.class);
-            verify(this.publisher)
-                    .publishEvent(eventCaptor.capture());
-            NewSellOrderEvent newSellOrderEvent = eventCaptor.getValue();
-            assertEquals(this.buyOrder, newSellOrderEvent.getBuyOrder());
-        } finally {
-            mockedSyncUtil.close();
-        }
-    }
-
-    @Test
     public void testProcessNotCompletedSellOrders_Success() {
         // Arrange
-        when(this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL))))
+        when(this.tradingSignalService.getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL))))
                 .thenReturn(List.of(this.tradingSignal));
         when(this.botOrderService.getSellOrders(argThat(list -> list.contains(this.tradingSignal))))
                 .thenReturn(List.of(this.sellOrder));
@@ -204,7 +169,7 @@ public class BinanceOpenSellOrderManagerTest {
 
         // Assert
         verify(this.tradingSignalService)
-                .getTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL)));
+                .getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL)));
         verify(this.botOrderService)
                 .getBuyOrders(argThat(list -> list.contains(this.tradingSignal)));
         ArgumentCaptor<NewSellOrderEvent> eventCaptor = ArgumentCaptor.forClass(NewSellOrderEvent.class);
@@ -217,7 +182,7 @@ public class BinanceOpenSellOrderManagerTest {
     @Test
     public void testProcessNotCompletedSellOrders_withEmptyBuyOrders() {
         // Arrange
-        when(this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL))))
+        when(this.tradingSignalService.getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL))))
                 .thenReturn(List.of(this.tradingSignal));
         when(this.botOrderService.getSellOrders(argThat(list -> list.contains(this.tradingSignal))))
                 .thenReturn(List.of(this.sellOrder));
@@ -229,7 +194,7 @@ public class BinanceOpenSellOrderManagerTest {
 
         // Assert
         verify(this.tradingSignalService)
-                .getTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL)));
+                .getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL)));
         verify(this.botOrderService)
                 .getBuyOrders(argThat(list -> list.contains(this.tradingSignal)));
         verify(this.publisher, never())
@@ -239,7 +204,7 @@ public class BinanceOpenSellOrderManagerTest {
     @Test
     public void testProcessNotCompletedSellOrders_withEmptySellOrders() {
         // Arrange
-        when(this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL))))
+        when(this.tradingSignalService.getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL))))
                 .thenReturn(List.of(this.tradingSignal));
         when(this.botOrderService.getSellOrders(argThat(list -> list.contains(this.tradingSignal))))
                 .thenReturn(List.of());
@@ -251,7 +216,7 @@ public class BinanceOpenSellOrderManagerTest {
 
         // Assert
         verify(this.tradingSignalService)
-                .getTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL)));
+                .getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL)));
         verify(this.botOrderService)
                 .getBuyOrders(argThat(list -> list.contains(this.tradingSignal)));
         verify(this.publisher, never())
@@ -261,7 +226,7 @@ public class BinanceOpenSellOrderManagerTest {
     @Test
     public void testProcessNotCompletedSellOrders_withEmptyTradingSignalList() {
         // Arrange
-        when(this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL))))
+        when(this.tradingSignalService.getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL))))
                 .thenReturn(List.of());
 
         // Act
@@ -269,7 +234,7 @@ public class BinanceOpenSellOrderManagerTest {
 
         // Assert
         verify(this.tradingSignalService)
-                .getTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL)));
+                .getDefaultTradingSignalsAfterDateAndIsProcessIn(any(), argThat(list -> list.contains(ProcessStatus.SELL)));
         verify(this.botOrderService, never())
                 .getBuyOrders(any());
         verify(this.publisher, never())

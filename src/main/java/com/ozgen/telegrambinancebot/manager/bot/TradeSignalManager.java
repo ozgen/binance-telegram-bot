@@ -29,7 +29,7 @@ public class TradeSignalManager {
         List<Integer> list = List.of(ProcessStatus.INIT);
         Date dateBeforeInMonths = DateFactory.getDateBeforeInMonths(this.scheduleConfiguration.getMonthBefore());
         log.debug("Retrieving trading signals after date: {}", dateBeforeInMonths);
-        List<TradingSignal> tradingSignals = this.tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(dateBeforeInMonths, list);
+        List<TradingSignal> tradingSignals = this.tradingSignalService.getAllTradingSignalsAfterDateAndIsProcessIn(dateBeforeInMonths, list);
         log.info("Found {} trading signals to process.", tradingSignals.size());
         tradingSignals.forEach(this::processTradingSignal);
     }
