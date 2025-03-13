@@ -15,7 +15,7 @@ It executes trades on Binance based on signals from Telegram, ensuring automated
 ## Getting Started
 
 ### Prerequisites
-- Java 11
+- Java 21
 - Maven
 - Binance account
 - Telegram account
