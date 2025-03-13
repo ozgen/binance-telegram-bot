@@ -165,7 +165,7 @@ public class BinanceBuyOrderManagerTest {
         verify(this.binanceApiManager)
                 .newOrder(SYMBOL, expectedBuyPrice, expectedCoinAmount);
         ArgumentCaptor<NewSellOrderEvent> eventCaptor = ArgumentCaptor.forClass(NewSellOrderEvent.class);
-        verify(this.publisher, times(2))
+        verify(this.publisher, times(1))
                 .publishEvent(eventCaptor.capture());
         NewSellOrderEvent newSellOrderEvent = eventCaptor.getValue();
         BuyOrder eventBuyOrder = newSellOrderEvent.getBuyOrder();
