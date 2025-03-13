@@ -3,6 +3,7 @@ package com.ozgen.telegrambinancebot.adapters.telegram;
 
 import com.ozgen.telegrambinancebot.configuration.telegram.TelegramConfig;
 import com.ozgen.telegrambinancebot.manager.telegram.TelegramMessageManager;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -11,8 +12,6 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
-import javax.annotation.PostConstruct;
 
 @Component
 @ConditionalOnProperty(name = "bot.telegram.enabled", havingValue = "true", matchIfMissing = true)

@@ -1,5 +1,5 @@
 # For Java 11
-FROM --platform=linux/amd64 adoptopenjdk:11-jre-hotspot
+FROM --platform=linux/amd64 eclipse-temurin:21.0.1_12-jre
 
 # Refer to Maven build -> finalName
 ARG JAR_FILE=target/*.jar
