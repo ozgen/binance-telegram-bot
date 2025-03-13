@@ -6,7 +6,6 @@ public interface BinanceAPI {
 
     public String getAccountSnapshot();
 
-
     public String getCoinPrice(String symbol);
 
     public String newOrder(String symbol, Double price, Double quantity);

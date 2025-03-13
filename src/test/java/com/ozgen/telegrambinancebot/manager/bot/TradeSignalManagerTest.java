@@ -47,7 +47,7 @@ public class TradeSignalManagerTest {
         Date mockDate = new Date();
         when(scheduleConfiguration.getMonthBefore())
                 .thenReturn(1);
-        when(tradingSignalService.getTradingSignalsAfterDateAndIsProcessIn(any(), anyList()))
+        when(tradingSignalService.getAllTradingSignalsAfterDateAndIsProcessIn(any(), anyList()))
                 .thenReturn(List.of(new TradingSignal()));
 
         // Act
@@ -55,7 +55,7 @@ public class TradeSignalManagerTest {
 
         // Assert
         verify(tradingSignalService)
-                .getTradingSignalsAfterDateAndIsProcessIn(any(), anyList());
+                .getAllTradingSignalsAfterDateAndIsProcessIn(any(), anyList());
         verify(publisher, times(1))
                 .publishEvent(any(IncomingTradingSignalEvent.class));
     }

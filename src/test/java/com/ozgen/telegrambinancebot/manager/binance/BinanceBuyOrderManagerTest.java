@@ -3,6 +3,7 @@ package com.ozgen.telegrambinancebot.manager.binance;
 
 import com.ozgen.telegrambinancebot.configuration.properties.BotConfiguration;
 import com.ozgen.telegrambinancebot.model.TradeStatus;
+import com.ozgen.telegrambinancebot.model.TradingStrategy;
 import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
@@ -28,6 +29,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -60,6 +62,8 @@ public class BinanceBuyOrderManagerTest {
     private FutureTradeService futureTradeService;
     @Mock
     private BotOrderService botOrderService;
+    @Mock
+    private BinanceHelper binanceHelper;
 
     @InjectMocks
     private BinanceBuyOrderManager binanceBuyOrderManager;
@@ -89,6 +93,10 @@ public class BinanceBuyOrderManagerTest {
                 .thenReturn(END_ENTRY);
         when(this.tradingSignal.getStopLoss())
                 .thenReturn(STOPLOSS);
+        when(this.tradingSignal.getInvestAmount())
+                .thenReturn(null);
+        when(this.tradingSignal.getStrategy())
+                .thenReturn(TradingStrategy.DEFAULT);
 
         when(this.botConfiguration.getCurrency())
                 .thenReturn(CURRENCY);
@@ -112,6 +120,9 @@ public class BinanceBuyOrderManagerTest {
     @Test
     void testProcessNewBuyOrderEvent_Success() throws Exception {
         // Arrange
+        double expectedBuyPrice = (Double.parseDouble(LAST_PRICE) * (PERCENTAGE_INC / 100) + Double.parseDouble(LAST_PRICE));
+        double binanceFee = AMOUNT * BINANCE_FEE_PERCENTAGE;
+        double expectedCoinAmount = ((AMOUNT - binanceFee) / Double.parseDouble(BTCUSD_PRICE)) / expectedBuyPrice;
         when(this.tickerData.getLastPrice())
                 .thenReturn(LAST_PRICE);
         when(this.binanceApiManager.getUserAsset())
@@ -124,6 +135,10 @@ public class BinanceBuyOrderManagerTest {
                 .thenReturn(Optional.empty());
         when(this.binanceApiManager.newOrderWithStopLoss(any(), any(), any(), any()))
                 .thenReturn(this.orderResponse);
+        when(this.binanceHelper.hasAccountEnoughAsset(anyList(), any()))
+                .thenReturn(true);
+        when(this.binanceHelper.calculateCoinAmount(expectedBuyPrice, this.tradingSignal))
+                .thenReturn(expectedCoinAmount);
         when(this.botOrderService.createBuyOrder(any(BuyOrder.class)))
                 .thenAnswer((Answer<BuyOrder>) invocation -> (BuyOrder) invocation.getArguments()[0]);
         NewBuyOrderEvent event = new NewBuyOrderEvent(this, this.tradingSignal, this.tickerData);
@@ -140,9 +155,6 @@ public class BinanceBuyOrderManagerTest {
         verify(this.botOrderService)
                 .createBuyOrder(buyOrderCaptor.capture());
         BuyOrder buyOrder = buyOrderCaptor.getValue();
-        double expectedBuyPrice = (Double.parseDouble(LAST_PRICE) * (PERCENTAGE_INC / 100) + Double.parseDouble(LAST_PRICE));
-        double binanceFee = AMOUNT * BINANCE_FEE_PERCENTAGE;
-        double expectedCoinAmount = ((AMOUNT - binanceFee) / Double.parseDouble(BTCUSD_PRICE)) / expectedBuyPrice;
         double expectedStopLoss = Double.parseDouble(END_ENTRY);
         assertEquals(expectedCoinAmount, buyOrder.getCoinAmount());
         assertEquals(expectedBuyPrice, buyOrder.getBuyPrice());
@@ -163,14 +175,8 @@ public class BinanceBuyOrderManagerTest {
     @Test
     void testProcessNewBuyOrderEvent_withHasNotEnoughBtc() throws Exception {
         // Arrange
-        when(this.tickerData.getLastPrice())
-                .thenReturn(LAST_PRICE);
-        when(this.binanceApiManager.getUserAsset())
-                .thenReturn(List.of(this.assetBalance));
-        when(this.assetBalance.getAsset())
-                .thenReturn(CURRENCY);
-        when(this.assetBalance.getFree())
-                .thenReturn(String.valueOf(0.00001));
+        when(this.binanceHelper.hasAccountEnoughAsset(anyList(), any()))
+                .thenReturn(false);
 
         when(this.futureTradeService.createFutureTrade(this.tradingSignal, TradeStatus.INSUFFICIENT))
                 .thenReturn(this.futureTrade);
@@ -197,8 +203,6 @@ public class BinanceBuyOrderManagerTest {
     @Test
     void testProcessNewBuyOrderEvent_withSnapShotApiException() throws Exception {
         // Arrange
-        when(this.tickerData.getLastPrice())
-                .thenReturn(LAST_PRICE);
         when(this.binanceApiManager.getUserAsset())
                 .thenThrow(RuntimeException.class);
         when(this.futureTradeService.createFutureTrade(this.tradingSignal, TradeStatus.ERROR_BUY))
@@ -236,6 +240,8 @@ public class BinanceBuyOrderManagerTest {
                 .thenReturn(CURRENCY);
         when(this.assetBalance.getFree())
                 .thenReturn(String.valueOf(BTC_AMOUNT));
+        when(this.binanceHelper.hasAccountEnoughAsset(anyList(), any()))
+                .thenReturn(true);
         when(this.futureTradeService.createFutureTrade(this.tradingSignal, TradeStatus.NOT_IN_RANGE))
                 .thenReturn(this.futureTrade);
         NewBuyOrderEvent event = new NewBuyOrderEvent(this, this.tradingSignal, this.tickerData);
@@ -273,6 +279,13 @@ public class BinanceBuyOrderManagerTest {
                 .thenReturn(Optional.empty());
         when(this.binanceApiManager.newOrder(any(), any(), any()))
                 .thenThrow(RuntimeException.class);
+        double expectedBuyPrice = (Double.parseDouble(LAST_PRICE) * (PERCENTAGE_INC / 100) + Double.parseDouble(LAST_PRICE));
+        double binanceFee = AMOUNT * BINANCE_FEE_PERCENTAGE;
+        double expectedCoinAmount = ((AMOUNT - binanceFee) / Double.parseDouble(BTCUSD_PRICE)) / expectedBuyPrice;
+        when(this.binanceHelper.hasAccountEnoughAsset(anyList(), any()))
+                .thenReturn(true);
+        when(this.binanceHelper.calculateCoinAmount(expectedBuyPrice, this.tradingSignal))
+                .thenReturn(expectedCoinAmount);
         when(this.futureTradeService.createFutureTrade(this.tradingSignal, TradeStatus.ERROR_BUY))
                 .thenReturn(this.futureTrade);
         NewBuyOrderEvent event = new NewBuyOrderEvent(this, this.tradingSignal, this.tickerData);

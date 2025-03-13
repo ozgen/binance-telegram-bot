@@ -3,6 +3,7 @@ package com.ozgen.telegrambinancebot.manager.binance;
 import com.ozgen.telegrambinancebot.configuration.properties.BotConfiguration;
 import com.ozgen.telegrambinancebot.model.ProcessStatus;
 import com.ozgen.telegrambinancebot.model.TradeStatus;
+import com.ozgen.telegrambinancebot.model.TradingStrategy;
 import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
@@ -34,6 +35,7 @@ public class BinanceBuyOrderManager {
     private final ApplicationEventPublisher publisher;
     private final BotConfiguration botConfiguration;
     private final FutureTradeService futureTradeService;
+    private final BinanceHelper binanceHelper;
 
     private final BotOrderService botOrderService;
 
@@ -44,8 +46,18 @@ public class BinanceBuyOrderManager {
 
         try {
             List<AssetBalance> assets = this.binanceApiManager.getUserAsset();
-            Double btcToUsdRate = this.getBtcToUsdConversionRate();
-            this.processOrder(tradingSignal, tickerData, assets, btcToUsdRate);
+            if (!this.binanceHelper.hasAccountEnoughAsset(assets, tradingSignal)) {
+                log.warn("Account does not have enough {} (less than {}$)", this.botConfiguration.getCurrency(), this.botConfiguration.getAmount());
+                this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.INSUFFICIENT);
+                return;
+            }
+
+            BuyOrder buyOrder = this.createBuyOrder(tradingSignal, tickerData);
+            if (buyOrder != null) {
+                this.sendBuyOrderInfoMessage(buyOrder);
+                SyncUtil.pauseBetweenOperations();
+                this.publishNewSellOrderEvent(buyOrder);
+            }
         } catch (Exception e) {
             log.error("Error processing new buy order event for trading signal {}: {}", tradingSignal.getId(), e.getMessage(), e);
             this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.ERROR_BUY);
@@ -53,63 +65,23 @@ public class BinanceBuyOrderManager {
         }
     }
 
-    private void processOrder(TradingSignal tradingSignal, TickerData tickerData, List<AssetBalance> assets, Double btcToUsdRate) {
-        if (!this.hasAccountEnoughBtc(assets, btcToUsdRate)) {
-            log.warn("Account does not have enough {} (less than {}$)", this.botConfiguration.getCurrency(), this.botConfiguration.getAmount());
-            this.futureTradeService.createFutureTrade(tradingSignal, TradeStatus.INSUFFICIENT);
+    private void publishNewSellOrderEvent(BuyOrder buyOrder) {
+        if (buyOrder.getTradingSignal().getStrategy() == TradingStrategy.SELL_LATER) {
             return;
         }
-
-        BuyOrder buyOrder = this.createBuyOrder(tradingSignal, tickerData, btcToUsdRate);
-        if (buyOrder != null) {
-            this.sendBuyOrderInfoMessage(buyOrder);
-            SyncUtil.pauseBetweenOperations();
-            this.publishNewSellOrderEvent(buyOrder);
-        }
-    }
-
-    private void publishNewSellOrderEvent(BuyOrder buyOrder) {
         NewSellOrderEvent newSellOrderEvent = new NewSellOrderEvent(this, buyOrder);
         this.publisher.publishEvent(newSellOrderEvent);
         log.info("Published NewSellOrderEvent for BuyOrder {}", buyOrder.getId());
     }
 
-
-    private double calculateCoinAmount(double buyPrice, double btcPriceInUsd) {
-        double dollarsToInvest = this.botConfiguration.getAmount();
-        float binanceFeePercentage = this.botConfiguration.getBinanceFeePercentage();
-
-        // Calculate how much BTC you can buy with $500
-        double btcAmount = dollarsToInvest / btcPriceInUsd;
-
-        double binanceFee = btcAmount * binanceFeePercentage;
-
-
-        // Calculate how much coin you can buy with that BTC amount
-        double coinAmount = (btcAmount - binanceFee) / buyPrice;
-
-        return coinAmount;
-    }
-
-    private boolean hasAccountEnoughBtc(List<AssetBalance> assets, Double btcToUsdRate) {
-        Double btcAmount = GenericParser.getAssetFromSymbol(assets, this.botConfiguration.getCurrency());
-        Double totalAccountValueInUsd = btcAmount * btcToUsdRate;
-        return totalAccountValueInUsd >= this.botConfiguration.getAmount();
-    }
-
-    private Double getBtcToUsdConversionRate() throws Exception {
-        TickerData tickerPrice24 = this.binanceApiManager.getTickerPrice24(this.botConfiguration.getCurrencyRate());
-        return GenericParser.getDouble(tickerPrice24.getLastPrice()).get();
-    }
-
-    private BuyOrder createBuyOrder(TradingSignal tradingSignal, TickerData tickerData, double btcToUsdRate) {
+    private BuyOrder createBuyOrder(TradingSignal tradingSignal, TickerData tickerData) throws Exception {
         if (!this.isTradeSignalInRange(tradingSignal, tickerData)) {
             this.handleNotInRange(tradingSignal);
             return null;
         }
 
         BuyOrder buyOrder = this.initializeOrRetrieveBuyOrder(tradingSignal);
-        this.populateBuyOrderDetails(buyOrder, tradingSignal, tickerData, btcToUsdRate);
+        this.populateBuyOrderDetails(buyOrder, tradingSignal, tickerData);
 
         if (this.createOrderInBinance(buyOrder, tradingSignal)) {
             return this.saveBuyOrder(buyOrder);
@@ -134,9 +106,9 @@ public class BinanceBuyOrderManager {
         return (buyOrder != null) ? buyOrder : new BuyOrder();
     }
 
-    private void populateBuyOrderDetails(BuyOrder buyOrder, TradingSignal tradingSignal, TickerData tickerData, double btcToUsdRate) {
+    private void populateBuyOrderDetails(BuyOrder buyOrder, TradingSignal tradingSignal, TickerData tickerData) throws Exception {
         double buyPrice = PriceCalculator.calculateCoinPriceInc(GenericParser.getDouble(tickerData.getLastPrice()).get(), this.botConfiguration.getPercentageInc());
-        double coinAmount = this.calculateCoinAmount(buyPrice, btcToUsdRate);
+        double coinAmount = this.binanceHelper.calculateCoinAmount(buyPrice, tradingSignal);
         double stopLoss = GenericParser.getDouble(tradingSignal.getEntryEnd()).get();
 
         buyOrder.setSymbol(tradingSignal.getSymbol());

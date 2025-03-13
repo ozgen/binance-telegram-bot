@@ -262,26 +262,33 @@ public class TestData {
             + "}";
 
     public static String TRADING_SIGNAL = "NKNBTC\n\nENTRY: 0.00000260 - 0.00000290\n\nTP1: 0.00000315\nTP2: 0.00000360\nTP3: 0.00000432\nTP4: 0.00000486\nTP5: 0.00000550\nTP6: 0.00000666\nTP7: 0.00000741\n\nSTOP: Close weekly below 0.00000240\n\nSHARED: 18-Nov-2023 @lamatrades ✨";
-    public static String TRADING_SIGNAL_2 = "ATABTC\n\nENTRY: 0.00000240 - 0.00000280\n\nTP1: 0.00000333\nTP2: 0.00000365\nTP3: 0.00000450\nTP4: 0.00000500\nTP5: 0.00000586\nTP6: 0.00000722\nTP7: 0.00000820\n\nSTOP: Close weekly below 0.00000220\n\nSHARED: 31-Dec-2023";
+    public static String TRADING_SIGNAL_2 = "ATABTC\n\nENTRY: 0.00000240 - 0.00000280\n\nSTOP: Close weekly below 0.00000220\n\nSHARED: 31-Dec-2023";
     public static String TRADING_SIGNAL_3 = "MDTBTC\n" +
             "\n" +
             "ENTRY: 0.00000125 - 0.00000150\n" +
             "\n" +
-            "TP1: 0.00000181\n" +
-            "TP2: 0.00000195\n" +
-            "TP3: 0.00000214\n" +
-            "TP4: 0.00000245\n" +
-            "TP5: 0.00000266\n" +
-            "TP6: 0.00000300\n" +
-            "TP7: 0.00000353\n" +
-            "TP8: 0.00000400\n" +
             "\n" +
             "STOP: Close weekly  below 0.00000120";
+    public static String TRADING_SIGNAL_4 = "MDTBTC\n" +
+            "\n" +
+            "ENTRY: 0.00000125 - 0.00000150\n" +
+            "\n" +
+            "STOP: 0.00000120";
+    public static String TRADING_SIGNAL_SELL_LATER = "MDTBTC\n" +
+            "\n" +
+            "ENTRY: 0.00000125 - 0.00000150\n" +
+            "INVEST: 0.0001 \n" +
+            "STRATEGY: SELL_LATER \n" +
+            "\n" +
+            "STOP: 0.00000120";
     public static String INVALID_TRADING_SIGNAL = "NKNBTC\n\nTP1: 0.00000315\nTP2: 0.00000360\nTP3: 0.00000432\nTP4: 0.00000486\nTP5: 0.00000550\nTP6: 0.00000666\nTP7: 0.00000741\n\nSTOP: Close weekly below 0.00000240\n\nSHARED: 18-Nov-2023 @lamatrades ✨";
 
 
     public static TradingSignal getTradingSignal() {
         return SignalParser.parseSignal(TRADING_SIGNAL);
+    }
+    public static TradingSignal getTradingSignalSellLater() {
+        return SignalParser.parseSignal(TRADING_SIGNAL_SELL_LATER);
     }
 
     public static CancelAndNewOrderResponse getCancelAndNewOrderResponse() throws Exception {

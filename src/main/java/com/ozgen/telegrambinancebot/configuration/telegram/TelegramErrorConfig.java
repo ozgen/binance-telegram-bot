@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 public class TelegramErrorConfig {
 
     @Value("${bot.telegram.error.bot_username}")
-    private  String botUserName ;
+    private  String botUserName;
 
     @Value("${bot.telegram.error.token}")
     private String telegramApiToken;

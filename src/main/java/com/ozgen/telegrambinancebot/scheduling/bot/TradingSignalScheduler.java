@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class TradingSignalScheduler {
+
     private static final Logger log = LoggerFactory.getLogger(TradingSignalScheduler.class);
 
     private final TradeSignalManager tradeSignalManager;

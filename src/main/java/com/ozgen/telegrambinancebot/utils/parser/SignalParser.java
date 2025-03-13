@@ -1,5 +1,6 @@
 package com.ozgen.telegrambinancebot.utils.parser;
 
+import com.ozgen.telegrambinancebot.model.TradingStrategy;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 
 import java.util.ArrayList;
@@ -37,8 +38,20 @@ public class SignalParser {
                 tradingSignal.setStopLoss(stopLossValue);
                 break;
             }
+            if (line.startsWith("INVEST")) {
+                String[] investParts = line.split("\\s+");
+                String investValue = investParts[investParts.length - 1].trim();
+                tradingSignal.setInvestAmount(investValue);
+            }
+            if (line.startsWith("STRATEGY")) {
+                String[] strategyParts = line.split("\\s+");
+                String investValue = strategyParts[strategyParts.length - 1].trim();
+                if (investValue.contains("SELL_LATER")) {
+                    tradingSignal.setStrategy(TradingStrategy.SELL_LATER);
+                }
+            }
+            tradingSignal.setTakeProfits(takeProfits);
         }
-        tradingSignal.setTakeProfits(takeProfits);
 
         return tradingSignal;
     }
