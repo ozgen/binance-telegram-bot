@@ -147,10 +147,10 @@ The bot allows **two optional parameters** in trading signals:
 - **STRATEGY: SELL_LATER** → Delays selling until a future condition is met.
 
 ### ** How It Works**
-| Parameter  | Description                                                                                                                                        |
-|------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `INVEST`   | Defines the amount allocated for the trade (e.g., `"0.0001 BTC"`). If omitted, the bot will use the default investment settings.                   |
-| `STRATEGY` | If set to `SELL_LATER`, the bot will **not** immediately create sell order instead, It creates sell order when profit targets (TPs) are reached.   |
+| Parameter  | Description                                                                                                                                       |
+|------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| `INVEST`   | Defines the amount allocated for the trade (e.g., `"0.0001 BTC"`). If omitted, the bot will use the default investment settings.                  |
+| `STRATEGY` | If set to `SELL_LATER`, the bot will **not** immediately create sell order. Instead, It creates sell order when profit targets (TPs) are reached. |
 
 ### **Example Signal with Optional Parameters**
 ```

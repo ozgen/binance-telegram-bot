@@ -93,11 +93,9 @@ public class BinanceOpenBuyOrderManager {
         });
     }
 
-
     private Date getSearchDate() {
         return DateFactory.getDateBeforeInMonths(this.scheduleConfiguration.getMonthBefore());
     }
-
 
     private BuyOrder createCancelAndBuyOrder(TradingSignal tradingSignal, TickerData tickerData, OrderInfo orderInfo) {
         String symbol = tradingSignal.getSymbol();
@@ -114,6 +112,7 @@ public class BinanceOpenBuyOrderManager {
         BuyOrder buyOrder = this.botOrderService.getBuyOrder(tradingSignal).orElse(null);
         if (buyOrder == null) {
             buyOrder = new BuyOrder();
+            buyOrder.setTotalCoinAmount(coinAmount);
         }
         this.updateBuyOrder(buyOrder, symbol, coinAmount, stopLoss, buyPrice, tradingSignal);
         return buyOrder;
