@@ -157,6 +157,7 @@ public class BinanceBuyOrderManagerTest {
         BuyOrder buyOrder = buyOrderCaptor.getValue();
         double expectedStopLoss = Double.parseDouble(END_ENTRY);
         assertEquals(expectedCoinAmount, buyOrder.getCoinAmount());
+        assertEquals(expectedCoinAmount, buyOrder.getTotalCoinAmount());
         assertEquals(expectedBuyPrice, buyOrder.getBuyPrice());
         assertEquals(expectedBuyPrice, buyOrder.getBuyPrice());
         assertEquals(expectedStopLoss, buyOrder.getStopLoss());
