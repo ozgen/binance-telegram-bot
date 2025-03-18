@@ -37,6 +37,7 @@ public class BinanceOpenSellOrderManagerTest {
     private static final String STOPLOSS = "0.008";
     private static final Double BNB_TOTAL_AMOUNT = 0.23;
     private static final Double BNB_LESS_AMOUNT = 0.13;
+    private static final Double BNB_LESS_AMOUNT_2 = 0.11;
     private static final String SIGNAL_ID = "signal_id";
 
     @Mock
@@ -81,7 +82,8 @@ public class BinanceOpenSellOrderManagerTest {
         this.buyOrder = new BuyOrder();
         this.buyOrder.setSymbol(SYMBOL);
         this.buyOrder.setBuyPrice(BUY_PRICE);
-        this.buyOrder.setCoinAmount(BNB_TOTAL_AMOUNT);
+        this.buyOrder.setCoinAmount(BNB_LESS_AMOUNT_2);
+        this.buyOrder.setTotalCoinAmount(BNB_TOTAL_AMOUNT);
         this.buyOrder.setStopLoss(0.012);
         this.buyOrder.setTradingSignal(this.tradingSignal);
 
