@@ -26,6 +26,7 @@ public class BuyOrder {
 
     private String symbol;
 
+    private double totalCoinAmount;
     private double coinAmount;
     private double stopLoss;
     private double buyPrice;
