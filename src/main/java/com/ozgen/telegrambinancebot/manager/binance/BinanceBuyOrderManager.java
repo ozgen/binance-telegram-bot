@@ -118,6 +118,10 @@ public class BinanceBuyOrderManager {
         buyOrder.setTimes(buyOrder.getTimes() + 1);
         tradingSignal.setIsProcessed(ProcessStatus.BUY);
         buyOrder.setTradingSignal(tradingSignal);
+        // if buy order created first time set totalAmount
+        if (buyOrder.getId() == null) {
+            buyOrder.setTotalCoinAmount(coinAmount);
+        }
     }
 
     private boolean createOrderInBinance(BuyOrder buyOrder, TradingSignal tradingSignal) {
