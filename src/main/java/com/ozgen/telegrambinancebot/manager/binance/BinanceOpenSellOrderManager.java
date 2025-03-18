@@ -69,7 +69,7 @@ public class BinanceOpenSellOrderManager {
                     TradingSignal buySignal = buyOrder.getTradingSignal();
                     return sellOrders.stream()
                             .anyMatch(sellOrder -> sellOrder.getTradingSignal().getId().equals(buySignal.getId()) &&
-                                    sellOrder.getCoinAmount() < buyOrder.getCoinAmount());
+                                    sellOrder.getCoinAmount() < buyOrder.getTotalCoinAmount());
                 })
                 .collect(Collectors.toList());
     }
