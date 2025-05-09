@@ -120,6 +120,63 @@ Replace the placeholder values with your actual configuration details.
 
 Ensure all prerequisites are met for the system to run smoothly.
 
+### Running the Bot (Local Profile with Dockerized PostgreSQL)
+
+For local development, you can run the **PostgreSQL database via Docker** and run the **Spring Boot application** locally with the `local` profile.
+
+#### Step 1: Start PostgreSQL via Docker Compose
+
+From the project root, run:
+
+```bash
+docker-compose -f docker/docker-compose.yml up -d
+```
+
+Make sure your `docker-compose.yml` exposes the correct PostgreSQL port (`5432`) and includes environment variables like:
+
+```yaml
+environment:
+  POSTGRES_DB: binancebot
+  POSTGRES_USER: myuser
+  POSTGRES_PASSWORD: mypass
+```
+
+#### Step 2: Set Local Environment Variables
+
+Export these variables in your terminal session (or place them in a `.env` file if your tooling supports it):
+
+```env
+# Database
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/binancebot
+SPRING_DATASOURCE_USERNAME=myuser
+SPRING_DATASOURCE_PASSWORD=mypass
+
+# Telegram Bot
+BOT_TELEGRAM_TOKEN=<your-telegram-token>
+BOT_TELEGRAM_ENABLED=true
+
+# Binance API
+BINANCE_API_KEY=<your-binance-api-key>
+BINANCE_API_SECRET=<your-binance-api-secret>
+```
+Example env file can be found in [here](/sample-local.env) 
+
+#### Step 3: Run the Spring Boot App with `local` Profile
+
+Build and run the app:
+
+```bash
+mvn clean install
+java -Dspring.profiles.active=local -jar target/binance-telegram-bot-0.0.1-SNAPSHOT.jar
+```
+
+This setup:
+- Connects to the PostgreSQL instance running in Docker
+- Loads credentials from local environment variables
+- Avoids any cloud integrations not enabled in the `local` profile
+
+---
+
 ## Usage
 The bot monitors specified Telegram channels for trading signals and executes corresponding trades on Binance. Here's an example of a trading signal the bot can process:
 

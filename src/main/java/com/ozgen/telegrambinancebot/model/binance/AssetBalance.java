@@ -1,5 +1,6 @@
 package com.ozgen.telegrambinancebot.model.binance;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -23,6 +24,7 @@ public class AssetBalance {
     private String asset;
     private String free;
     private String locked;
+    @Column(name = "\"freeze\"")
     private String freeze;
     private String withdrawing;
     private String ipoable;

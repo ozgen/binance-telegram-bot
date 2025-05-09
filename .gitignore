@@ -19,7 +19,7 @@ logs/
 *.iws
 *.iml
 *.ipr
-*.env
+test.env
 
 ### NetBeans ###
 /nbproject/private/
