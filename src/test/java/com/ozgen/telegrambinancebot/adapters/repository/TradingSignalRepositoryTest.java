@@ -1,4 +1,4 @@
-package com.ozgen.telegrambinancebot.repository;
+package com.ozgen.telegrambinancebot.adapters.repository;
 
 import com.ozgen.telegrambinancebot.adapters.repository.TradingSignalRepository;
 import com.ozgen.telegrambinancebot.model.ExecutionStrategy;

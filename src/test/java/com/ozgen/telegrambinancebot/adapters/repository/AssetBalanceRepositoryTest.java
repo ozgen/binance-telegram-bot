@@ -1,7 +1,7 @@
-package com.ozgen.telegrambinancebot.repository;
+package com.ozgen.telegrambinancebot.adapters.repository;
 
-import com.ozgen.telegrambinancebot.adapters.repository.OrderInfoRepository;
-import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
+import com.ozgen.telegrambinancebot.adapters.repository.AssetBalanceRepository;
+import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.utils.TestData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,27 +18,25 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @DataJpaTest
 @TestPropertySource(locations = "classpath:application-test.properties")
-public class OrderInfoRepositoryTest {
+public class AssetBalanceRepositoryTest {
 
     @Autowired
     private TestEntityManager entityManager;
 
     @Autowired
-    private OrderInfoRepository orderInfoRepository;
+    private AssetBalanceRepository assetBalanceRepository;
 
     @BeforeEach
     public void setUp() throws Exception {
-        List<OrderInfo> orderInfos = TestData.getOrderInfos();
-        for (OrderInfo order : orderInfos) {
-            this.entityManager.persist(order);
-        }
+        List<AssetBalance> assets = TestData.getAssets();
+        assets.forEach(assetBalance -> this.entityManager.persist(assetBalance));
     }
 
     @Test
     public void testFindAll() {
-        List<OrderInfo> orderInfos = this.orderInfoRepository.findAll();
+        List<AssetBalance> assetBalances = this.assetBalanceRepository.findAll();
 
-        assertFalse(orderInfos.isEmpty());
-        assertEquals(1, orderInfos.size());
+        assertFalse(assetBalances.isEmpty());
+        assertEquals(7, assetBalances.size());
     }
 }
