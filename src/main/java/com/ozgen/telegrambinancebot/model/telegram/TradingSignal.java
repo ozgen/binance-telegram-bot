@@ -1,5 +1,6 @@
 package com.ozgen.telegrambinancebot.model.telegram;
 
+import com.ozgen.telegrambinancebot.model.ExecutionStrategy;
 import com.ozgen.telegrambinancebot.model.TradingStrategy;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -34,6 +35,8 @@ public class TradingSignal {
     private String stopLoss;
     @Enumerated(EnumType.STRING)
     private TradingStrategy strategy;
+    @Enumerated(EnumType.STRING)
+    private ExecutionStrategy executionStrategy;
     private String investAmount;
 
     private Date createdAt;
@@ -44,6 +47,7 @@ public class TradingSignal {
 
     public TradingSignal() {
         this.strategy = TradingStrategy.DEFAULT;
+        this.executionStrategy = ExecutionStrategy.DEFAULT;
     }
 
     @PrePersist

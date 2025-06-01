@@ -1,5 +1,7 @@
 package com.ozgen.telegrambinancebot.adapters.binance;
 
+import com.ozgen.telegrambinancebot.model.binance.IntervalType;
+
 public interface BinanceAPI {
 
     public String getBTCWalletStatus();
@@ -21,4 +23,6 @@ public interface BinanceAPI {
     public String cancelAndNewOrder(String symbol, Double price, Double quantity, Long cancelOrderId);
 
     public String getUserAsset();
+
+    public String getKlines(String symbol, IntervalType interval);
 }

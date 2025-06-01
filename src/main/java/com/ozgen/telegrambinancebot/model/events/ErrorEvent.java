@@ -1,8 +1,10 @@
 package com.ozgen.telegrambinancebot.model.events;
 
+import lombok.Getter;
 import lombok.ToString;
 import org.springframework.context.ApplicationEvent;
 
+@Getter
 @ToString
 public class ErrorEvent extends ApplicationEvent {
     private final Exception exception;
@@ -12,7 +14,4 @@ public class ErrorEvent extends ApplicationEvent {
         this.exception = exception;
     }
 
-    public Exception getException() {
-        return exception;
-    }
 }

@@ -1,6 +1,7 @@
 package com.ozgen.telegrambinancebot.repository;
 
 
+import com.ozgen.telegrambinancebot.adapters.repository.FutureTradeRepository;
 import com.ozgen.telegrambinancebot.model.TradeStatus;
 import com.ozgen.telegrambinancebot.model.bot.FutureTrade;
 import org.junit.jupiter.api.BeforeEach;

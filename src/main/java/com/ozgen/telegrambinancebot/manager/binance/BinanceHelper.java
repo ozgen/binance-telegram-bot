@@ -1,15 +1,18 @@
 package com.ozgen.telegrambinancebot.manager.binance;
 
 import com.ozgen.telegrambinancebot.configuration.properties.BotConfiguration;
+import com.ozgen.telegrambinancebot.configuration.properties.ScheduleConfiguration;
 import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
+import com.ozgen.telegrambinancebot.utils.DateFactory;
 import com.ozgen.telegrambinancebot.utils.PriceCalculator;
 import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -18,7 +21,17 @@ import java.util.List;
 public class BinanceHelper {
 
     private final BotConfiguration botConfiguration;
+    private final ScheduleConfiguration scheduleConfiguration;
     private final BinanceApiManager binanceApiManager;
+
+    public List<AssetBalance> getUserAssets() {
+        try {
+            return binanceApiManager.getUserAsset();
+        } catch (Exception e) {
+            log.error("Error fetching user assets: {}", e.getMessage(), e);
+            return List.of();
+        }
+    }
 
     public boolean hasAccountEnoughAsset(List<AssetBalance> assets, TradingSignal tradingSignal) throws Exception {
         if (tradingSignal.getInvestAmount() == null) {
@@ -54,6 +67,10 @@ public class BinanceHelper {
         double sellPrice = PriceCalculator.calculateCoinPriceInc(buyPrice, this.botConfiguration.getProfitPercentage());
         Double lastPrice = GenericParser.getDouble(tickerData.getLastPrice()).get();
         return sellPrice <= lastPrice;
+    }
+
+    public Date getSearchDate() {
+        return DateFactory.getDateBeforeInMonths(this.scheduleConfiguration.getMonthBefore());
     }
 
     private Double getBtcToUsdConversionRate() throws Exception {

@@ -1,9 +1,10 @@
 package com.ozgen.telegrambinancebot.service;
 
 
+import com.ozgen.telegrambinancebot.model.ExecutionStrategy;
 import com.ozgen.telegrambinancebot.model.TradingStrategy;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
-import com.ozgen.telegrambinancebot.repository.TradingSignalRepository;
+import com.ozgen.telegrambinancebot.adapters.repository.TradingSignalRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -16,9 +17,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class TradingSignalServiceTest {
 
@@ -65,14 +64,14 @@ public class TradingSignalServiceTest {
         List<String> uuidList = List.of(UUID.randomUUID().toString());
         List<TradingStrategy> strategies = List.of(TradingStrategy.DEFAULT);
         List<TradingSignal> expectedSignals = List.of(new TradingSignal());
-        when(this.tradingSignalRepository.findAllByIdInAndStrategyIn(uuidList, strategies))
+        when(this.tradingSignalRepository.findAllByIdInAndStrategyInAndExecutionStrategy(uuidList, strategies, ExecutionStrategy.DEFAULT))
                 .thenReturn(expectedSignals);
 
         List<TradingSignal> result = this.tradingSignalService.getTradingSignalsByIdList(uuidList);
 
         assertEquals(expectedSignals, result);
         verify(this.tradingSignalRepository)
-                .findAllByIdInAndStrategyIn(uuidList, strategies);
+                .findAllByIdInAndStrategyInAndExecutionStrategy(uuidList, strategies, ExecutionStrategy.DEFAULT);
     }
 
     @Test
@@ -81,14 +80,14 @@ public class TradingSignalServiceTest {
         List<Integer> processStatuses = List.of(1, 2); // Example status codes
         List<TradingSignal> expectedSignals = List.of(new TradingSignal());
         List<TradingStrategy> strategies = List.of(TradingStrategy.DEFAULT);
-        when(this.tradingSignalRepository.findAllByCreatedAtAfterAndIsProcessedInAndStrategyIn(date, processStatuses, strategies))
+        when(this.tradingSignalRepository.findAllByCreatedAtAfterAndIsProcessedInAndStrategyInAndExecutionStrategy(date, processStatuses, strategies, ExecutionStrategy.DEFAULT))
                 .thenReturn(expectedSignals);
 
         List<TradingSignal> result = this.tradingSignalService.getDefaultTradingSignalsAfterDateAndIsProcessIn(date, processStatuses);
 
         assertEquals(expectedSignals, result);
         verify(this.tradingSignalRepository)
-                .findAllByCreatedAtAfterAndIsProcessedInAndStrategyIn(date, processStatuses, strategies);
+                .findAllByCreatedAtAfterAndIsProcessedInAndStrategyInAndExecutionStrategy(date, processStatuses, strategies, ExecutionStrategy.DEFAULT);
     }
 
     @Test
@@ -97,14 +96,14 @@ public class TradingSignalServiceTest {
         List<Integer> processStatuses = List.of(1, 2); // Example status codes
         List<TradingSignal> expectedSignals = List.of(new TradingSignal());
         List<TradingStrategy> strategies = List.of(TradingStrategy.DEFAULT, TradingStrategy.SELL_LATER);
-        when(this.tradingSignalRepository.findAllByCreatedAtAfterAndIsProcessedInAndStrategyIn(date, processStatuses, strategies))
+        when(this.tradingSignalRepository.findAllByCreatedAtAfterAndIsProcessedInAndStrategyInAndExecutionStrategy(date, processStatuses, strategies, ExecutionStrategy.DEFAULT))
                 .thenReturn(expectedSignals);
 
         List<TradingSignal> result = this.tradingSignalService.getAllTradingSignalsAfterDateAndIsProcessIn(date, processStatuses);
 
         assertEquals(expectedSignals, result);
         verify(this.tradingSignalRepository)
-                .findAllByCreatedAtAfterAndIsProcessedInAndStrategyIn(date, processStatuses, strategies);
+                .findAllByCreatedAtAfterAndIsProcessedInAndStrategyInAndExecutionStrategy(date, processStatuses, strategies, ExecutionStrategy.DEFAULT);
     }
 
     @Test
@@ -113,14 +112,98 @@ public class TradingSignalServiceTest {
         List<Integer> processStatuses = List.of(1, 2); // Example status codes
         List<TradingSignal> expectedSignals = List.of(new TradingSignal());
         List<TradingStrategy> strategies = List.of( TradingStrategy.SELL_LATER);
-        when(this.tradingSignalRepository.findAllByCreatedAtAfterAndIsProcessedInAndStrategyIn(date, processStatuses, strategies))
+        when(this.tradingSignalRepository.findAllByCreatedAtAfterAndIsProcessedInAndStrategyInAndExecutionStrategy(date, processStatuses, strategies, ExecutionStrategy.DEFAULT))
                 .thenReturn(expectedSignals);
 
         List<TradingSignal> result = this.tradingSignalService.getSellLaterTradingSignalsAfterDateAndIsProcessIn(date, processStatuses);
 
         assertEquals(expectedSignals, result);
         verify(this.tradingSignalRepository)
-                .findAllByCreatedAtAfterAndIsProcessedInAndStrategyIn(date, processStatuses, strategies);
+                .findAllByCreatedAtAfterAndIsProcessedInAndStrategyInAndExecutionStrategy(date, processStatuses, strategies, ExecutionStrategy.DEFAULT);
+    }
+
+    @Test
+    public void testUpdateTradingSignal_Success() {
+        // Arrange
+        TradingSignal signal = new TradingSignal();
+        String id = UUID.randomUUID().toString();
+        signal.setId(id);
+        when(tradingSignalRepository.existsById(id)).thenReturn(true);
+        when(tradingSignalRepository.save(signal)).thenReturn(signal);
+
+        // Act
+        tradingSignalService.updateTradingSignal(signal);
+
+        // Assert
+        verify(tradingSignalRepository).existsById(id);
+        verify(tradingSignalRepository).save(signal);
+    }
+
+    @Test
+    public void testUpdateTradingSignal_IdIsNull() {
+        // Arrange
+        TradingSignal signal = new TradingSignal(); // ID is null
+
+        // Act
+        tradingSignalService.updateTradingSignal(signal);
+
+        // Assert
+        verify(tradingSignalRepository, never()).save(any());
+        verify(tradingSignalRepository, never()).existsById(any());
+    }
+
+    @Test
+    public void testUpdateTradingSignal_IdDoesNotExist() {
+        // Arrange
+        TradingSignal signal = new TradingSignal();
+        String id = UUID.randomUUID().toString();
+        signal.setId(id);
+        when(tradingSignalRepository.existsById(id)).thenReturn(false);
+
+        // Act
+        tradingSignalService.updateTradingSignal(signal);
+
+        // Assert
+        verify(tradingSignalRepository).existsById(id);
+        verify(tradingSignalRepository, never()).save(any());
+    }
+
+    @Test
+    public void testUpdateTradingSignal_ExceptionThrown() {
+        // Arrange
+        TradingSignal signal = new TradingSignal();
+        String id = UUID.randomUUID().toString();
+        signal.setId(id);
+        when(tradingSignalRepository.existsById(id)).thenReturn(true);
+        when(tradingSignalRepository.save(signal)).thenThrow(new RuntimeException("Simulated DB error"));
+
+        // Act
+        tradingSignalService.updateTradingSignal(signal);
+
+        // Assert
+        verify(tradingSignalRepository).existsById(id);
+        verify(tradingSignalRepository).save(signal);
+    }
+
+    @Test
+    public void testGetAllTradingSignalsAfterDateAndIsProcessInForChunkOrders_Success() {
+        // Arrange
+        Date date = new Date();
+        List<Integer> processStatuses = List.of(1, 2); // example statuses
+        List<TradingStrategy> expectedStrategies = List.of(TradingStrategy.DEFAULT, TradingStrategy.SELL_LATER);
+        List<TradingSignal> expectedSignals = List.of(new TradingSignal());
+
+        when(tradingSignalRepository.findAllByCreatedAtAfterAndIsProcessedInAndStrategyInAndExecutionStrategy(
+                date, processStatuses, expectedStrategies, ExecutionStrategy.CHUNKED))
+                .thenReturn(expectedSignals);
+
+        // Act
+        List<TradingSignal> result = tradingSignalService.getAllTradingSignalsAfterDateAndIsProcessInForChunkOrders(date, processStatuses);
+
+        // Assert
+        assertEquals(expectedSignals, result);
+        verify(tradingSignalRepository).findAllByCreatedAtAfterAndIsProcessedInAndStrategyInAndExecutionStrategy(
+                date, processStatuses, expectedStrategies, ExecutionStrategy.CHUNKED);
     }
 }
 

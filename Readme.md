@@ -252,6 +252,44 @@ STRATEGY: SELL_LATER
 - **SELL_LATER** → Useful for **longer-term holds** instead of auto-selling.
 ---
 
+
+## Chunked Buy and Sell Orders
+
+The bot now supports placing buy and sell orders in smaller parts (called "chunks"). This helps avoid problems like sudden price changes when trading large amounts.
+
+### How to Enable
+
+To turn on chunked order execution, add the following to your `application.properties` or environment variables:
+
+```properties
+# app execution strategy: CHUNKED or DEFAULT
+app.bot.execution.strategy=CHUNKED
+```
+
+### How It Works
+
+When you use the `CHUNKED` setting:
+
+* The bot checks the average trading volume for the coin.
+* Based on the volume, it decides how many small orders (chunks) to place.
+* Your total investment is divided across these small buy orders.
+* Each buy order is tracked separately.
+* When the price target is reached, the bot creates separate sell orders for each chunk.
+
+### Advantages
+
+* Helps avoid moving the market price by placing smaller orders.
+* Adapts to how actively a coin is being traded.
+* Makes it easier to manage and track each trade.
+
+### Switch Back to Default
+
+If you want the bot to place just one buy and one sell order per signal, change the setting back to:
+
+```properties
+app.bot.execution.strategy=DEFAULT
+```
+
 ## Test Coverage
 
 ### Running Tests

@@ -13,7 +13,6 @@ public class BinanceNotCompletedSellOrderScheduler {
 
     private final BinanceOpenSellOrderManager binanceOpenSellOrderManager;
 
-
     @Scheduled(fixedRateString = "#{${app.bot.schedule.openSellOrder}}")
     public void processNotCompletedSellOrders() {
         log.info("NotCompletedSellOrderScheduler has been started");

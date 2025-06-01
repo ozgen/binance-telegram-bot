@@ -2,6 +2,7 @@ package com.ozgen.telegrambinancebot.manager.bot;
 
 
 import com.ozgen.telegrambinancebot.configuration.properties.ScheduleConfiguration;
+import com.ozgen.telegrambinancebot.model.events.IncomingChunkedTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.events.IncomingTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
@@ -73,4 +74,37 @@ public class TradeSignalManagerTest {
         verify(publisher)
                 .publishEvent(any(IncomingTradingSignalEvent.class));
     }
+
+    @Test
+    public void testProcessInitTradingSignalsForChunkOrders() {
+        // Arrange
+        Date mockDate = new Date();
+        TradingSignal mockSignal = new TradingSignal();
+        mockSignal.setId(UUID.randomUUID().toString());
+
+        when(scheduleConfiguration.getMonthBefore()).thenReturn(1);
+        when(tradingSignalService.getAllTradingSignalsAfterDateAndIsProcessInForChunkOrders(any(), anyList()))
+                .thenReturn(List.of(mockSignal));
+
+        // Act
+        tradeSignalManager.processInitTradingSignalsForChunkOrders();
+
+        // Assert
+        verify(tradingSignalService).getAllTradingSignalsAfterDateAndIsProcessInForChunkOrders(any(), anyList());
+        verify(publisher, times(1)).publishEvent(any(IncomingChunkedTradingSignalEvent.class));
+    }
+
+    @Test
+    public void testProcessTradingSignalForChunkOrders() {
+        // Arrange
+        TradingSignal tradingSignal = new TradingSignal();
+        tradingSignal.setId(UUID.randomUUID().toString());
+
+        // Act
+        tradeSignalManager.processTradingSignalForChunkOrders(tradingSignal);
+
+        // Assert
+        verify(publisher).publishEvent(any(IncomingChunkedTradingSignalEvent.class));
+    }
+
 }
