@@ -1,18 +1,22 @@
 package com.ozgen.telegrambinancebot.service;
 
+import com.ozgen.telegrambinancebot.adapters.repository.BuyOrderRepository;
+import com.ozgen.telegrambinancebot.adapters.repository.ChunkOrderRepository;
+import com.ozgen.telegrambinancebot.adapters.repository.SellOrderRepository;
+import com.ozgen.telegrambinancebot.adapters.repository.TradingSignalRepository;
 import com.ozgen.telegrambinancebot.model.ProcessStatus;
-import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
-import com.ozgen.telegrambinancebot.repository.BuyOrderRepository;
-import com.ozgen.telegrambinancebot.repository.SellOrderRepository;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
+import com.ozgen.telegrambinancebot.model.bot.ChunkOrder;
+import com.ozgen.telegrambinancebot.model.bot.OrderStatus;
 import com.ozgen.telegrambinancebot.model.bot.SellOrder;
-import com.ozgen.telegrambinancebot.repository.TradingSignalRepository;
+import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +29,7 @@ public class BotOrderService {
     private final BuyOrderRepository buyOrderRepository;
     private final SellOrderRepository sellOrderRepository;
     private final TradingSignalRepository tradingSignalRepository;
+    private final ChunkOrderRepository chunkOrderRepository;
 
 
     @Transactional
@@ -52,6 +57,18 @@ public class BotOrderService {
         } catch (Exception e) {
             log.error("Error creating sell order: {}", e.getMessage(), e);
             throw e; // Rethrow to handle at a higher level or use specific business logic
+        }
+    }
+
+    @Transactional
+    public ChunkOrder saveChunkOrder(ChunkOrder chunkOrder) {
+        try {
+            ChunkOrder saved = chunkOrderRepository.save(chunkOrder);
+            log.info("ChunkOrder saved: {}", saved);
+            return saved;
+        } catch (Exception e) {
+            log.error("Error saving ChunkOrder: {}", e.getMessage(), e);
+            throw e;
         }
     }
 
@@ -96,6 +113,28 @@ public class BotOrderService {
         } catch (Exception e) {
             log.error("Error retrieving buy orders: {}", e.getMessage(), e);
             return List.of(); // Return an empty list in case of error
+        }
+    }
+
+    public List<ChunkOrder> getBuyChunksByStatus(OrderStatus status) {
+        try {
+            List<ChunkOrder> chunks = chunkOrderRepository.findAllByStatus(status);
+            log.info("Retrieved {} chunk orders with status {}", chunks.size(), status);
+            return chunks;
+        } catch (Exception e) {
+            log.error("Error retrieving chunk orders by status {}: {}", status, e.getMessage(), e);
+            return List.of();
+        }
+    }
+
+    public List<ChunkOrder> getBuyChunksByStatusesAndDate(List<OrderStatus> statuses, Date date) {
+        try {
+            List<ChunkOrder> chunks = chunkOrderRepository.findAllByCreatedAtAfterAndStatusIn(date, statuses);
+            log.info("Retrieved {} chunk orders with date {}", chunks.size(), date);
+            return chunks;
+        } catch (Exception e) {
+            log.error("Error retrieving chunk orders by  date {}: {}", date, e.getMessage(), e);
+            return List.of();
         }
     }
 }

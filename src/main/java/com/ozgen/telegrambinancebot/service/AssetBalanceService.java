@@ -1,7 +1,7 @@
 package com.ozgen.telegrambinancebot.service;
 
 import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
-import com.ozgen.telegrambinancebot.repository.AssetBalanceRepository;
+import com.ozgen.telegrambinancebot.adapters.repository.AssetBalanceRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

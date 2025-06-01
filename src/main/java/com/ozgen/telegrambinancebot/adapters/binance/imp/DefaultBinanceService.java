@@ -2,6 +2,7 @@ package com.ozgen.telegrambinancebot.adapters.binance.imp;
 
 import com.binance.connector.client.SpotClient;
 import com.ozgen.telegrambinancebot.adapters.binance.BinanceAPI;
+import com.ozgen.telegrambinancebot.model.binance.IntervalType;
 import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -97,5 +98,13 @@ public class DefaultBinanceService implements BinanceAPI {
     public String getUserAsset() {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
         return this.binanceClient.createWallet().getUserAsset(parameters);
+    }
+
+    @Override
+    public String getKlines(String symbol, IntervalType interval) {
+        LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
+        parameters.put("symbol", symbol);
+        parameters.put("interval", interval.getValue());
+        return this.binanceClient.createMarket().klines(parameters);
     }
 }

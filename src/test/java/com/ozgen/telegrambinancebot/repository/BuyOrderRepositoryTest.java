@@ -1,5 +1,6 @@
 package com.ozgen.telegrambinancebot.repository;
 
+import com.ozgen.telegrambinancebot.adapters.repository.BuyOrderRepository;
 import com.ozgen.telegrambinancebot.model.ProcessStatus;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;

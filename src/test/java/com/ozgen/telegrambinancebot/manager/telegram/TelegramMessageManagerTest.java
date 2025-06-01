@@ -1,6 +1,9 @@
 package com.ozgen.telegrambinancebot.manager.telegram;
 
 
+import com.ozgen.telegrambinancebot.configuration.properties.AppConfiguration;
+import com.ozgen.telegrambinancebot.model.ExecutionStrategy;
+import com.ozgen.telegrambinancebot.model.events.IncomingChunkedTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.events.IncomingTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
@@ -24,6 +27,8 @@ public class TelegramMessageManagerTest {
 
     @Mock
     private TradingSignalService tradingSignalService;
+    @Mock
+    private AppConfiguration appConfiguration;
 
     @Mock
     private ApplicationEventPublisher publisher;
@@ -40,6 +45,7 @@ public class TelegramMessageManagerTest {
     void testParseTelegramMessage_withValidSignal() {
         // Arrange
         String message = TestData.TRADING_SIGNAL;
+        when(appConfiguration.getExecutionStrategy()).thenReturn(ExecutionStrategy.DEFAULT);
         when(tradingSignalService.saveTradingSignal(any(TradingSignal.class)))
                 .thenAnswer((Answer<TradingSignal>) invocation -> (TradingSignal) invocation.getArguments()[0]);
 
@@ -52,6 +58,25 @@ public class TelegramMessageManagerTest {
                 .saveTradingSignal(any(TradingSignal.class));
         verify(publisher)
                 .publishEvent(any(IncomingTradingSignalEvent.class));
+    }
+
+    @Test
+    void testParseTelegramMessage_withValidSignalAndChunkStrategy() {
+        // Arrange
+        String message = TestData.TRADING_SIGNAL;
+        when(appConfiguration.getExecutionStrategy()).thenReturn(ExecutionStrategy.CHUNKED);
+        when(tradingSignalService.saveTradingSignal(any(TradingSignal.class)))
+                .thenAnswer((Answer<TradingSignal>) invocation -> (TradingSignal) invocation.getArguments()[0]);
+
+        // Act
+        String result = telegramMessageManager.parseTelegramMessage(message);
+
+        // Assert
+        assertTrue(result.contains("success"));
+        verify(tradingSignalService)
+                .saveTradingSignal(any(TradingSignal.class));
+        verify(publisher)
+                .publishEvent(any(IncomingChunkedTradingSignalEvent.class));
     }
 
     @Test

@@ -3,6 +3,7 @@ package com.ozgen.telegrambinancebot.utils.parser;
 
 import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.model.binance.CancelAndNewOrderResponse;
+import com.ozgen.telegrambinancebot.model.binance.KlineData;
 import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
 import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
 import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
@@ -12,10 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class JsonParserTest {
 
@@ -176,4 +174,45 @@ class JsonParserTest {
         assertEquals(Long.valueOf(28), result.getOrderId());
         assertTrue(result.getFills() == null);
     }
+
+    @Test
+    void testParseKlinesJson_withValidJson() {
+        // Arrange
+        String jsonString = "[" +
+                "[" +
+                "1625097600000," +              // openTime
+                "\"34000.00\"," +              // openPrice
+                "\"34500.00\"," +              // highPrice
+                "\"33900.00\"," +              // lowPrice
+                "\"34400.00\"," +              // closePrice
+                "\"100.5\"," +                 // volume
+                "1625097699999," +            // closeTime
+                "3450000.0," +                // quoteAssetVolume
+                "150," +                      // numberOfTrades
+                "\"50.25\"," +                // takerBuyBaseAssetVolume
+                "\"1725000.0\"" +             // takerBuyQuoteAssetVolume
+                "]" +
+                "]";
+
+        // Act
+        List<KlineData> klines = JsonParser.parseKlinesJson(jsonString);
+
+        // Assert
+        assertNotNull(klines);
+        assertEquals(1, klines.size());
+
+        KlineData kline = klines.get(0);
+        assertEquals(1625097600000L, kline.getOpenTime());
+        assertEquals("34000.00", kline.getOpenPrice());
+        assertEquals("34500.00", kline.getHighPrice());
+        assertEquals("33900.00", kline.getLowPrice());
+        assertEquals("34400.00", kline.getClosePrice());
+        assertEquals("100.5", kline.getVolume());
+        assertEquals(1625097699999L, kline.getCloseTime());
+        assertEquals(3450000.0, kline.getQuoteAssetVolume());
+        assertEquals(150, kline.getNumberOfTrades());
+        assertEquals("50.25", kline.getTakerBuyBaseAssetVolume());
+        assertEquals("1725000.0", kline.getTakerBuyQuoteAssetVolume());
+    }
 }
+

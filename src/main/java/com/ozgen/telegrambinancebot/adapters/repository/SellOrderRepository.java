@@ -1,4 +1,4 @@
-package com.ozgen.telegrambinancebot.repository;
+package com.ozgen.telegrambinancebot.adapters.repository;
 
 import com.ozgen.telegrambinancebot.model.bot.SellOrder;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
@@ -13,6 +13,5 @@ public interface SellOrderRepository extends JpaRepository<SellOrder, String> {
 
     Optional<SellOrder> findByTradingSignal(TradingSignal tradingSignal);
     List<SellOrder> findByTradingSignalIn(List<TradingSignal> tradingSignals);
-
 
 }

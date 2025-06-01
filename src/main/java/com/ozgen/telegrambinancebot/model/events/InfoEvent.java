@@ -1,8 +1,10 @@
 package com.ozgen.telegrambinancebot.model.events;
 
+import lombok.Getter;
 import lombok.ToString;
 import org.springframework.context.ApplicationEvent;
 
+@Getter
 @ToString
 public class InfoEvent extends ApplicationEvent {
     private final String message;
@@ -12,7 +14,4 @@ public class InfoEvent extends ApplicationEvent {
         this.message = message;
     }
 
-    public String getMessage() {
-        return message;
-    }
 }

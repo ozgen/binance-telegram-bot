@@ -1,6 +1,7 @@
 package com.ozgen.telegrambinancebot.repository;
 
 
+import com.ozgen.telegrambinancebot.adapters.repository.OpenOrderRepository;
 import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
 import com.ozgen.telegrambinancebot.utils.TestData;
 import org.junit.jupiter.api.BeforeEach;

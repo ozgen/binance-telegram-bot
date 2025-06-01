@@ -1,18 +1,22 @@
 package com.ozgen.telegrambinancebot.service;
 
 
+import com.ozgen.telegrambinancebot.adapters.repository.BuyOrderRepository;
+import com.ozgen.telegrambinancebot.adapters.repository.ChunkOrderRepository;
+import com.ozgen.telegrambinancebot.adapters.repository.SellOrderRepository;
+import com.ozgen.telegrambinancebot.adapters.repository.TradingSignalRepository;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
+import com.ozgen.telegrambinancebot.model.bot.ChunkOrder;
+import com.ozgen.telegrambinancebot.model.bot.OrderStatus;
 import com.ozgen.telegrambinancebot.model.bot.SellOrder;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
-import com.ozgen.telegrambinancebot.repository.BuyOrderRepository;
-import com.ozgen.telegrambinancebot.repository.SellOrderRepository;
-import com.ozgen.telegrambinancebot.repository.TradingSignalRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +33,9 @@ public class BotOrderServiceTest {
     private SellOrderRepository sellOrderRepository;
     @Mock
     private TradingSignalRepository tradingSignalRepository;
+    @Mock
+    private ChunkOrderRepository chunkOrderRepository;
+
 
     @InjectMocks
     private BotOrderService botOrderService;
@@ -240,5 +247,95 @@ public class BotOrderServiceTest {
         assertTrue(result.isEmpty());
         verify(this.sellOrderRepository)
                 .findByTradingSignalIn(signals);
+    }
+
+    @Test
+    public void testSaveChunkOrder_Success() {
+        // Arrange
+        ChunkOrder chunkOrder = new ChunkOrder();
+        when(chunkOrderRepository.save(chunkOrder)).thenReturn(chunkOrder);
+
+        // Act
+        ChunkOrder result = botOrderService.saveChunkOrder(chunkOrder);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(chunkOrder, result);
+        verify(chunkOrderRepository).save(chunkOrder);
+    }
+
+    @Test
+    public void testSaveChunkOrder_Exception() {
+        // Arrange
+        ChunkOrder chunkOrder = new ChunkOrder();
+        when(chunkOrderRepository.save(chunkOrder)).thenThrow(new RuntimeException("Test exception"));
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> botOrderService.saveChunkOrder(chunkOrder));
+        verify(chunkOrderRepository).save(chunkOrder);
+    }
+
+    @Test
+    public void testGetBuyChunksByStatus_Success() {
+        // Arrange
+        OrderStatus status = OrderStatus.BUY_EXECUTED;
+        List<ChunkOrder> expectedChunks = List.of(new ChunkOrder());
+        when(chunkOrderRepository.findAllByStatus(status)).thenReturn(expectedChunks);
+
+        // Act
+        List<ChunkOrder> result = botOrderService.getBuyChunksByStatus(status);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(expectedChunks, result);
+        verify(chunkOrderRepository).findAllByStatus(status);
+    }
+
+    @Test
+    public void testGetBuyChunksByStatus_Exception() {
+        // Arrange
+        OrderStatus status = OrderStatus.SELL_PENDING_RETRY;
+        when(chunkOrderRepository.findAllByStatus(status)).thenThrow(new RuntimeException("Test exception"));
+
+        // Act
+        List<ChunkOrder> result = botOrderService.getBuyChunksByStatus(status);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(chunkOrderRepository).findAllByStatus(status);
+    }
+
+    @Test
+    public void testGetBuyChunksByStatusesAndDate_Success() {
+        // Arrange
+        List<OrderStatus> statuses = List.of(OrderStatus.SELL_PENDING_RETRY, OrderStatus.BUY_EXECUTED);
+        Date date = new Date();
+        List<ChunkOrder> expectedChunks = List.of(new ChunkOrder());
+        when(chunkOrderRepository.findAllByCreatedAtAfterAndStatusIn(date, statuses)).thenReturn(expectedChunks);
+
+        // Act
+        List<ChunkOrder> result = botOrderService.getBuyChunksByStatusesAndDate(statuses, date);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(expectedChunks, result);
+        verify(chunkOrderRepository).findAllByCreatedAtAfterAndStatusIn(date, statuses);
+    }
+
+    @Test
+    public void testGetBuyChunksByStatusesAndDate_Exception() {
+        // Arrange
+        List<OrderStatus> statuses = List.of(OrderStatus.SELL_FAILED);
+        Date date = new Date();
+        when(chunkOrderRepository.findAllByCreatedAtAfterAndStatusIn(date, statuses)).thenThrow(new RuntimeException("DB error"));
+
+        // Act
+        List<ChunkOrder> result = botOrderService.getBuyChunksByStatusesAndDate(statuses, date);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(chunkOrderRepository).findAllByCreatedAtAfterAndStatusIn(date, statuses);
     }
 }

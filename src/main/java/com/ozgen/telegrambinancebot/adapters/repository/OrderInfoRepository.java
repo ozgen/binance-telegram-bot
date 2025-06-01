@@ -1,4 +1,4 @@
-package com.ozgen.telegrambinancebot.repository;
+package com.ozgen.telegrambinancebot.adapters.repository;
 
 import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
 import org.springframework.data.jpa.repository.JpaRepository;

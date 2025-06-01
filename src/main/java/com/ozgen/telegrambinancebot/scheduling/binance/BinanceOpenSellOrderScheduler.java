@@ -14,7 +14,6 @@ public class BinanceOpenSellOrderScheduler {
 
     private final BinanceOpenSellOrderManager binanceOpenSellOrderManager;
 
-
     @Scheduled(fixedRateString = "#{${app.bot.schedule.openSellOrder}}")
     public void processOpenSellOrders() {
         log.info("OpenSellOrderScheduler has been started");

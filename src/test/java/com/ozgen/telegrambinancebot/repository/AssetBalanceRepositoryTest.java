@@ -1,5 +1,6 @@
 package com.ozgen.telegrambinancebot.repository;
 
+import com.ozgen.telegrambinancebot.adapters.repository.AssetBalanceRepository;
 import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.utils.TestData;
 import org.junit.jupiter.api.BeforeEach;

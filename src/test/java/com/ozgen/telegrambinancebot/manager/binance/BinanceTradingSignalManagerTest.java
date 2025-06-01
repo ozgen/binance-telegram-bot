@@ -3,8 +3,10 @@ package com.ozgen.telegrambinancebot.manager.binance;
 
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
+import com.ozgen.telegrambinancebot.model.events.IncomingChunkedTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.events.IncomingTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.events.NewBuyOrderEvent;
+import com.ozgen.telegrambinancebot.model.events.NewChunkedBuyExecutionEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,9 +19,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class BinanceTradingSignalManagerTest {
 
@@ -128,5 +128,64 @@ public class BinanceTradingSignalManagerTest {
                 .getTickerPrice24(SYMBOL);
         verify(this.publisher, never())
                 .publishEvent(any());
+    }
+
+    @Test
+    void testProcessIncomingChunkedTradingSignalEvent_Success() throws Exception {
+        // Arrange
+        when(tradingSignal.getSymbol()).thenReturn(SYMBOL);
+        when(tradingSignal.getEntryStart()).thenReturn(START_ENTRY);
+        when(tradingSignal.getEntryEnd()).thenReturn(END_ENTRY);
+        when(tickerData.getLastPrice()).thenReturn(LAST_PRICE);
+        when(binanceApiManager.getTickerPrice24(SYMBOL)).thenReturn(tickerData);
+
+        IncomingChunkedTradingSignalEvent event = new IncomingChunkedTradingSignalEvent(this, tradingSignal);
+
+        // Act
+        binanceTradingSignalManager.processIncomingChunkedTradingSignalEvent(event);
+
+        // Assert
+        verify(binanceApiManager).getTickerPrice24(SYMBOL);
+        ArgumentCaptor<NewChunkedBuyExecutionEvent> eventCaptor = ArgumentCaptor.forClass(NewChunkedBuyExecutionEvent.class);
+        verify(publisher).publishEvent(eventCaptor.capture());
+
+        NewChunkedBuyExecutionEvent publishedEvent = eventCaptor.getValue();
+        assertEquals(tradingSignal, publishedEvent.getTradingSignal());
+        assertEquals(tickerData, publishedEvent.getTickerData());
+    }
+
+    @Test
+    void testProcessIncomingChunkedTradingSignalEvent_FetchTickerFails() throws Exception {
+        // Arrange
+        when(tradingSignal.getSymbol()).thenReturn(SYMBOL);
+        when(binanceApiManager.getTickerPrice24(SYMBOL)).thenThrow(new RuntimeException("API error"));
+
+        IncomingChunkedTradingSignalEvent event = new IncomingChunkedTradingSignalEvent(this, tradingSignal);
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> binanceTradingSignalManager.processIncomingChunkedTradingSignalEvent(event));
+
+        verify(binanceApiManager).getTickerPrice24(SYMBOL);
+        verify(publisher).publishEvent(any(ErrorEvent.class));
+        verify(publisher, never()).publishEvent(isA(NewChunkedBuyExecutionEvent.class));
+    }
+
+    @Test
+    void testProcessIncomingChunkedTradingSignalEvent_NotAvailableToBuy() throws Exception {
+        // Arrange
+        when(tradingSignal.getSymbol()).thenReturn(SYMBOL);
+        when(tradingSignal.getEntryStart()).thenReturn(START_ENTRY);
+        when(tradingSignal.getEntryEnd()).thenReturn(END_ENTRY);
+        when(tickerData.getLastPrice()).thenReturn(LAST_PRICE_OUT_RANGE); // outside of entry range
+        when(binanceApiManager.getTickerPrice24(SYMBOL)).thenReturn(tickerData);
+
+        IncomingChunkedTradingSignalEvent event = new IncomingChunkedTradingSignalEvent(this, tradingSignal);
+
+        // Act
+        binanceTradingSignalManager.processIncomingChunkedTradingSignalEvent(event);
+
+        // Assert
+        verify(binanceApiManager).getTickerPrice24(SYMBOL);
+        verify(publisher, never()).publishEvent(isA(NewChunkedBuyExecutionEvent.class));
     }
 }

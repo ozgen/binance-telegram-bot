@@ -57,6 +57,8 @@ public class BinanceSellOrderManagerTest {
     @Mock
     private BotOrderService botOrderService;
     @Mock
+    private BinanceHelper binanceHelper;
+    @Mock
     private ApplicationEventPublisher publisher;
 
     @InjectMocks
@@ -107,6 +109,10 @@ public class BinanceSellOrderManagerTest {
                 .thenReturn(0.012);
         when(this.buyOrder.getTradingSignal())
                 .thenReturn(this.tradingSignal);
+
+        when(this.binanceHelper.getUserAssets())
+                .thenReturn(List.of(assetBalance));
+
     }
 
     @Test

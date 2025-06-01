@@ -4,7 +4,7 @@ package com.ozgen.telegrambinancebot.service;
 import com.ozgen.telegrambinancebot.model.TradeStatus;
 import com.ozgen.telegrambinancebot.model.bot.FutureTrade;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
-import com.ozgen.telegrambinancebot.repository.FutureTradeRepository;
+import com.ozgen.telegrambinancebot.adapters.repository.FutureTradeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

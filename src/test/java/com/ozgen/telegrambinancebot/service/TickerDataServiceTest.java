@@ -2,7 +2,7 @@ package com.ozgen.telegrambinancebot.service;
 
 
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
-import com.ozgen.telegrambinancebot.repository.TickerDataRepository;
+import com.ozgen.telegrambinancebot.adapters.repository.TickerDataRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

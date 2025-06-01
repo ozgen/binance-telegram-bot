@@ -2,21 +2,22 @@ package com.ozgen.telegrambinancebot.manager.binance;
 
 
 import com.ozgen.telegrambinancebot.configuration.properties.BotConfiguration;
+import com.ozgen.telegrambinancebot.configuration.properties.ScheduleConfiguration;
 import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
+import com.ozgen.telegrambinancebot.utils.DateFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 class BinanceHelperTest {
@@ -41,6 +42,8 @@ class BinanceHelperTest {
     private BotConfiguration botConfiguration;
     @Mock
     private BinanceApiManager binanceApiManager;
+    @Mock
+    private ScheduleConfiguration scheduleConfiguration;
 
     @InjectMocks
     private BinanceHelper binanceHelper;
@@ -170,5 +173,48 @@ class BinanceHelperTest {
         double result = this.binanceHelper.calculateCoinAmount(expectedBuyPrice, this.tradingSignal);
 
         assertEquals(expectedCoinAmount, result);
+    }
+
+    @Test
+    public void test_getUserAssets_success() throws Exception {
+        // Arrange
+        List<AssetBalance> mockAssets = List.of(new AssetBalance());
+        when(binanceApiManager.getUserAsset()).thenReturn(mockAssets);
+
+        // Act
+        List<AssetBalance> result = binanceHelper.getUserAssets();
+
+        // Assert
+        assertEquals(mockAssets, result);
+    }
+
+    @Test
+    public void test_getUserAssets_exceptionReturnsEmptyList() throws Exception {
+        // Arrange
+        when(binanceApiManager.getUserAsset()).thenThrow(new RuntimeException("API failure"));
+
+        // Act
+        List<AssetBalance> result = binanceHelper.getUserAssets();
+
+        // Assert
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void test_getSearchDate_returnsExpectedDate() {
+        // Arrange
+        int monthsBefore = 2;
+        when(scheduleConfiguration.getMonthBefore()).thenReturn(monthsBefore);
+        Date expectedDate = new Date(0); // example fixed point
+
+        try (MockedStatic<DateFactory> mockedStatic = org.mockito.Mockito.mockStatic(DateFactory.class)) {
+            mockedStatic.when(() -> DateFactory.getDateBeforeInMonths(monthsBefore)).thenReturn(expectedDate);
+
+            // Act
+            Date result = binanceHelper.getSearchDate();
+
+            // Assert
+            assertEquals(expectedDate, result);
+        }
     }
 }

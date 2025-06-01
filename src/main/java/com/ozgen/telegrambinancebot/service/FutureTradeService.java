@@ -3,7 +3,7 @@ package com.ozgen.telegrambinancebot.service;
 import com.ozgen.telegrambinancebot.model.TradeStatus;
 import com.ozgen.telegrambinancebot.model.bot.FutureTrade;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
-import com.ozgen.telegrambinancebot.repository.FutureTradeRepository;
+import com.ozgen.telegrambinancebot.adapters.repository.FutureTradeRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
