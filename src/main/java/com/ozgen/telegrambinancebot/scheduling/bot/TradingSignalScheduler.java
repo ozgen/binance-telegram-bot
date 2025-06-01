@@ -21,4 +21,11 @@ public class TradingSignalScheduler {
         this.tradeSignalManager.processInitTradingSignals();
         log.info("TradingSignalScheduler has been finished");
     }
+
+    @Scheduled(fixedRateString = "#{${app.bot.schedule.tradingSignal}}")
+    public void processInitTradingSignalsForChunkOrders() {
+        log.info("TradingSignalScheduler for chunk orders has been started");
+        this.tradeSignalManager.processInitTradingSignalsForChunkOrders();
+        log.info("TradingSignalScheduler for chunk orders has been finished");
+    }
 }

@@ -32,11 +32,12 @@ public class BinanceSellOrderManager {
     private final FutureTradeService futureTradeService;
     private final BotOrderService botOrderService;
     private final ApplicationEventPublisher publisher;
+    private final BinanceHelper helper;
 
 
     public void processNewSellOrderEvent(NewSellOrderEvent event) {
         BuyOrder buyOrder = event.getBuyOrder();
-        List<AssetBalance> assets = this.getUserAssets();
+        List<AssetBalance> assets = this.helper.getUserAssets();
         if (assets == null || assets.isEmpty()) {
             log.error("Failed to get account snapshot for BuyOrder ID {}", buyOrder.getId());
             //todo check this case is handled or not?
@@ -54,23 +55,12 @@ public class BinanceSellOrderManager {
         if (sellOrder != null) {
             this.sendSellOrderInfoMessage(sellOrder);
             log.info("Sell order created successfully for BuyOrder ID {}", buyOrder.getId());
-            // Additional logic if required
+            // todo Additional logic if required
         } else {
             log.warn("Sell order creation failed for BuyOrder ID {}", buyOrder.getId());
-            // Handle failed sell order creation with sell error future trade schedule...
+            // todo Handle failed sell order creation with sell error future trade schedule...
         }
     }
-
-    private List<AssetBalance> getUserAssets() {
-        try {
-            return binanceApiManager.getUserAsset();
-        } catch (Exception e) {
-            log.error("Error fetching user assets: {}", e.getMessage(), e);
-            this.processException(e);
-            return null;
-        }
-    }
-
 
     private SellOrder createSellOrder(BuyOrder buyOrder, List<AssetBalance> assets, String coinSymbol) {
         Double coinAmount = GenericParser.getAssetFromSymbol(assets, coinSymbol);

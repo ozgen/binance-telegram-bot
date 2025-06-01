@@ -3,6 +3,8 @@ package com.ozgen.telegrambinancebot.manager.binance;
 import com.ozgen.telegrambinancebot.adapters.binance.BinanceAPI;
 import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
 import com.ozgen.telegrambinancebot.model.binance.CancelAndNewOrderResponse;
+import com.ozgen.telegrambinancebot.model.binance.IntervalType;
+import com.ozgen.telegrambinancebot.model.binance.KlineData;
 import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
 import com.ozgen.telegrambinancebot.model.binance.OrderInfo;
 import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
@@ -36,6 +38,14 @@ public class BinanceApiManager {
 
         log.info("'{}' of symbol ticker data is parsed, successfully.", symbol);
         return this.tickerDataService.createTickerData(tickerData);
+    }
+
+    List<KlineData> getListOfKlineData(String symbol, IntervalType interval) throws Exception {
+        String klinesJson = this.binanceAPI.getKlines(symbol, interval);
+        List<KlineData> klineDataList = JsonParser.parseKlinesJson(klinesJson);
+        klineDataList.forEach(klineData -> klineData.setSymbol(symbol));
+        log.info("kline data list are parsed, successfully.");
+        return klineDataList;
     }
 
 //    SnapshotData getAccountSnapshot() throws Exception {

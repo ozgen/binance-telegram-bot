@@ -1,6 +1,9 @@
 package com.ozgen.telegrambinancebot.manager.telegram;
 
+import com.ozgen.telegrambinancebot.configuration.properties.AppConfiguration;
+import com.ozgen.telegrambinancebot.model.ExecutionStrategy;
 import com.ozgen.telegrambinancebot.model.ProcessStatus;
+import com.ozgen.telegrambinancebot.model.events.IncomingChunkedTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.events.IncomingTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
@@ -20,6 +23,7 @@ public class TelegramMessageManager {
     static final String FAILED_MESSAGE = "The post is not parsed.";
 
     private final TradingSignalService tradingSignalService;
+    private final AppConfiguration appConfiguration;
 
     private final ApplicationEventPublisher publisher;
 
@@ -35,9 +39,16 @@ public class TelegramMessageManager {
             return FAILED_MESSAGE;
         }
         tradingSignal.setIsProcessed(ProcessStatus.INIT);
+        tradingSignal.setExecutionStrategy(appConfiguration.getExecutionStrategy());
+
         TradingSignal saved = this.tradingSignalService.saveTradingSignal(tradingSignal);
-        IncomingTradingSignalEvent event = new IncomingTradingSignalEvent(this, saved);
-        this.publisher.publishEvent(event);
+        if (saved.getExecutionStrategy() == ExecutionStrategy.CHUNKED) {
+            log.info("Dispatching IncomingChunkedTradingSignalEvent for {}", saved.getSymbol());
+            this.publisher.publishEvent(new IncomingChunkedTradingSignalEvent(this, saved));
+        } else {
+            log.info("Dispatching IncomingTradingSignalEvent for {}", saved.getSymbol());
+            this.publisher.publishEvent(new IncomingTradingSignalEvent(this, saved));
+        }
 
         return String.format(SUCCESS_MESSAGE, saved.getSymbol());
     }

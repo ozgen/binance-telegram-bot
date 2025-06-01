@@ -1,6 +1,7 @@
 package com.ozgen.telegrambinancebot.repository;
 
 
+import com.ozgen.telegrambinancebot.adapters.repository.CancelAndNewOrderResponseRepository;
 import com.ozgen.telegrambinancebot.model.binance.CancelAndNewOrderResponse;
 import com.ozgen.telegrambinancebot.utils.TestData;
 import org.junit.jupiter.api.BeforeEach;
