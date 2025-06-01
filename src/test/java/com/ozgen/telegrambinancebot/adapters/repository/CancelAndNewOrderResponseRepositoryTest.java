@@ -1,7 +1,8 @@
-package com.ozgen.telegrambinancebot.repository;
+package com.ozgen.telegrambinancebot.adapters.repository;
 
-import com.ozgen.telegrambinancebot.adapters.repository.OrderResponseRepository;
-import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
+
+import com.ozgen.telegrambinancebot.adapters.repository.CancelAndNewOrderResponseRepository;
+import com.ozgen.telegrambinancebot.model.binance.CancelAndNewOrderResponse;
 import com.ozgen.telegrambinancebot.utils.TestData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,26 +16,25 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-
 @DataJpaTest
 @TestPropertySource(locations = "classpath:application-test.properties")
-public class OrderResponseRepositoryTest {
+public class CancelAndNewOrderResponseRepositoryTest {
 
     @Autowired
     private TestEntityManager entityManager;
 
     @Autowired
-    private OrderResponseRepository orderResponseRepository;
+    private CancelAndNewOrderResponseRepository cancelAndNewOrderResponseRepository;
 
     @BeforeEach
     public void setUp() throws Exception {
-        OrderResponse orderResponse = TestData.getOrderResponse();
-        this.entityManager.persist(orderResponse);
+        CancelAndNewOrderResponse cancelAndNewOrderResponse = TestData.getCancelAndNewOrderResponse();
+        this.entityManager.persist(cancelAndNewOrderResponse);
     }
 
     @Test
-    public void testFindAll() {
-        List<OrderResponse> orderResponses = this.orderResponseRepository.findAll();
+    public void testFindAll(){
+        List<CancelAndNewOrderResponse> orderResponses = this.cancelAndNewOrderResponseRepository.findAll();
 
         assertFalse(orderResponses.isEmpty());
         assertEquals(1, orderResponses.size());
