@@ -1,7 +1,7 @@
-package com.ozgen.telegrambinancebot.repository;
+package com.ozgen.telegrambinancebot.adapters.repository;
 
-import com.ozgen.telegrambinancebot.adapters.repository.AssetBalanceRepository;
-import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
+import com.ozgen.telegrambinancebot.adapters.repository.TickerDataRepository;
+import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.utils.TestData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,25 +18,25 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @DataJpaTest
 @TestPropertySource(locations = "classpath:application-test.properties")
-public class AssetBalanceRepositoryTest {
+public class TickerDataRepositoryTest {
 
     @Autowired
     private TestEntityManager entityManager;
 
     @Autowired
-    private AssetBalanceRepository assetBalanceRepository;
+    private TickerDataRepository tickerDataRepository;
 
     @BeforeEach
     public void setUp() throws Exception {
-        List<AssetBalance> assets = TestData.getAssets();
-        assets.forEach(assetBalance -> this.entityManager.persist(assetBalance));
+        TickerData tickerData = TestData.getTickerData();
+        this.entityManager.persist(tickerData);
     }
 
     @Test
     public void testFindAll() {
-        List<AssetBalance> assetBalances = this.assetBalanceRepository.findAll();
+        List<TickerData> tickerDataList = this.tickerDataRepository.findAll();
 
-        assertFalse(assetBalances.isEmpty());
-        assertEquals(7, assetBalances.size());
+        assertFalse(tickerDataList.isEmpty());
+        assertEquals(1, tickerDataList.size());
     }
 }

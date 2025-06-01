@@ -1,8 +1,7 @@
-package com.ozgen.telegrambinancebot.repository;
+package com.ozgen.telegrambinancebot.adapters.repository;
 
-
-import com.ozgen.telegrambinancebot.adapters.repository.OpenOrderRepository;
-import com.ozgen.telegrambinancebot.model.binance.OpenOrder;
+import com.ozgen.telegrambinancebot.adapters.repository.OrderResponseRepository;
+import com.ozgen.telegrambinancebot.model.binance.OrderResponse;
 import com.ozgen.telegrambinancebot.utils.TestData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,29 +15,28 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+
 @DataJpaTest
 @TestPropertySource(locations = "classpath:application-test.properties")
-public class OpenOrderRepositoryTest {
+public class OrderResponseRepositoryTest {
 
     @Autowired
     private TestEntityManager entityManager;
 
     @Autowired
-    private OpenOrderRepository openOrderRepository;
+    private OrderResponseRepository orderResponseRepository;
 
     @BeforeEach
     public void setUp() throws Exception {
-        List<OpenOrder> openOrders = TestData.getOpenOrders();
-        for (OpenOrder order : openOrders) {
-            this.entityManager.persist(order);
-        }
+        OrderResponse orderResponse = TestData.getOrderResponse();
+        this.entityManager.persist(orderResponse);
     }
 
     @Test
     public void testFindAll() {
-        List<OpenOrder> openOrders = this.openOrderRepository.findAll();
+        List<OrderResponse> orderResponses = this.orderResponseRepository.findAll();
 
-        assertFalse(openOrders.isEmpty());
-        assertEquals(3, openOrders.size());
+        assertFalse(orderResponses.isEmpty());
+        assertEquals(1, orderResponses.size());
     }
 }
