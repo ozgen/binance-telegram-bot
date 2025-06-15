@@ -3,6 +3,7 @@ package com.ozgen.telegrambinancebot.manager.bot;
 import com.ozgen.telegrambinancebot.configuration.properties.ScheduleConfiguration;
 import com.ozgen.telegrambinancebot.model.ProcessStatus;
 import com.ozgen.telegrambinancebot.model.events.IncomingChunkedTradingSignalEvent;
+import com.ozgen.telegrambinancebot.model.events.IncomingProgressiveChunkedTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.events.IncomingTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
@@ -45,6 +46,16 @@ public class TradeSignalManager {
         tradingSignals.forEach(this::processTradingSignalForChunkOrders);
     }
 
+    public void processInitTradingSignalsForProgressiveChunkOrders() {
+        log.info("Processing initial trading signals...");
+        List<Integer> list = List.of(ProcessStatus.INIT);
+        Date dateBeforeInMonths = DateFactory.getDateBeforeInMonths(this.scheduleConfiguration.getMonthBefore());
+        log.debug("Retrieving trading signals after date: {}", dateBeforeInMonths);
+        List<TradingSignal> tradingSignals = this.tradingSignalService.getAllTradingSignalsAfterDateAndIsProcessInForPrChunkOrders(dateBeforeInMonths, list);
+        log.info("Found {} trading signals to process progressive chunk.", tradingSignals.size());
+        tradingSignals.forEach(this::processTradingSignalForProgressiveChunkOrders);
+    }
+
     void processTradingSignal(TradingSignal tradingSignal) {
         log.info("Processing trading signal: {}", tradingSignal.getId());
         IncomingTradingSignalEvent incomingTradingSignalEvent = new IncomingTradingSignalEvent(this, tradingSignal);
@@ -56,6 +67,14 @@ public class TradeSignalManager {
     void processTradingSignalForChunkOrders(TradingSignal tradingSignal) {
         log.info("Processing trading signal: {}", tradingSignal.getId());
         IncomingChunkedTradingSignalEvent incomingTradingSignalEvent = new IncomingChunkedTradingSignalEvent(this, tradingSignal);
+        this.publisher.publishEvent(incomingTradingSignalEvent);
+        log.info("Published IncomingTradingSignalEvent for Trading Signal ID: {}", tradingSignal.getId());
+        SyncUtil.pauseBetweenOperations();
+    }
+
+    void processTradingSignalForProgressiveChunkOrders(TradingSignal tradingSignal) {
+        log.info("Processing trading signal: {}", tradingSignal.getId());
+        IncomingProgressiveChunkedTradingSignalEvent incomingTradingSignalEvent = new IncomingProgressiveChunkedTradingSignalEvent(this, tradingSignal);
         this.publisher.publishEvent(incomingTradingSignalEvent);
         log.info("Published IncomingTradingSignalEvent for Trading Signal ID: {}", tradingSignal.getId());
         SyncUtil.pauseBetweenOperations();
