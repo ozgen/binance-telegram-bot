@@ -252,7 +252,6 @@ STRATEGY: SELL_LATER
 - **SELL_LATER** → Useful for **longer-term holds** instead of auto-selling.
 ---
 
-
 ## Chunked Buy and Sell Orders
 
 The bot now supports placing buy and sell orders in smaller parts (called "chunks"). This helps avoid problems like sudden price changes when trading large amounts.
@@ -282,6 +281,72 @@ When you use the `CHUNKED` setting:
 * Adapts to how actively a coin is being traded.
 * Makes it easier to manage and track each trade.
 
+---
+
+### CHUNKED_PROGRESSIVE Strategy
+
+This advanced execution strategy builds upon `CHUNKED` by reacting dynamically to real-time market conditions. It also supports multiple entries, margin-split investments, calculated leverage, and multiple take-profit levels.
+
+To enable:
+
+```properties
+app.bot.execution.strategy=CHUNKED_PROGRESSIVE
+```
+
+#### How It Works
+
+* The bot calculates **average quote volume** using recent 5-minute candlesticks.
+* Based on this liquidity, it dynamically sets the **number of chunks**:
+
+  * Higher liquidity → more chunks.
+  * Lower liquidity → fewer chunks.
+* Before placing each chunk, the bot ensures:
+
+  * The **price is within the signal's entry range**.
+  * The market shows a **short-term bullish trend** (based on recent price movements).
+* For each chunk:
+
+  * It uses a **fixed portion of the total margin** (e.g., 5% of portfolio split evenly).
+
+  * It calculates **leverage** using the formula:
+
+    ```
+    leverage = entryPrice / (entryPrice - stopLoss)
+    ```
+
+  * It assigns a specific **take-profit level** based on chunk index.
+* Each chunk is sold **independently** once its target profit price is reached.
+
+#### Signal Example
+
+```
+NKNBTC
+ENTRY: 0.00000260 - 0.00000290
+TP1: 0.00000315
+TP2: 0.00000360
+TP3: 0.00000432
+TP4: 0.00000486
+TP5: 0.00000550
+TP6: 0.00000666
+TP7: 0.00000741
+STOP: Close weekly below 0.00000240
+```
+
+In this case:
+
+* The bot averages the entry range (e.g., midpoint of 0.00000260 and 0.00000290).
+* Calculates leverage using that midpoint and the stop price (e.g., 0.00000275 / (0.00000275 - 0.00000240)).
+* Distributes investment and assigns a corresponding take-profit (TP1–TP7) per chunk.
+
+#### Advantages
+
+* Reacts to live market signals for smarter trade timing.
+* Dynamically adjusts chunking based on market liquidity.
+* Calculates leverage based on real risk (entry vs. stop).
+* Supports multiple TP levels for staggered profit-taking.
+
+---
+
 ### Switch Back to Default
 
 If you want the bot to place just one buy and one sell order per signal, change the setting back to:
@@ -289,6 +354,8 @@ If you want the bot to place just one buy and one sell order per signal, change 
 ```properties
 app.bot.execution.strategy=DEFAULT
 ```
+
+---
 
 ## Test Coverage
 
