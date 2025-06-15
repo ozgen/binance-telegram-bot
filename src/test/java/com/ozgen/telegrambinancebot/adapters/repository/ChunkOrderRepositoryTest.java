@@ -1,7 +1,10 @@
 package com.ozgen.telegrambinancebot.adapters.repository;
 
+import com.ozgen.telegrambinancebot.model.ExecutionStrategy;
 import com.ozgen.telegrambinancebot.model.bot.ChunkOrder;
 import com.ozgen.telegrambinancebot.model.bot.OrderStatus;
+import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
+import com.ozgen.telegrambinancebot.utils.TestData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +35,10 @@ public class ChunkOrderRepositoryTest {
         this.chunkOrder = new ChunkOrder();
         this.chunkOrder.setStatus(OrderStatus.BUY_EXECUTED);
         this.chunkOrder.setCreatedAt(new Date(System.currentTimeMillis() - 1000)); // 1 second ago
+        TradingSignal tradingSignal = TestData.getTradingSignal();
+        tradingSignal.setExecutionStrategy(ExecutionStrategy.CHUNKED);
+        this.entityManager.persist(tradingSignal);
+        this.chunkOrder.setTradingSignal(tradingSignal);
 
         this.chunkOrder = this.entityManager.persist(this.chunkOrder);
     }
@@ -47,9 +54,10 @@ public class ChunkOrderRepositoryTest {
     @Test
     public void testFindAllByCreatedAtAfterAndStatusIn() {
         Date beforeCreation = new Date(System.currentTimeMillis() - 2000); // 2 seconds ago
-        List<ChunkOrder> result = this.chunkOrderRepository.findAllByCreatedAtAfterAndStatusIn(
+        List<ChunkOrder> result = this.chunkOrderRepository.findAllByCreatedAtAfterAndStatusInAndTradingSignal_ExecutionStrategy(
                 beforeCreation,
-                List.of(OrderStatus.BUY_EXECUTED)
+                List.of(OrderStatus.BUY_EXECUTED),
+                ExecutionStrategy.CHUNKED
         );
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());

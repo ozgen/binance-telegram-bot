@@ -16,7 +16,6 @@ import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -33,7 +32,6 @@ public class BinanceChunkSellOrderManager {
     private final BotConfiguration botConfiguration;
     private final BinanceHelper binanceHelper;
 
-    @EventListener
     public void onNewSellChunkOrderEvent(NewSellChunkOrderEvent event) {
         processChunkOrder(event.getChunkOrder());
     }
@@ -57,42 +55,41 @@ public class BinanceChunkSellOrderManager {
 
         try {
             double currentPrice = GenericParser.getDouble(
-                    binanceApiManager.getTickerPrice24(symbol).getLastPrice()).orElseThrow();
+                    this.binanceApiManager.getTickerPrice24(symbol).getLastPrice()).orElseThrow();
 
             double sellPrice = PriceCalculator.calculateCoinPriceInc(
-                    chunkOrder.getBuyPrice(), botConfiguration.getProfitPercentage());
+                    chunkOrder.getBuyPrice(), this.botConfiguration.getProfitPercentage());
 
             boolean shouldSell = currentPrice >= sellPrice || signal.getStrategy() == TradingStrategy.DEFAULT;
 
             if (shouldSell) {
                 double stopLoss = GenericParser.getDouble(signal.getStopLoss()).orElse(0.0);
-                List<AssetBalance> assets = binanceHelper.getUserAssets();
-                String coinSymbol = SymbolGenerator.getCoinSymbol(symbol, botConfiguration.getCurrency());
+                List<AssetBalance> assets = this.binanceHelper.getUserAssets();
+                String coinSymbol = SymbolGenerator.getCoinSymbol(symbol, this.botConfiguration.getCurrency());
 
                 if (coinSymbol == null) {
                     log.error("Coin symbol could not be generated for BuyOrder ID {}", chunkOrder.getId());
                     return;
                 }
 
-                Double coinAmount = GenericParser.getAssetFromSymbol(assets, coinSymbol);
-                if (coinAmount == null) {
+                double coinAmount = GenericParser.getAssetFromSymbol(assets, coinSymbol);
+                if (coinAmount == 0.0) {
                     log.error("Coin amount could not be found for symbol {}", coinSymbol);
                     return;
                 }
 
                 chunkOrder.setSellCoinAmount(
-                        coinAmount > chunkOrder.getBuyCoinAmount() ?
-                                chunkOrder.getBuyCoinAmount() : coinAmount
+                        Math.min(coinAmount, chunkOrder.getBuyCoinAmount())
                 );
 
-                binanceApiManager.newOrderWithStopLoss(symbol, sellPrice,
+                this.binanceApiManager.newOrderWithStopLoss(symbol, sellPrice,
                         chunkOrder.getSellCoinAmount(), stopLoss);
 
                 chunkOrder.setSellPrice(sellPrice);
                 chunkOrder.setStopLoss(stopLoss);
                 chunkOrder.setStatus(OrderStatus.SELL_EXECUTED);
                 log.info("Sell chunk executed: {}", chunkOrder);
-                publisher.publishEvent(new InfoEvent(this, "Sell executed for: " + chunkOrder));
+                this.publisher.publishEvent(new InfoEvent(this, "Sell executed for: " + chunkOrder));
             } else {
                 chunkOrder.setStatus(OrderStatus.SELL_PENDING_RETRY);
                 log.info("Chunk {} not sold, price below threshold. Marked for retry.", chunkOrder.getId());
@@ -100,24 +97,24 @@ public class BinanceChunkSellOrderManager {
         } catch (Exception e) {
             log.error("Error executing sell chunk {}: {}", chunkOrder.getId(), e.getMessage(), e);
             chunkOrder.setStatus(OrderStatus.SELL_FAILED);
-            publisher.publishEvent(new ErrorEvent(this, e));
+            this.publisher.publishEvent(new ErrorEvent(this, e));
         }
 
-        botOrderService.saveChunkOrder(chunkOrder);
+        this.botOrderService.saveChunkOrder(chunkOrder);
     }
 
     public void retryPendingChunks() {
-        List<ChunkOrder> pending = botOrderService.getBuyChunksByStatus(OrderStatus.SELL_PENDING_RETRY);
+        List<ChunkOrder> pending = this.botOrderService.getBuyChunksByStatus(OrderStatus.SELL_PENDING_RETRY);
 
         for (ChunkOrder chunk : pending) {
             try {
                 double price = GenericParser.getDouble(
-                        binanceApiManager.getTickerPrice24(chunk.getSymbol()).getLastPrice()
+                        this.binanceApiManager.getTickerPrice24(chunk.getSymbol()).getLastPrice()
                 ).orElseThrow();
 
                 if (price > chunk.getBuyPrice()) {
                     log.info("Retrying chunk {} due to rising price", chunk.getId());
-                    publisher.publishEvent(new NewSellChunkOrderEvent(this, chunk));
+                    this.publisher.publishEvent(new NewSellChunkOrderEvent(this, chunk));
                 } else {
                     log.info("Chunk {} still not profitable. Waiting...", chunk.getId());
                 }

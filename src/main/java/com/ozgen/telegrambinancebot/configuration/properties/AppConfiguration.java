@@ -12,6 +12,6 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 public class AppConfiguration {
 
-    private ExecutionStrategy executionStrategy;
+    private ExecutionStrategy strategy;
     private double minQuoteVolume;
 }

@@ -4,6 +4,7 @@ import com.ozgen.telegrambinancebot.configuration.properties.AppConfiguration;
 import com.ozgen.telegrambinancebot.model.ExecutionStrategy;
 import com.ozgen.telegrambinancebot.model.ProcessStatus;
 import com.ozgen.telegrambinancebot.model.events.IncomingChunkedTradingSignalEvent;
+import com.ozgen.telegrambinancebot.model.events.IncomingProgressiveChunkedTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.events.IncomingTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
@@ -39,12 +40,15 @@ public class TelegramMessageManager {
             return FAILED_MESSAGE;
         }
         tradingSignal.setIsProcessed(ProcessStatus.INIT);
-        tradingSignal.setExecutionStrategy(appConfiguration.getExecutionStrategy());
+        tradingSignal.setExecutionStrategy(appConfiguration.getStrategy());
 
         TradingSignal saved = this.tradingSignalService.saveTradingSignal(tradingSignal);
         if (saved.getExecutionStrategy() == ExecutionStrategy.CHUNKED) {
             log.info("Dispatching IncomingChunkedTradingSignalEvent for {}", saved.getSymbol());
             this.publisher.publishEvent(new IncomingChunkedTradingSignalEvent(this, saved));
+        } else if (saved.getExecutionStrategy() == ExecutionStrategy.CHUNKED_PROGRESSIVE) {
+            log.info("Dispatching IncomingProgressiveChunkedTradingSignalEvent for {}", saved.getSymbol());
+            this.publisher.publishEvent(new IncomingProgressiveChunkedTradingSignalEvent(this, saved));
         } else {
             log.info("Dispatching IncomingTradingSignalEvent for {}", saved.getSymbol());
             this.publisher.publishEvent(new IncomingTradingSignalEvent(this, saved));

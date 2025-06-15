@@ -5,6 +5,7 @@ import com.ozgen.telegrambinancebot.adapters.repository.BuyOrderRepository;
 import com.ozgen.telegrambinancebot.adapters.repository.ChunkOrderRepository;
 import com.ozgen.telegrambinancebot.adapters.repository.SellOrderRepository;
 import com.ozgen.telegrambinancebot.adapters.repository.TradingSignalRepository;
+import com.ozgen.telegrambinancebot.model.ExecutionStrategy;
 import com.ozgen.telegrambinancebot.model.bot.BuyOrder;
 import com.ozgen.telegrambinancebot.model.bot.ChunkOrder;
 import com.ozgen.telegrambinancebot.model.bot.OrderStatus;
@@ -312,7 +313,7 @@ public class BotOrderServiceTest {
         List<OrderStatus> statuses = List.of(OrderStatus.SELL_PENDING_RETRY, OrderStatus.BUY_EXECUTED);
         Date date = new Date();
         List<ChunkOrder> expectedChunks = List.of(new ChunkOrder());
-        when(chunkOrderRepository.findAllByCreatedAtAfterAndStatusIn(date, statuses)).thenReturn(expectedChunks);
+        when(chunkOrderRepository.findAllByCreatedAtAfterAndStatusInAndTradingSignal_ExecutionStrategy(date, statuses, ExecutionStrategy.CHUNKED)).thenReturn(expectedChunks);
 
         // Act
         List<ChunkOrder> result = botOrderService.getBuyChunksByStatusesAndDate(statuses, date);
@@ -320,7 +321,7 @@ public class BotOrderServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(expectedChunks, result);
-        verify(chunkOrderRepository).findAllByCreatedAtAfterAndStatusIn(date, statuses);
+        verify(chunkOrderRepository).findAllByCreatedAtAfterAndStatusInAndTradingSignal_ExecutionStrategy(date, statuses, ExecutionStrategy.CHUNKED);
     }
 
     @Test
@@ -328,7 +329,7 @@ public class BotOrderServiceTest {
         // Arrange
         List<OrderStatus> statuses = List.of(OrderStatus.SELL_FAILED);
         Date date = new Date();
-        when(chunkOrderRepository.findAllByCreatedAtAfterAndStatusIn(date, statuses)).thenThrow(new RuntimeException("DB error"));
+        when(chunkOrderRepository.findAllByCreatedAtAfterAndStatusInAndTradingSignal_ExecutionStrategy(date, statuses, ExecutionStrategy.CHUNKED)).thenThrow(new RuntimeException("DB error"));
 
         // Act
         List<ChunkOrder> result = botOrderService.getBuyChunksByStatusesAndDate(statuses, date);
@@ -336,6 +337,6 @@ public class BotOrderServiceTest {
         // Assert
         assertNotNull(result);
         assertTrue(result.isEmpty());
-        verify(chunkOrderRepository).findAllByCreatedAtAfterAndStatusIn(date, statuses);
+        verify(chunkOrderRepository).findAllByCreatedAtAfterAndStatusInAndTradingSignal_ExecutionStrategy(date, statuses, ExecutionStrategy.CHUNKED);
     }
 }
