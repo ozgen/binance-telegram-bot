@@ -66,8 +66,8 @@ public class BinanceProgressiveChunkedSellOrderManager {
             boolean shouldSell = currentPrice >= tpPrice || signal.getStrategy() == TradingStrategy.DEFAULT;
 
             if (shouldSell) {
-                double stopLoss = GenericParser.getDouble(signal.getStopLoss()).orElse(0.0);
                 List<AssetBalance> assets = binanceHelper.getUserAssets();
+                double stopLoss = GenericParser.getDouble(signal.getStopLoss()).orElse(0.0);
 
                 double sellAmount = binanceHelper.calculateSellAmount(assets, chunkOrder);
                 if (sellAmount <= 0) {
@@ -75,11 +75,21 @@ public class BinanceProgressiveChunkedSellOrderManager {
                     return;
                 }
 
-                chunkOrder.setSellCoinAmount(sellAmount);
+                double leverage = chunkOrder.getBuyPrice() / (chunkOrder.getBuyPrice() - stopLoss);
+                double expectedProfit = (tpPrice - chunkOrder.getBuyPrice()) * sellAmount;
+                double risk = (chunkOrder.getBuyPrice() - stopLoss) * sellAmount;
 
+                log.info("Sell conditions met. TP={}, SL={}, Leverage≈{}, Risk≈{}, Profit≈{}",
+                        tpPrice, stopLoss, String.format("%.2f", leverage),
+                        String.format("%.4f", risk), String.format("%.4f", expectedProfit)
+                );
+
+                // Execute order with stop-loss protection
                 binanceApiManager.newOrderWithStopLoss(symbol, tpPrice, sellAmount, stopLoss);
 
+                // Update chunkOrder state
                 chunkOrder.setSellPrice(tpPrice);
+                chunkOrder.setSellCoinAmount(sellAmount);
                 chunkOrder.setStopLoss(stopLoss);
                 chunkOrder.setStatus(OrderStatus.SELL_EXECUTED);
                 publisher.publishEvent(new InfoEvent(this, "Progressive sell executed: " + chunkOrder));

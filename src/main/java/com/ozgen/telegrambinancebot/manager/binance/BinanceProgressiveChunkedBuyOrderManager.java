@@ -111,7 +111,6 @@ public class BinanceProgressiveChunkedBuyOrderManager {
         TradingSignal signal = chunkOrder.getTradingSignal();
         String symbol = chunkOrder.getSymbol();
 
-        // If already the last chunk, don't trigger more
         if (chunkOrder.getChunkIndex() >= chunkOrder.getTotalChunkCount() - 1) {
             log.info("Chunk {} is the last one. No further chunks to trigger.", chunkOrder.getId());
             return false;
@@ -125,7 +124,6 @@ public class BinanceProgressiveChunkedBuyOrderManager {
             double entryStart = GenericParser.getDouble(signal.getEntryStart()).orElse(0.0);
             double entryEnd = GenericParser.getDouble(signal.getEntryEnd()).orElse(Double.MAX_VALUE);
 
-            // Trigger next chunk if price is still in entry zone
             boolean inEntryZone = currentPrice >= entryStart && currentPrice <= entryEnd;
 
             if (!inEntryZone) {
@@ -196,8 +194,19 @@ public class BinanceProgressiveChunkedBuyOrderManager {
         chunkOrder.setTradingSignal(signal);
         chunkOrder.setEntryPoint(currentPrice);
         chunkOrder.setLeverage(leverage);
-        chunkOrder.setTakeProfitIndex(chunkIndex % signal.getTakeProfits().size());
-        chunkOrder.setTakeProfitAllocation(100 / maxChunks);
+
+        List<String> takeProfits = signal.getTakeProfits();
+        if (!takeProfits.isEmpty()) {
+            int tpIndex = chunkIndex % takeProfits.size();
+            double allocation = (tpIndex == takeProfits.size() - 1)
+                    ? 100 - (100 / takeProfits.size()) * tpIndex
+                    : 100 / takeProfits.size();
+            chunkOrder.setTakeProfitIndex(tpIndex);
+            chunkOrder.setTakeProfitAllocation(allocation);
+        } else {
+            chunkOrder.setTakeProfitIndex(0);
+            chunkOrder.setTakeProfitAllocation(100);
+        }
 
         try {
             binanceApiManager.newOrder(signal.getSymbol(), currentPrice, coinAmount);

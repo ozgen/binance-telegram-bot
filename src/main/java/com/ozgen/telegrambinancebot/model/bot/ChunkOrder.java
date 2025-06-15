@@ -30,7 +30,7 @@ public class ChunkOrder {
     private double entryPoint;            // specific entry used in this chunk
     private double leverage;              // calculated leverage per chunk
     private int takeProfitIndex;          // which TP this chunk targets (e.g. 0 = TP1)
-    private int takeProfitAllocation;     // percent of coin to sell at this TP
+    private double takeProfitAllocation;  // percent of coin to sell at this TP
     private int totalChunkCount;          // total chunks expected for this signal
 
     private int chunkIndex;
