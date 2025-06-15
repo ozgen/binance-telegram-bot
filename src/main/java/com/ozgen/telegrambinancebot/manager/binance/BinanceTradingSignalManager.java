@@ -3,9 +3,11 @@ package com.ozgen.telegrambinancebot.manager.binance;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
 import com.ozgen.telegrambinancebot.model.events.IncomingChunkedTradingSignalEvent;
+import com.ozgen.telegrambinancebot.model.events.IncomingProgressiveChunkedTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.events.IncomingTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.events.NewBuyOrderEvent;
-import com.ozgen.telegrambinancebot.model.events.NewChunkedBuyExecutionEvent;
+import com.ozgen.telegrambinancebot.model.events.NewChunkedBuyOrderEvent;
+import com.ozgen.telegrambinancebot.model.events.NewProgressiveChunkedBuyOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.utils.validators.TradingSignalValidator;
 import lombok.RequiredArgsConstructor;
@@ -71,11 +73,39 @@ public class BinanceTradingSignalManager {
 
         if (availableToBuy) {
             log.info("Chunked strategy active: scheduling chunked buy orders for {}", symbol);
-            this.publisher.publishEvent(new NewChunkedBuyExecutionEvent(this, tradingSignal, tickerPrice24));
+            this.publisher.publishEvent(new NewChunkedBuyOrderEvent(this, tradingSignal, tickerPrice24));
         } else {
             log.info("Symbol {} is not available to buy under chunked strategy", symbol);
         }
     }
+
+    public void processIncomingProgressiveChunkedTradingSignalEvent(IncomingProgressiveChunkedTradingSignalEvent event) {
+        TradingSignal tradingSignal = event.getTradingSignal();
+        String symbol = tradingSignal.getSymbol();
+
+        log.info("Processing incoming CHUNKED_PROGRESSIVE trading signal for symbol: {}", symbol);
+
+        TickerData tickerPrice24;
+        try {
+            tickerPrice24 = this.binanceApiManager.getTickerPrice24(symbol);
+            log.info("Fetched ticker price for symbol {}: {}", symbol, tickerPrice24);
+        } catch (Exception e) {
+            log.error("Error occurred while fetching ticker price for symbol {}: {}", symbol, e.getMessage(), e);
+            this.processException(e);
+            throw new RuntimeException("Error fetching ticker price", e);
+        }
+
+        boolean availableToBuy = TradingSignalValidator.isAvailableToBuy(tickerPrice24, tradingSignal);
+        log.info("Availability to buy for symbol {}: {}", symbol, availableToBuy);
+
+        if (availableToBuy) {
+            log.info("Progressive chunk strategy active: publishing event for {}", symbol);
+            this.publisher.publishEvent(new NewProgressiveChunkedBuyOrderEvent(this, tradingSignal, tickerPrice24));
+        } else {
+            log.info("Symbol {} is not available to buy under progressive chunk strategy", symbol);
+        }
+    }
+
 
     private void processException(Exception e) {
         ErrorEvent errorEvent = new ErrorEvent(this, e);

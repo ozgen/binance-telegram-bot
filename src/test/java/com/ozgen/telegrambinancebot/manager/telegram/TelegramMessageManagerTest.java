@@ -45,7 +45,7 @@ public class TelegramMessageManagerTest {
     void testParseTelegramMessage_withValidSignal() {
         // Arrange
         String message = TestData.TRADING_SIGNAL;
-        when(appConfiguration.getExecutionStrategy()).thenReturn(ExecutionStrategy.DEFAULT);
+        when(appConfiguration.getStrategy()).thenReturn(ExecutionStrategy.DEFAULT);
         when(tradingSignalService.saveTradingSignal(any(TradingSignal.class)))
                 .thenAnswer((Answer<TradingSignal>) invocation -> (TradingSignal) invocation.getArguments()[0]);
 
@@ -64,7 +64,7 @@ public class TelegramMessageManagerTest {
     void testParseTelegramMessage_withValidSignalAndChunkStrategy() {
         // Arrange
         String message = TestData.TRADING_SIGNAL;
-        when(appConfiguration.getExecutionStrategy()).thenReturn(ExecutionStrategy.CHUNKED);
+        when(appConfiguration.getStrategy()).thenReturn(ExecutionStrategy.CHUNKED);
         when(tradingSignalService.saveTradingSignal(any(TradingSignal.class)))
                 .thenAnswer((Answer<TradingSignal>) invocation -> (TradingSignal) invocation.getArguments()[0]);
 
