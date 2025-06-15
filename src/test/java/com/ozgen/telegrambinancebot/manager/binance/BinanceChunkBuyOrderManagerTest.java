@@ -9,7 +9,7 @@ import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.model.bot.ChunkOrder;
 import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
 import com.ozgen.telegrambinancebot.model.events.InfoEvent;
-import com.ozgen.telegrambinancebot.model.events.NewChunkedBuyExecutionEvent;
+import com.ozgen.telegrambinancebot.model.events.NewChunkedBuyOrderEvent;
 import com.ozgen.telegrambinancebot.model.events.NewSellChunkOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.BotOrderService;
@@ -65,10 +65,11 @@ class BinanceChunkBuyOrderManagerTest {
         signal.setSymbol("BTCUSDT");
         signal.setEntryEnd("90");
 
-        NewChunkedBuyExecutionEvent event = new NewChunkedBuyExecutionEvent(this, signal, ticker);
+        NewChunkedBuyOrderEvent event = new NewChunkedBuyOrderEvent(this, signal, ticker);
 
         when(binanceHelper.getUserAssets()).thenReturn(List.of(mock(AssetBalance.class)));
         when(binanceHelper.hasAccountEnoughAsset(any(), eq(signal))).thenReturn(true);
+        when(binanceHelper.calculateDynamicChunkCount(anyDouble())).thenReturn(1);
         when(botConfiguration.getAmount()).thenReturn(100.0);
         when(botConfiguration.getPercentageInc()).thenReturn(1.0);
         when(binanceApiManager.getListOfKlineData(any(), any())).thenReturn(List.of(
@@ -93,7 +94,7 @@ class BinanceChunkBuyOrderManagerTest {
         TradingSignal signal = new TradingSignal();
         signal.setSymbol("BTCUSDT");
 
-        NewChunkedBuyExecutionEvent event = new NewChunkedBuyExecutionEvent(this, signal, ticker);
+        NewChunkedBuyOrderEvent event = new NewChunkedBuyOrderEvent(this, signal, ticker);
 
         when(binanceHelper.getUserAssets()).thenReturn(Collections.emptyList());
         when(binanceHelper.hasAccountEnoughAsset(any(), any())).thenReturn(false);
@@ -139,7 +140,7 @@ class BinanceChunkBuyOrderManagerTest {
         when(binanceApiManager.getListOfKlineData(any(), any())).thenReturn(List.of(mockKline(10.0)));
         when(appConfiguration.getMinQuoteVolume()).thenReturn(500.0);
 
-        manager.handleChunkedBuyEvent(new NewChunkedBuyExecutionEvent(this, signal, ticker));
+        manager.handleChunkedBuyEvent(new NewChunkedBuyOrderEvent(this, signal, ticker));
 
         verify(botOrderService, never()).saveChunkOrder(any());
     }

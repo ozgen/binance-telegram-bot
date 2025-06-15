@@ -3,10 +3,13 @@ package com.ozgen.telegrambinancebot.manager.binance;
 import com.ozgen.telegrambinancebot.configuration.properties.BotConfiguration;
 import com.ozgen.telegrambinancebot.configuration.properties.ScheduleConfiguration;
 import com.ozgen.telegrambinancebot.model.binance.AssetBalance;
+import com.ozgen.telegrambinancebot.model.binance.KlineData;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
+import com.ozgen.telegrambinancebot.model.bot.ChunkOrder;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.utils.DateFactory;
 import com.ozgen.telegrambinancebot.utils.PriceCalculator;
+import com.ozgen.telegrambinancebot.utils.SymbolGenerator;
 import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +74,40 @@ public class BinanceHelper {
 
     public Date getSearchDate() {
         return DateFactory.getDateBeforeInMonths(this.scheduleConfiguration.getMonthBefore());
+    }
+
+    public int calculateDynamicChunkCount(double avgQuoteVolume) {
+        if (avgQuoteVolume > 100_000) return 5;
+        if (avgQuoteVolume > 50_000) return 4;
+        if (avgQuoteVolume > 20_000) return 3;
+        return 2;
+    }
+
+    public boolean isShortTermBullish(List<KlineData> klines) {
+        if (klines == null || klines.size() < 2) return false;
+
+        KlineData prev = klines.get(klines.size() - 2);
+        KlineData current = klines.get(klines.size() - 1);
+
+        double prevClose = GenericParser.getDouble(prev.getClosePrice()).orElse(0.0);
+        double currentClose = GenericParser.getDouble(current.getClosePrice()).orElse(0.0);
+
+        return currentClose > prevClose;
+    }
+
+    public double calculateSellAmount(List<AssetBalance> assets, ChunkOrder chunkOrder) {
+        String symbol = chunkOrder.getSymbol();
+        String coinSymbol = SymbolGenerator.getCoinSymbol(symbol, botConfiguration.getCurrency());
+
+        if (coinSymbol == null) {
+            throw new IllegalArgumentException("Coin symbol could not be resolved for: " + symbol);
+        }
+
+        double balance = GenericParser.getAssetFromSymbol(assets, coinSymbol);
+        double allocationRatio = chunkOrder.getTakeProfitAllocation() / 100.0;
+        double desiredAmount = chunkOrder.getBuyCoinAmount() * allocationRatio;
+
+        return Math.min(balance, desiredAmount);
     }
 
     private Double getBtcToUsdConversionRate() throws Exception {

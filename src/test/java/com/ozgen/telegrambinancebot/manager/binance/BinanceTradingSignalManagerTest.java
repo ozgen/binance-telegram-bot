@@ -6,7 +6,7 @@ import com.ozgen.telegrambinancebot.model.events.ErrorEvent;
 import com.ozgen.telegrambinancebot.model.events.IncomingChunkedTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.events.IncomingTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.events.NewBuyOrderEvent;
-import com.ozgen.telegrambinancebot.model.events.NewChunkedBuyExecutionEvent;
+import com.ozgen.telegrambinancebot.model.events.NewChunkedBuyOrderEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -146,10 +146,10 @@ public class BinanceTradingSignalManagerTest {
 
         // Assert
         verify(binanceApiManager).getTickerPrice24(SYMBOL);
-        ArgumentCaptor<NewChunkedBuyExecutionEvent> eventCaptor = ArgumentCaptor.forClass(NewChunkedBuyExecutionEvent.class);
+        ArgumentCaptor<NewChunkedBuyOrderEvent> eventCaptor = ArgumentCaptor.forClass(NewChunkedBuyOrderEvent.class);
         verify(publisher).publishEvent(eventCaptor.capture());
 
-        NewChunkedBuyExecutionEvent publishedEvent = eventCaptor.getValue();
+        NewChunkedBuyOrderEvent publishedEvent = eventCaptor.getValue();
         assertEquals(tradingSignal, publishedEvent.getTradingSignal());
         assertEquals(tickerData, publishedEvent.getTickerData());
     }
@@ -167,7 +167,7 @@ public class BinanceTradingSignalManagerTest {
 
         verify(binanceApiManager).getTickerPrice24(SYMBOL);
         verify(publisher).publishEvent(any(ErrorEvent.class));
-        verify(publisher, never()).publishEvent(isA(NewChunkedBuyExecutionEvent.class));
+        verify(publisher, never()).publishEvent(isA(NewChunkedBuyOrderEvent.class));
     }
 
     @Test
@@ -186,6 +186,6 @@ public class BinanceTradingSignalManagerTest {
 
         // Assert
         verify(binanceApiManager).getTickerPrice24(SYMBOL);
-        verify(publisher, never()).publishEvent(isA(NewChunkedBuyExecutionEvent.class));
+        verify(publisher, never()).publishEvent(isA(NewChunkedBuyOrderEvent.class));
     }
 }
