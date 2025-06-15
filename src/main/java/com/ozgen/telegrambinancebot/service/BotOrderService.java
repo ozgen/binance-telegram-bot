@@ -139,7 +139,7 @@ public class BotOrderService {
         }
     }
 
-    public List<ChunkOrder> getBuyProgressiveChunksByStatusesAndDate(List<OrderStatus> statuses, Date date) {
+    public List<ChunkOrder> getProgressiveChunksByStatusesAndDate(List<OrderStatus> statuses, Date date) {
         try {
             List<ChunkOrder> chunks = chunkOrderRepository.findAllByCreatedAtAfterAndStatusInAndTradingSignal_ExecutionStrategy(date, statuses, ExecutionStrategy.CHUNKED_PROGRESSIVE);
             log.info("Retrieved {} progressive chunk orders with date {}", chunks.size(), date);
@@ -152,7 +152,7 @@ public class BotOrderService {
 
     public List<ChunkOrder> getChunksBySignalAndStatuses(String tradingSignalId, List<OrderStatus> statuses) {
         try {
-            List<ChunkOrder> chunks = chunkOrderRepository.findAllByTradingSignalIdAndAndStatusIn(tradingSignalId, statuses);
+            List<ChunkOrder> chunks = chunkOrderRepository.findAllByTradingSignalIdAndStatusIn(tradingSignalId, statuses);
             log.info("Retrieved {} chunk orders with tradingSignal {}", chunks.size(), tradingSignalId);
             return chunks;
         } catch (Exception e) {

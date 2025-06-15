@@ -339,4 +339,74 @@ public class BotOrderServiceTest {
         assertTrue(result.isEmpty());
         verify(chunkOrderRepository).findAllByCreatedAtAfterAndStatusInAndTradingSignal_ExecutionStrategy(date, statuses, ExecutionStrategy.CHUNKED);
     }
+
+    @Test
+    public void testGetBuyProgressiveChunksByStatusesAndDate_Success() {
+        // Arrange
+        List<OrderStatus> statuses = List.of(OrderStatus.BUY_EXECUTED);
+        Date date = new Date();
+        List<ChunkOrder> expectedChunks = List.of(new ChunkOrder());
+        when(chunkOrderRepository.findAllByCreatedAtAfterAndStatusInAndTradingSignal_ExecutionStrategy(date, statuses, ExecutionStrategy.CHUNKED_PROGRESSIVE))
+                .thenReturn(expectedChunks);
+
+        // Act
+        List<ChunkOrder> result = botOrderService.getProgressiveChunksByStatusesAndDate(statuses, date);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(expectedChunks, result);
+        verify(chunkOrderRepository).findAllByCreatedAtAfterAndStatusInAndTradingSignal_ExecutionStrategy(date, statuses, ExecutionStrategy.CHUNKED_PROGRESSIVE);
+    }
+
+    @Test
+    public void testGetBuyProgressiveChunksByStatusesAndDate_Exception() {
+        // Arrange
+        List<OrderStatus> statuses = List.of(OrderStatus.SELL_FAILED);
+        Date date = new Date();
+        when(chunkOrderRepository.findAllByCreatedAtAfterAndStatusInAndTradingSignal_ExecutionStrategy(date, statuses, ExecutionStrategy.CHUNKED_PROGRESSIVE))
+                .thenThrow(new RuntimeException("Simulated DB error"));
+
+        // Act
+        List<ChunkOrder> result = botOrderService.getProgressiveChunksByStatusesAndDate(statuses, date);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(chunkOrderRepository).findAllByCreatedAtAfterAndStatusInAndTradingSignal_ExecutionStrategy(date, statuses, ExecutionStrategy.CHUNKED_PROGRESSIVE);
+    }
+
+    @Test
+    public void testGetChunksBySignalAndStatuses_Success() {
+        // Arrange
+        String signalId = "test-signal-id";
+        List<OrderStatus> statuses = List.of(OrderStatus.SELL_FAILED, OrderStatus.SELL_PENDING_RETRY);
+        List<ChunkOrder> expectedChunks = List.of(new ChunkOrder());
+        when(chunkOrderRepository.findAllByTradingSignalIdAndStatusIn(signalId, statuses))
+                .thenReturn(expectedChunks);
+
+        // Act
+        List<ChunkOrder> result = botOrderService.getChunksBySignalAndStatuses(signalId, statuses);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(expectedChunks, result);
+        verify(chunkOrderRepository).findAllByTradingSignalIdAndStatusIn(signalId, statuses);
+    }
+
+    @Test
+    public void testGetChunksBySignalAndStatuses_Exception() {
+        // Arrange
+        String signalId = "faulty-signal-id";
+        List<OrderStatus> statuses = List.of(OrderStatus.BUY_FAILED);
+        when(chunkOrderRepository.findAllByTradingSignalIdAndStatusIn(signalId, statuses))
+                .thenThrow(new RuntimeException("Simulated error"));
+
+        // Act
+        List<ChunkOrder> result = botOrderService.getChunksBySignalAndStatuses(signalId, statuses);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(chunkOrderRepository).findAllByTradingSignalIdAndStatusIn(signalId, statuses);
+    }
 }

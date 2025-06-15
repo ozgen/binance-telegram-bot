@@ -3,6 +3,7 @@ package com.ozgen.telegrambinancebot.manager.bot;
 
 import com.ozgen.telegrambinancebot.configuration.properties.ScheduleConfiguration;
 import com.ozgen.telegrambinancebot.model.events.IncomingChunkedTradingSignalEvent;
+import com.ozgen.telegrambinancebot.model.events.IncomingProgressiveChunkedTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.events.IncomingTradingSignalEvent;
 import com.ozgen.telegrambinancebot.model.telegram.TradingSignal;
 import com.ozgen.telegrambinancebot.service.TradingSignalService;
@@ -19,9 +20,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class TradeSignalManagerTest {
 
@@ -107,4 +106,22 @@ public class TradeSignalManagerTest {
         verify(publisher).publishEvent(any(IncomingChunkedTradingSignalEvent.class));
     }
 
+    @Test
+    public void testProcessInitTradingSignalsForProgressiveChunkOrders() {
+        // Arrange
+        TradingSignal mockSignal = new TradingSignal();
+        mockSignal.setId(UUID.randomUUID().toString());
+
+        when(scheduleConfiguration.getMonthBefore()).thenReturn(1);
+
+        when(tradingSignalService.getAllTradingSignalsAfterDateAndIsProcessInForPrChunkOrders(any(), anyList()))
+                .thenReturn(List.of(mockSignal));
+
+        // Act
+        tradeSignalManager.processInitTradingSignalsForProgressiveChunkOrders();
+
+        // Assert
+        verify(tradingSignalService).getAllTradingSignalsAfterDateAndIsProcessInForPrChunkOrders(any(), anyList());
+        verify(publisher).publishEvent(any(IncomingProgressiveChunkedTradingSignalEvent.class));
+    }
 }

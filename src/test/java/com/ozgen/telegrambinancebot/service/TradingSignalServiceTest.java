@@ -205,5 +205,26 @@ public class TradingSignalServiceTest {
         verify(tradingSignalRepository).findAllByCreatedAtAfterAndIsProcessedInAndStrategyInAndExecutionStrategy(
                 date, processStatuses, expectedStrategies, ExecutionStrategy.CHUNKED);
     }
+
+    @Test
+    public void testGetAllTradingSignalsAfterDateAndIsProcessInForPrChunkOrders_Success() {
+        // Arrange
+        Date date = new Date();
+        List<Integer> processStatuses = List.of(0, 1);
+        List<TradingStrategy> strategies = List.of(TradingStrategy.DEFAULT, TradingStrategy.SELL_LATER);
+        List<TradingSignal> expectedSignals = List.of(new TradingSignal());
+
+        when(tradingSignalRepository.findAllByCreatedAtAfterAndIsProcessedInAndStrategyInAndExecutionStrategy(
+                date, processStatuses, strategies, ExecutionStrategy.CHUNKED_PROGRESSIVE))
+                .thenReturn(expectedSignals);
+
+        // Act
+        List<TradingSignal> result = tradingSignalService.getAllTradingSignalsAfterDateAndIsProcessInForPrChunkOrders(date, processStatuses);
+
+        // Assert
+        assertEquals(expectedSignals, result);
+        verify(tradingSignalRepository).findAllByCreatedAtAfterAndIsProcessedInAndStrategyInAndExecutionStrategy(
+                date, processStatuses, strategies, ExecutionStrategy.CHUNKED_PROGRESSIVE);
+    }
 }
 

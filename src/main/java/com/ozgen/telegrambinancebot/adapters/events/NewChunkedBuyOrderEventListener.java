@@ -15,7 +15,6 @@ public class NewChunkedBuyOrderEventListener implements ApplicationListener<NewC
 
     private final BinanceChunkBuyOrderManager binanceChunkBuyOrderManager;
 
-    //todo write unit test for this
     @Override
     public void onApplicationEvent(@NotNull NewChunkedBuyOrderEvent event) {
         log.info("new NewChunkedBuyOrderEvent consumed. event : {}", event);

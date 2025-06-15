@@ -19,7 +19,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -37,7 +36,6 @@ public class BinanceProgressiveChunkedBuyOrderManager {
     private final BotConfiguration botConfiguration;
     private final AppConfiguration appConfiguration;
 
-    @EventListener
     @Transactional
     public void handleProgressiveChunkedBuy(NewProgressiveChunkedBuyOrderEvent event) {
         TradingSignal signal = event.getTradingSignal();
@@ -84,7 +82,7 @@ public class BinanceProgressiveChunkedBuyOrderManager {
     public void processFailedProgressiveBuyChunks() {
         Date searchDate = binanceHelper.getSearchDate();
         List<OrderStatus> statuses = List.of(OrderStatus.BUY_FAILED);
-        List<ChunkOrder> orders = buyChunkOrderService.getBuyProgressiveChunksByStatusesAndDate(
+        List<ChunkOrder> orders = buyChunkOrderService.getProgressiveChunksByStatusesAndDate(
                 statuses, searchDate);
 
         log.info("Found {} executed progressive buy chunks", orders.size());
@@ -98,7 +96,7 @@ public class BinanceProgressiveChunkedBuyOrderManager {
     public void processExecutedProgressiveBuyChunks() {
         Date searchDate = binanceHelper.getSearchDate();
         List<OrderStatus> statuses = List.of(OrderStatus.BUY_EXECUTED);
-        List<ChunkOrder> orders = buyChunkOrderService.getBuyProgressiveChunksByStatusesAndDate(
+        List<ChunkOrder> orders = buyChunkOrderService.getProgressiveChunksByStatusesAndDate(
                 statuses, searchDate);
 
         log.info("Found {} executed progressive buy chunks", orders.size());
@@ -168,17 +166,19 @@ public class BinanceProgressiveChunkedBuyOrderManager {
         }
     }
 
-    private boolean shouldPlaceNextChunk(TradingSignal signal, double currentPrice, List<KlineData> klines) {
+    protected boolean shouldPlaceNextChunk(TradingSignal signal, double currentPrice, List<KlineData> klines) {
         double entryStart = GenericParser.getDouble(signal.getEntryStart()).orElseThrow();
         double entryEnd = GenericParser.getDouble(signal.getEntryEnd()).orElseThrow();
 
-        boolean inEntryRange = currentPrice >= entryEnd && currentPrice <= entryStart;
+        double minEntry = Math.min(entryStart, entryEnd);
+        double maxEntry = Math.max(entryStart, entryEnd);
+        boolean inEntryRange = currentPrice >= minEntry && currentPrice <= maxEntry;
         boolean shortTermBullish = binanceHelper.isShortTermBullish(klines);
 
         return inEntryRange && shortTermBullish;
     }
 
-    private void placeNextChunk(TradingSignal signal, double currentPrice, int chunkIndex, int maxChunks) {
+    protected void placeNextChunk(TradingSignal signal, double currentPrice, int chunkIndex, int maxChunks) {
         double stopLoss = GenericParser.getDouble(signal.getStopLoss()).orElseThrow();
         double leverage = currentPrice / (currentPrice - stopLoss);
 

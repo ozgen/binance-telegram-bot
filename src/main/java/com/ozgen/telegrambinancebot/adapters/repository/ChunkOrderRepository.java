@@ -18,5 +18,5 @@ public interface ChunkOrderRepository extends JpaRepository<ChunkOrder, String> 
             List<OrderStatus> statuses,
             ExecutionStrategy executionStrategy
     );
-    List<ChunkOrder> findAllByTradingSignalIdAndAndStatusIn(String tradingSignalId, List<OrderStatus> statuses);
+    List<ChunkOrder> findAllByTradingSignalIdAndStatusIn(String tradingSignalId, List<OrderStatus> statuses);
 }

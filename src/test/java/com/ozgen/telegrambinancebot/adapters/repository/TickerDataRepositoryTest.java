@@ -1,6 +1,5 @@
 package com.ozgen.telegrambinancebot.adapters.repository;
 
-import com.ozgen.telegrambinancebot.adapters.repository.TickerDataRepository;
 import com.ozgen.telegrambinancebot.model.binance.TickerData;
 import com.ozgen.telegrambinancebot.utils.TestData;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,7 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
@@ -17,7 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 
 @DataJpaTest
-@TestPropertySource(locations = "classpath:application-test.properties")
+@ActiveProfiles("test")
+@EnableJpaRepositories(basePackages = "com.ozgen.telegrambinancebot.adapters.repository")
 public class TickerDataRepositoryTest {
 
     @Autowired

@@ -40,4 +40,14 @@ public class TradingSignalSchedulerTest {
         verify(this.tradeSignalManager)
                 .processInitTradingSignalsForChunkOrders();
     }
+
+    @Test
+    public void testProcessInitTradingSignalsForProgressiveChunkOrders() {
+        // when
+        this.tradingSignalScheduler.processInitTradingSignalsForProgressiveChunkOrders();
+
+        // then
+        verify(this.tradeSignalManager)
+                .processInitTradingSignalsForProgressiveChunkOrders();
+    }
 }
