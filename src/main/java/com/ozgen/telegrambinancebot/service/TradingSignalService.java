@@ -61,4 +61,8 @@ public class TradingSignalService {
     public List<TradingSignal> getAllTradingSignalsAfterDateAndIsProcessInForChunkOrders(Date date, List<Integer> processStatuses) {
         return this.repository.findAllByCreatedAtAfterAndIsProcessedInAndStrategyInAndExecutionStrategy(date, processStatuses, List.of(TradingStrategy.DEFAULT, TradingStrategy.SELL_LATER), ExecutionStrategy.CHUNKED);
     }
+
+    public List<TradingSignal> getAllTradingSignalsAfterDateAndIsProcessInForPrChunkOrders(Date date, List<Integer> processStatuses) {
+        return this.repository.findAllByCreatedAtAfterAndIsProcessedInAndStrategyInAndExecutionStrategy(date, processStatuses, List.of(TradingStrategy.DEFAULT, TradingStrategy.SELL_LATER), ExecutionStrategy.CHUNKED_PROGRESSIVE);
+    }
 }

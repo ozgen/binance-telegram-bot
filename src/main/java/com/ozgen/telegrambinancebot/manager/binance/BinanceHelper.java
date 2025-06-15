@@ -125,5 +125,4 @@ public class BinanceHelper {
         Double btcAmount = GenericParser.getAssetFromSymbol(assets, this.botConfiguration.getCurrency());
         return btcAmount >= btcInvestAmount;
     }
-
 }

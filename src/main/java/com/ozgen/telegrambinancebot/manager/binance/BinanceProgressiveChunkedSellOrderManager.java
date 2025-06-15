@@ -15,7 +15,6 @@ import com.ozgen.telegrambinancebot.utils.parser.GenericParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -32,7 +31,6 @@ public class BinanceProgressiveChunkedSellOrderManager {
     private final BotConfiguration botConfiguration;
     private final BinanceHelper binanceHelper;
 
-    @EventListener
     public void onNewSellProgressiveChunkOrderEvent(NewProgressiveChunkedSellOrderEvent event) {
         processChunkOrder(event.getChunkOrder());
     }
@@ -40,12 +38,12 @@ public class BinanceProgressiveChunkedSellOrderManager {
     public void processSellChunkOrders() {
         Date searchDate = this.binanceHelper.getSearchDate();
         List<OrderStatus> statuses = List.of(OrderStatus.SELL_PENDING_RETRY, OrderStatus.SELL_FAILED);
-        List<ChunkOrder> orders = botOrderService.getBuyProgressiveChunksByStatusesAndDate(statuses, searchDate);
+        List<ChunkOrder> orders = botOrderService.getProgressiveChunksByStatusesAndDate(statuses, searchDate);
         log.info("Found {} progressive sell candidates", orders.size());
         orders.forEach(this::processChunkOrder);
     }
 
-    private void processChunkOrder(ChunkOrder chunkOrder) {
+    protected void processChunkOrder(ChunkOrder chunkOrder) {
         TradingSignal signal = chunkOrder.getTradingSignal();
         String symbol = chunkOrder.getSymbol();
 

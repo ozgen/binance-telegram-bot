@@ -10,7 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Date;
 import java.util.List;
@@ -19,7 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @DataJpaTest
-@TestPropertySource(locations = "classpath:application-test.properties")
+@ActiveProfiles("test")
+@EnableJpaRepositories(basePackages = "com.ozgen.telegrambinancebot.adapters.repository")
 public class ChunkOrderRepositoryTest {
 
     @Autowired
@@ -61,5 +63,22 @@ public class ChunkOrderRepositoryTest {
         );
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
+    }
+
+    @Test
+    public void testFindAllByTradingSignalIdAndStatusIn() {
+        // given
+        List<OrderStatus> statuses = List.of(OrderStatus.BUY_EXECUTED);
+        String tradingSignalId = chunkOrder.getTradingSignal().getId();
+
+        // when
+        List<ChunkOrder> result = chunkOrderRepository
+                .findAllByTradingSignalIdAndStatusIn(tradingSignalId, statuses);
+
+        // then
+        assertFalse(result.isEmpty(), "Result should not be empty");
+        assertEquals(1, result.size(), "Should find one matching ChunkOrder");
+        assertEquals(OrderStatus.BUY_EXECUTED, result.getFirst().getStatus());
+        assertEquals(tradingSignalId, result.getFirst().getTradingSignal().getId());
     }
 }
