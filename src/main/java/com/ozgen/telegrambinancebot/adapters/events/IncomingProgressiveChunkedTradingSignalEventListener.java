@@ -2,9 +2,9 @@ package com.ozgen.telegrambinancebot.adapters.events;
 
 import com.ozgen.telegrambinancebot.manager.binance.BinanceTradingSignalManager;
 import com.ozgen.telegrambinancebot.model.events.IncomingProgressiveChunkedTradingSignalEvent;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
