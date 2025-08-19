@@ -14,7 +14,7 @@ jobs:
     if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Fetch PR Review Status
         id: pr_review_status
@@ -48,5 +48,5 @@ jobs:
 
       - name: Checkout Repository
         if: steps.pr_review_status.outputs.state != 'APPROVED'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
