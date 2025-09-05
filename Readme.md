@@ -203,7 +203,7 @@ The bot allows **two optional parameters** in trading signals:
 - **INVEST** → Specifies how much to invest in the trade.
 - **STRATEGY: SELL_LATER** → Delays selling until a future condition is met.
 
-### ** How It Works**
+###  How It Works
 | Parameter  | Description                                                                                                                                       |
 |------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
 | `INVEST`   | Defines the amount allocated for the trade (e.g., `"0.0001 BTC"`). If omitted, the bot will use the default investment settings.                  |
@@ -373,7 +373,7 @@ mvn jacoco:report
 The coverage report can be found in `target/site/jacoco/index.html`. Open it in a web browser to view detailed coverage statistics.
 
 ## License
-This project is licensed under the MIT License - see [LICENSE.md](LICENSE.md) for details.
+This project is licensed under the MIT License
 
 ## Acknowledgments
 - Binance API
