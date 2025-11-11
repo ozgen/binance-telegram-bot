@@ -20,7 +20,7 @@ public class BinanceOpenBuyOrderSchedulerTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
