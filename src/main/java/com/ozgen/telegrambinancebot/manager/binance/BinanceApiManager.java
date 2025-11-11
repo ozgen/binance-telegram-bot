@@ -53,7 +53,7 @@ public class BinanceApiManager {
 //        SnapshotData snapshotData = JsonParser.parseSnapshotJson(accountSnapshotJson);
 //
 //        log.info("account snapshot data is parsed, successfully.");
-//        // todo due to thıs process takes too long, commented the saving DB operatıon
+//        // todo due to thıs process takes too long, commented the saving DB operation
 ////        return this.accountSnapshotService.createSnapshotData(snapshotData);
 //        return snapshotData;
 //    }
