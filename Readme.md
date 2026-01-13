@@ -1,3 +1,5 @@
+![CI](https://github.com/ozgen/binance-telegram-bot/actions/workflows/ci.yml/badge.svg)
+![Coverage](https://codecov.io/gh/ozgen/binance-telegram-bot/branch/main/graph/badge.svg)
 
 # Binance Telegram Bot
 
