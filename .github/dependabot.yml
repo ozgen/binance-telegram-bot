@@ -14,11 +14,3 @@ updates:
       - "dependencies"
       - "maven"
 
-  # GitHub Actions updates (if CI/CD is used)
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "dependencies"
-      - "ci"
