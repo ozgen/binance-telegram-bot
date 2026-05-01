@@ -19,10 +19,18 @@ public class BinanceConfig {
     @Value("${binance-customer-secret-key}")
     private String secretKey;
 
+    @Value("${binance.api.url:https://api.binance.com}")
+    private String baseUrl;
+
+    @Value("${binance.api.signature:ED25519}")
+    private String signatureType;
+
     @Bean
     public SpotClientImpl binanceClient() throws IOException {
-
+        if ("HMAC".equalsIgnoreCase(signatureType)) {
+            return new SpotClientImpl(apiKey, secretKey, baseUrl);
+        }
         CustomEd25519SignatureGenerator signatureGenerator = new CustomEd25519SignatureGenerator(secretKey);
-        return new SpotClientImpl(apiKey, signatureGenerator, "https://api.binance.com");
+        return new SpotClientImpl(apiKey, signatureGenerator, baseUrl);
     }
 }

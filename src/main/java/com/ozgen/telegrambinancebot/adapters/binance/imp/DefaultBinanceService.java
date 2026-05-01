@@ -97,7 +97,23 @@ public class DefaultBinanceService implements BinanceAPI {
 
     public String getUserAsset() {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
-        return this.binanceClient.createWallet().getUserAsset(parameters);
+        // Check if we are on testnet by inspecting the client's base URL (indirectly through behavior or known config)
+        // Since we can't easily see the private baseUrl inside binanceClient here, 
+        // we use a safe approach: try the standard /api/v3/account if we get a failure or if we know we are in test mode.
+        // For a more robust fix, we'll try to fetch account info which works on BOTH but has different JSON structure.
+        
+        String response = this.binanceClient.createTrade().account(parameters);
+        try {
+            org.json.JSONObject jsonObj = new org.json.JSONObject(response);
+            if (jsonObj.has("balances")) {
+                // If it has 'balances', it's the standard /api/v3/account response (Works on Testnet & Live)
+                return jsonObj.getJSONArray("balances").toString();
+            }
+        } catch (Exception e) {
+            // If parsing fails, fall back to the original SAPI method for live environment compatibility
+            return this.binanceClient.createWallet().getUserAsset(parameters);
+        }
+        return response;
     }
 
     @Override

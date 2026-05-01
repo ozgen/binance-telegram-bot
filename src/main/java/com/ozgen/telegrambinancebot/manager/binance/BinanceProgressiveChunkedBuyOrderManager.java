@@ -37,6 +37,7 @@ public class BinanceProgressiveChunkedBuyOrderManager {
     private final AppConfiguration appConfiguration;
 
     @Transactional
+    @org.springframework.transaction.annotation.Transactional
     public void handleProgressiveChunkedBuy(NewProgressiveChunkedBuyOrderEvent event) {
         TradingSignal signal = event.getTradingSignal();
         TickerData ticker = event.getTickerData();

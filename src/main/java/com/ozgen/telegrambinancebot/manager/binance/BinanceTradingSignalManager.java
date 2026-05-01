@@ -79,6 +79,7 @@ public class BinanceTradingSignalManager {
         }
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public void processIncomingProgressiveChunkedTradingSignalEvent(IncomingProgressiveChunkedTradingSignalEvent event) {
         TradingSignal tradingSignal = event.getTradingSignal();
         String symbol = tradingSignal.getSymbol();

@@ -3,16 +3,16 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16.4-alpine
-    container_name: postgres_db
+    container_name: binance_postgres_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: app
+      POSTGRES_USER: binancebot_user
+      POSTGRES_PASSWORD: binancebot_password
+      POSTGRES_DB: binancebot_app
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - binance_postgres_data:/var/lib/postgresql/data
     restart: always
 
 volumes:
-  postgres_data:
+  binance_postgres_data:

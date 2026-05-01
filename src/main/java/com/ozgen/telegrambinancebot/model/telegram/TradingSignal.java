@@ -30,7 +30,7 @@ public class TradingSignal {
     private String symbol;
     private String entryStart;
     private String entryEnd;
-    @ElementCollection
+    @ElementCollection(fetch = jakarta.persistence.FetchType.EAGER)
     private List<String> takeProfits;
     private String stopLoss;
     @Enumerated(EnumType.STRING)

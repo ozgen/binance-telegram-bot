@@ -37,13 +37,19 @@ public class TelegramBinanceBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+        log.info("RAW UPDATE RECEIVED: {}", update);
+        Message incomingMessage = null;
         if (update.hasChannelPost()) {
-            // Handle channel post
-            Message channelPost = update.getChannelPost();
-            this.channelId = channelPost.getChatId();
-            String text = channelPost.getText();
+            incomingMessage = update.getChannelPost();
+        } else if (update.hasMessage()) {
+            incomingMessage = update.getMessage();
+        }
 
-            log.info("Received channel post \"{}\" from {}", text, this.channelId);
+        if (incomingMessage != null && incomingMessage.hasText()) {
+            this.channelId = incomingMessage.getChatId();
+            String text = incomingMessage.getText();
+
+            log.info("Received post \"{}\" from {}", text, this.channelId);
 
             String message = this.telegramMessageManager.parseTelegramMessage(text);
             SendMessage response = new SendMessage();
@@ -54,6 +60,8 @@ public class TelegramBinanceBot extends TelegramLongPollingBot {
             } catch (Exception e) {
                 log.error("Failed to send message: {}", e.getMessage());
             }
+        } else {
+            log.warn("Update received but it is not a text message or channel post: {}", update);
         }
     }
 
